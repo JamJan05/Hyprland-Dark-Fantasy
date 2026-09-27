@@ -50,8 +50,12 @@ Singleton {
     readonly property int maksimum: 30
 
     // What the current profile wants; 0 = factory.
-    readonly property int docelowy: UstawieniaPowloki.limitMocy(PowerProfiles.profile)
+    readonly property int profil: PowerProfiles.profile
+    readonly property int docelowy: UstawieniaPowloki.limitMocy(profil)
 
+    // Both: two profiles with the same limit still need a call on a switch,
+    // because a ThinkPad's firmware puts its own limits in on every profile change.
+    onProfilChanged: opoznienie.restart()
     onDocelowyChanged: opoznienie.restart()
 
     function zastosuj(): void {
