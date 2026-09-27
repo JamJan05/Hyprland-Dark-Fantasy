@@ -64,6 +64,15 @@ MAX_W=54
 (( EUID == 0 )) || { echo "df-limit-mocy: run as root (sudo)" >&2; exit 3; }
 [[ -x $RYZENADJ ]] || { echo "df-limit-mocy: $RYZENADJ not found" >&2; exit 2; }
 
+# Arguments first, before anything is read or recorded. At most two digits,
+# no leading zero: bash reads "0060" as octal 48, which would pass the range
+# check while awk below makes it 60 W.
+if (( $# > 1 )) || { (( $# == 1 )) && [[ $1 != fabryczny ]] &&
+        { ! [[ $1 =~ ^[1-9][0-9]?$ ]] || (( 10#$1 < MIN_W || 10#$1 > MAX_W )); }; }; then
+    echo "df-limit-mocy: one argument: a whole number of watts, $MIN_W-$MAX_W, or \"fabryczny\"" >&2
+    exit 5
+fi
+
 # "stapm fast slow" in W from the ryzenadj --info table, e.g. "28.000 35.000 30.000".
 odczyt() {
     "$RYZENADJ" --info 2>/dev/null | awk -F'|' '
@@ -122,12 +131,6 @@ fabryczny)
     read -r a b c <<< "$fabryczne"
     ;;
 *)
-    # At most two digits, no leading zero: bash reads "0060" as octal 48,
-    # which would pass the range check while awk below makes it 60 W.
-    if ! [[ $1 =~ ^[1-9][0-9]?$ ]] || (( 10#$1 < MIN_W || 10#$1 > MAX_W )); then
-        echo "df-limit-mocy: the limit must be a whole number of watts, $MIN_W-$MAX_W, or \"fabryczny\"" >&2
-        exit 5
-    fi
     a=$1 b=$1 c=$1
     ;;
 esac
