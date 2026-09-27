@@ -76,6 +76,22 @@ Singleton {
 
     readonly property bool laduje: status === "Charging"
     readonly property bool naKablu: status === "Full" || status === "Not charging"
+    readonly property bool naBaterii: obecna && status === "Discharging"
+
+    // How long the battery will last, in seconds; 0 = unknown or not on battery.
+    // From UPower, not from sysfs: power_now jumps with every load spike,
+    // and UPower averages it - a raw teraz / power_now would flicker
+    // between "40 min" and "6 h".
+    readonly property real pozostalo: naBaterii && UPower.displayDevice
+        ? Math.max(0, UPower.displayDevice.timeToEmpty)
+        : 0
+
+    // "3 h 42 min" / "25 min".
+    function czas(sekundy: real): string {
+        const minuty = Math.round(sekundy / 60);
+        const h = Math.floor(minuty / 60);
+        return h <= 0 ? minuty + " min" : h + " h " + minuty % 60 + " min";
+    }
 
     function odswiez(): void {
         if (!obecna) return;

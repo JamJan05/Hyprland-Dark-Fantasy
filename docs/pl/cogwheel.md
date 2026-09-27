@@ -23,7 +23,7 @@ W nawiasach nazwy z angielskiego interfejsu.
 |---|---|
 | **Dźwięk** (Sound) | Urządzenie wyjściowe, głośność, wyciszenie, głośność mikrofonu, wyciszenie mikrofonu, głośność grających programów (z PipeWire) |
 | **Ekran** (Display) | Jasność podświetlenia i nazwa urządzenia |
-| **Zasilanie** (Power) | Profil zasilania, limit ładowania, próg wznowienia ładowania, stan baterii |
+| **Zasilanie** (Power) | Profil zasilania, limit mocy procesora dla każdego profilu, limit ładowania, próg wznowienia ładowania, stan baterii |
 | **Zachowanie** (Behavior) | Nie wygaszaj ekranu (wstrzymuje wygaszanie, blokadę i uśpienie), paski HUD-u |
 | **Sieć** (Network) | Przełącznik Wi-Fi, lista sieci, łączenie z hasłem (NetworkManager) |
 | **Bluetooth** | Zasilanie, lista urządzeń, łączenie |
@@ -57,6 +57,17 @@ Skale są ograniczone do „czystych” wartości, bo rozdzielczość podzielona
 - Pliki należą do roota. Bez [reguły udev](installation.md#limit-ładowania-baterii-reguła-udev) każda zmiana pyta o hasło administratora (`pkexec`).
 - Powłoka pamięta ostatni limit i przywraca go przy starcie sesji, ale tylko po cichu, czyli tylko z wgraną regułą udev. ThinkPad i tak pamięta progi w kontrolerze.
 - Z terminala: `limit-ladowania` wypisuje `start koniec zapisywalny`, a `limit-ladowania 75` ustawia limit. Skrypt zna kolejność zapisu, której wymaga `thinkpad_acpi`.
+
+## Limit mocy procesora
+
+Twardy sufit mocy procesora dla każdego profilu zasilania, np. 7 W w oszczędnym i 15 W w zrównoważonym. Jeden suwak na profil, 5-30 W; krok za 30 W oznacza limit fabryczny. Wiersz „Limit mocy procesora” pokazuje obecny limit i fabryczny limit bieżącego profilu.
+
+- Limit obejmuje procesor z wbudowaną grafiką, a nie cały laptop: ekran, Wi-Fi i dysk biorą swoje ponad to. Na pustym pulpicie nic nie zmienia, bo procesor i tak bierze mniej. Działa pod obciążeniem: przy kompilacji, grach, ciężkich stronach.
+- STAPM, PPT fast i PPT slow dostają tę samą wartość, więc nie ma też chwilowego przekraczania limitu.
+- Limit jest ustawiany przy każdej zmianie profilu (Zębatka, `SUPER + B`, cokolwiek innego rozmawiającego z power-profiles-daemon), 800 ms po puszczeniu suwaka, i sprawdzany co minutę, bo niektóre firmware po cichu przywracają własne limity.
+- **ThinkPady mają własne limity dla każdego profilu.** Firmware zmienia je przy każdej zmianie `platform_profile` (na testowanym laptopie: 10 W w low-power). Dlatego wartość fabryczna jest zapisywana osobno dla każdego profilu, przy pierwszym wywołaniu w nim po starcie.
+- **Konfiguracja wymaga roota:** ryzenadj, skrypt `df-limit-mocy` z regułą sudo i parametr jądra `iomem=relaxed`. Patrz [installation.md](installation.md#limit-mocy-procesora-ryzenadj). Do tego czasu rzędy są ukryte; przy niepełnej konfiguracji wiersz błędu mówi, czego brakuje.
+- Z terminala: `sudo df-limit-mocy` wypisuje obecne i fabryczne limity (sześć liczb w W), `sudo df-limit-mocy 7` ustawia 7 W, `sudo df-limit-mocy fabryczny` przywraca limity fabryczne.
 
 ## Tapeta
 
@@ -105,6 +116,7 @@ To, co należy do samej powłoki, trafia do `~/.local/state/dark-fantasy/powloka
 |---|---|
 | `hudBars` | Paski HUD-u wł. / wył. |
 | `limitLadowania` | Ostatni limit ładowania (0 = nigdy nie ustawiony) |
+| `mocOszczedny`, `mocZrownowazony`, `mocWydajny` | Limit mocy procesora w W dla profilu oszczędnego, zrównoważonego i wydajności (0 = fabryczny) |
 | `jezyk` | Język interfejsu, `en` albo `pl` |
 
 ## Język

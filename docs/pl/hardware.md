@@ -22,6 +22,7 @@ Konfiguracja jest przygotowana pod Gentoo i była używana tylko tam. Te miejsca
 | Autostart w `config/hypr/hyprland.lua` | Agent polkit w `/usr/libexec/hyprpolkitagent` | Popraw ścieżkę, jeśli dystrybucja instaluje go gdzie indziej |
 | Podpowiedzi `sddm/install-theme.sh` | Usługa menedżera wyświetlania na OpenRC to `display-manager` | Na systemd `systemctl restart display-manager` |
 | `udev/99-dark-fantasy-bateria.rules` | Administratorzy są w grupie `wheel`; `/etc/udev/rules.d` może nie istnieć | W razie potrzeby zmień grupę |
+| `sudoers/dark-fantasy-moc`, konfiguracja limitu mocy | Grupa `wheel`; `/etc/sudoers.d` może nie istnieć; `iomem=relaxed` dodawany przez GRUB-a | Zmień grupę; dodaj parametr jądra tak, jak robi to Twój bootloader |
 
 ## Elementy zależne od sprzętu
 
@@ -34,6 +35,7 @@ Konfiguracja jest przygotowana pod Gentoo i była używana tylko tam. Te miejsca
 | HUD, pasek HP (`services/Battery.qml`) | Zakłada obecność baterii | Bez baterii HP to pełny pasek o stałej długości (`Theme.hudHpBezBaterii`) |
 | Zębatka → Zasilanie | Wymaga `sys-power/power-profiles-daemon` | Profil „wydajność” pojawia się tylko, gdy sprzęt go zgłasza |
 | Zębatka → Zasilanie, limit ładowania | Pliki `charge_control_*` baterii (ThinkPad: `thinkpad_acpi`) | Bez nich rzędy limitu się nie pokazują |
+| Zębatka → Zasilanie, limit mocy procesora | Mobilny AMD Ryzen obsługiwany przez ryzenadj; suwak do 30 W, czyli górnej granicy konfigurowalnego TDP Ryzena 7 250 | Bez konfiguracji roota rzędy się nie pokazują; dla innego procesora zmień `maksimum` w `services/LimitMocy.qml` |
 | Zębatka → Hyprland → Ekran | Skale i odświeżanie | Liczone z `hyprctl monitors` dla bieżącej rozdzielczości; nic nie trzeba zmieniać |
 | Zębatka → Wejście, czułość touchpada | Reguła urządzenia dla touchpada z `hyprctl devices` | Bez touchpada rząd jest przygaszony |
 

@@ -145,7 +145,8 @@ Instalator robi jeszcze dwie rzeczy:
 1. **Pliki Portage**, jeśli nie skopiował ich już `bootstrap.sh` (patrz wariant B).
 2. **Ekran logowania** (opcjonalnie): `cd sddm && ./install-theme.sh --apply`.
 3. **Limit ładowania baterii bez pytania o hasło**, na laptopach z progami ładowania: patrz [reguła udev](#limit-ładowania-baterii-reguła-udev).
-4. **Przeładowanie**: `hyprctl reload` albo uruchomienie Hyprlanda (z TTY: `Hyprland`).
+4. **Limit mocy procesora dla profili** (opcjonalnie, laptopy z AMD Ryzen): patrz [limit mocy procesora](#limit-mocy-procesora-ryzenadj).
+5. **Przeładowanie**: `hyprctl reload` albo uruchomienie Hyprlanda (z TTY: `Hyprland`).
 
 `bootstrap.sh` dokłada jeszcze jeden: **Bluetooth**. Pasek pokazuje Bluetooth jako wyłączony, dopóki usługa nie działa.
 
@@ -200,6 +201,38 @@ sudo udevadm trigger --subsystem-match=power_supply --action=change
 
 `bootstrap.sh` wgrywa regułę sam, jeśli istnieje `/sys/class/power_supply/BAT*/charge_control_end_threshold`. Więcej o limicie ładowania w [cogwheel.md](cogwheel.md#profil-zasilania-i-limit-ładowania).
 
+## Limit mocy procesora (ryzenadj)
+
+Zębatka → System → Zasilanie może ustawić twardy limit mocy procesora dla każdego profilu zasilania, np. 7 W w oszczędnym i 15 W w zrównoważonym. Działa na laptopach z AMD Ryzen przez [ryzenadj](https://github.com/FlyGoat/RyzenAdj). Powłoka woła należący do roota `/usr/local/sbin/df-limit-mocy`, a ten woła ryzenadj. Dopóki nie zrobisz wszystkich trzech kroków, rzędy się nie pokazują. Nie robi ich ani `install.sh`, ani `bootstrap.sh`.
+
+**1. ryzenadj.** Nie ma go w drzewie Gentoo ani w GURU. Zbuduj go ze źródeł (wymaga `sys-apps/pciutils`):
+
+```sh
+git clone https://github.com/FlyGoat/RyzenAdj.git && cd RyzenAdj
+mkdir build && cd build && cmake -DCMAKE_BUILD_TYPE=Release .. && make
+sudo install -o root -g root -m 0755 ryzenadj /usr/local/bin/
+```
+
+**2. Skrypt i reguła sudo.** Reguła pozwala grupie `wheel` uruchamiać ten jeden skrypt bez hasła i bez wpisu w logu za każdym razem (powłoka sprawdza limit co minutę). Z katalogu repozytorium:
+
+```sh
+sudo install -o root -g root -m 0755 sbin/df-limit-mocy /usr/local/sbin/
+sudo install -d -o root -g root -m 0750 /etc/sudoers.d     # na Gentoo może nie istnieć
+sudo visudo -cf sudoers/dark-fantasy-moc && sudo install -o root -g root -m 0440 sudoers/dark-fantasy-moc /etc/sudoers.d/
+sudo grep -n includedir /etc/sudoers                         # musi wypisać @includedir /etc/sudoers.d
+```
+
+Jeśli ostatnie polecenie nic nie wypisze, dopisz `@includedir /etc/sudoers.d` na końcu `/etc/sudoers` przez `sudo visudo`. Nigdy nie kopiuj pliku do `/etc/sudoers.d` bez wcześniejszego `visudo -c`: uszkodzony plik blokuje sudo.
+
+**3. `iomem=relaxed`.** ryzenadj sięga do procesora przez `/dev/mem`, a jądro blokuje to przy `CONFIG_STRICT_DEVMEM=y`, tak jak w dystrybucyjnym jądrze Gentoo. Parametr luzuje tę blokadę, co nieco osłabia ochronę pamięci sprzętu przed rootem. Z GRUB-em (jeśli `/etc/default/grub` ma już aktywną linię `GRUB_CMDLINE_LINUX_DEFAULT`, dopisz parametr do niej):
+
+```sh
+echo 'GRUB_CMDLINE_LINUX_DEFAULT="iomem=relaxed"' | sudo tee -a /etc/default/grub
+sudo grub-mkconfig -o /boot/grub/grub.cfg
+```
+
+Po restarcie `sudo df-limit-mocy` powinno wypisać sześć liczb: obecne limity i fabryczne, w watach. Więcej w [cogwheel.md](cogwheel.md#limit-mocy-procesora).
+
 ## Kopia zapasowa i przywracanie
 
 ### Repozytorium jest kopią
@@ -224,11 +257,12 @@ Te pliki leżą w katalogach systemowych i wymagają roota. Jeśli je zmienisz, 
 | `/etc/portage/package.accept_keywords/hyprland-desktop`, `/etc/portage/package.use/hyprland-desktop` | `bootstrap.sh` albo ręcznie |
 | `/usr/share/sddm/themes/dark-fantasy/` | `sddm/install-theme.sh` |
 | `/etc/udev/rules.d/99-dark-fantasy-bateria.rules` | `bootstrap.sh` albo ręcznie |
+| `/usr/local/sbin/df-limit-mocy`, `/etc/sudoers.d/dark-fantasy-moc`, `/usr/local/bin/ryzenadj`, `iomem=relaxed` w `/etc/default/grub` | Ręcznie, patrz [limit mocy procesora](#limit-mocy-procesora-ryzenadj) |
 
 Część stanu celowo zostaje **poza** repozytorium, bo dotyczy jednego komputera, a nie konfiguracji pulpitu:
 
 - `~/.config/hypr/ustawienia.lua`: ustawienia Hyprlanda z Zębatki (wpisane też do `.gitignore`),
-- `~/.local/state/dark-fantasy/powloka.json`: ustawienia powłoki (język, paski HUD-u, limit ładowania).
+- `~/.local/state/dark-fantasy/powloka.json`: ustawienia powłoki (język, paski HUD-u, limit ładowania, limity mocy procesora).
 
 **Tapeta też jest lokalna.** Wybór tapety w Zębatce przepisuje `path` w `~/.config/hypr/hyprpaper.conf` i `$tapeta` w `~/.config/hypr/hyprlock.conf`. To kopie, więc zmiana jest lokalna: nie pojawia się w `git status`, a `install.sh --apply` ją zachowuje, chyba że od ostatniej instalacji zmieniła się wersja któregoś z tych plików w repo (wtedy Twoja wersja trafia do kopii `.bak-*` i tapetę wybierasz ponownie). Przenoś te pliki do repo tylko wtedy, gdy ścieżka obrazu istnieje też na Twoich innych komputerach.
 

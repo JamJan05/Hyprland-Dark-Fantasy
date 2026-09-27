@@ -12,6 +12,10 @@ Każdą z tych rzeczy wykryto przy budowaniu tej konfiguracji. Większość koń
 
 **Nie ma rzędów limitu ładowania.** Bateria nie ma w sysfs plików `charge_control_*`, więc na tym sprzęcie ta opcja nie jest dostępna.
 
+**Nie ma rzędów limitu mocy procesora.** Powłoka nie może uruchomić `sudo -n /usr/local/sbin/df-limit-mocy`: brakuje skryptu albo reguły sudo. Patrz [installation.md](installation.md#limit-mocy-procesora-ryzenadj). `sudo -n -l /usr/local/sbin/df-limit-mocy` powinno wypisać ścieżkę bez pytania o hasło.
+
+**Zębatka pisze, że brakuje iomem=relaxed.** ryzenadj nie ma dostępu do procesora. Sprawdź `grep -o iomem=relaxed /proc/cmdline`; jeśli nic nie wypisze, parametr nie trafił do konfiguracji bootloadera albo komputer nie został uruchomiony ponownie.
+
 **Po `./install.sh --apply` wróciła domyślna tapeta.** Tapeta wybrana w Zębatce (Cogwheel) jest zapisana w `hyprpaper.conf` i `hyprlock.conf` jako lokalna zmiana. Instalator ją zachowuje, chyba że w repo zmieniła się wersja tych plików; wtedy Twoja wersja leży obok w pliku `.bak-*`. Wybierz tapetę ponownie w Zębatce. Patrz [installation.md](installation.md#czego-installsh-nie-obejmuje).
 
 **Ustawienie z Zębatki zepsuło Hyprlanda.** Hyprland pokaże powiadomienie wskazujące `ustawienia.lua`. Użyj Zębatka → Hyprland → Przywróć domyślne albo usuń `~/.config/hypr/ustawienia.lua` i uruchom `hyprctl reload`.

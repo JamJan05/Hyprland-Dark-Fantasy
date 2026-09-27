@@ -21,7 +21,7 @@ Network and Bluetooth need device lists, passwords and pairing, which do not fit
 |---|---|
 | **Sound** | Output device, volume, mute, microphone volume, mute microphone, per-app volume of playing programs (from PipeWire) |
 | **Display** | Backlight brightness and the device name |
-| **Power** | Power profile, charge limit, resume charging threshold, battery state |
+| **Power** | Power profile, CPU power limit per profile, charge limit, resume charging threshold, battery state |
 | **Behavior** | Keep screen on (blocks screen off, lock and suspend), HUD bars |
 | **Network** | Wi-Fi toggle, network list, connecting with a password (NetworkManager) |
 | **Bluetooth** | Power, device list, connecting |
@@ -55,6 +55,17 @@ Scales are limited to "clean" values because the resolution divided by the scale
 - The files belong to root. Without the [udev rule](installation.md#battery-charge-limit-udev-rule) every change asks for the administrator password (`pkexec`).
 - The shell remembers the last limit and restores it at session start, but only silently, which means only with the udev rule installed. ThinkPads also keep the thresholds in the embedded controller.
 - From a terminal: `limit-ladowania` prints `start end writable`, and `limit-ladowania 75` sets the limit. The script knows the write order that `thinkpad_acpi` requires.
+
+## CPU power limit
+
+A hard ceiling on CPU power for each power profile, for example 7 W in power saver and 15 W in balanced. One slider per profile, 5-30 W; one step past 30 W means the factory limit. The "CPU power limit" row shows the current limit and the factory one of the current profile.
+
+- The limit covers the CPU with its integrated GPU, not the whole laptop: the screen, Wi-Fi and disk come on top. On an idle desktop it changes nothing, because the CPU draws less anyway. It matters under load: compiling, games, heavy web pages.
+- STAPM, PPT fast and PPT slow are all set to the same value, so there is no short boost above it either.
+- It is applied on every profile change (Cogwheel, `SUPER + B`, anything else talking to power-profiles-daemon), 800 ms after the slider stops, and re-checked once a minute, because some firmware quietly restores its own limits.
+- **ThinkPads have their own limits per profile.** The firmware changes them on every `platform_profile` change (on the tested laptop: 10 W in low-power). The factory value is therefore recorded separately for each profile, on the first call in it after boot.
+- **Setup needs root:** ryzenadj, the `df-limit-mocy` script with its sudo rule, and the `iomem=relaxed` kernel parameter. See [installation.md](installation.md#cpu-power-limit-ryzenadj). Until then the rows are hidden; with a partial setup, an error line says what is missing.
+- From a terminal: `sudo df-limit-mocy` prints the current and factory limits (six numbers in W), `sudo df-limit-mocy 7` sets 7 W, `sudo df-limit-mocy fabryczny` restores the factory limits.
 
 ## Wallpaper
 
@@ -103,6 +114,7 @@ Settings that belong to the shell itself go to `~/.local/state/dark-fantasy/powl
 |---|---|
 | `hudBars` | HUD bars on / off |
 | `limitLadowania` | Last charge limit (0 = never set) |
+| `mocOszczedny`, `mocZrownowazony`, `mocWydajny` | CPU power limit in W for power saver, balanced and performance (0 = factory) |
 | `jezyk` | Interface language, `en` or `pl` |
 
 ## Language

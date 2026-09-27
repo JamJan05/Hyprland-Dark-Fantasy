@@ -276,6 +276,13 @@ else
        sudo mkdir -p /etc/udev/rules.d
        sudo cp udev/99-dark-fantasy-bateria.rules /etc/udev/rules.d/
        sudo udevadm trigger --subsystem-match=power_supply --action=change
-  4. Reload: hyprctl reload
+  4. CPU power limit per profile (AMD Ryzen laptops, optional) - ryzenadj in
+     /usr/local/bin, iomem=relaxed on the kernel command line, then:
+       sudo install -o root -g root -m 0755 sbin/df-limit-mocy /usr/local/sbin/
+       sudo install -d -o root -g root -m 0750 /etc/sudoers.d
+       sudo visudo -cf sudoers/dark-fantasy-moc && \
+         sudo install -o root -g root -m 0440 sudoers/dark-fantasy-moc /etc/sudoers.d/
+     Details: docs/installation.md, "CPU power limit (ryzenadj)".
+  5. Reload: hyprctl reload
 NOTE
 fi

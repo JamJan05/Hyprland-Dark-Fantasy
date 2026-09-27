@@ -179,16 +179,23 @@ Item {
             return true;
         }
 
-        // Letter, digit, space - into the search. Shortcuts with Ctrl, Alt
-        // and the Windows key are not typing.
-        const mody = Qt.ControlModifier | Qt.AltModifier | Qt.MetaModifier;
-        const t = zdarzenie.text;
-        if (t.length === 1 && t.charCodeAt(0) >= 32 && t.charCodeAt(0) !== 127
-                && (zdarzenie.modifiers & mody) === 0) {
-            fraza += t;
+        if (jestTekstem(zdarzenie)) {
+            fraza += zdarzenie.text;
             return true;
         }
         return false;
+    }
+
+    // Letter, digit, space - into the search. Shortcuts with Ctrl, Alt
+    // and the Windows key are not typing. Also asked by the tile row, which
+    // opens the pause from rest only for typing.
+    function jestTekstem(zdarzenie: var): bool {
+        const mody = Qt.ControlModifier | Qt.AltModifier | Qt.MetaModifier;
+        // One code point, not one UTF-16 unit - an emoji is two units.
+        const t = zdarzenie.text;
+        const kod = t.codePointAt(0);
+        return [...t].length === 1 && kod >= 32 && kod !== 127
+            && (zdarzenie.modifiers & mody) === 0;
     }
 
     // ---------------------------------------------------------------

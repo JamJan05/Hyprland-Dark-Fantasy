@@ -14,7 +14,9 @@ pragma ComponentBehavior: Bound
 //  TWO STATES
 //
 //  REST - row visible, desktop not dimmed, no background or lines.
-//  A tile is selected by hovering the mouse.
+//  A tile is selected by hovering the mouse. On an EMPTY desktop the row
+//  also holds the keyboard (there is no window to take it from): ← → walk
+//  the row, ↓ / Enter use the tile, typing at the Arsenal opens its search.
 //
 //  PAUSE (SUPER+R or a click on the strip at the bottom edge of the screen)
 //  - desktop dimmed to 40 % (no blur: the world
@@ -104,6 +106,9 @@ PanelWindow {
     // ---- INPUT - set by shell.qml ----
     property bool pauza: false
 
+    // Another panel (media, quick panel) is open and needs the keyboard itself.
+    property bool innyPanel: false
+
     // ---- OUTPUT ----
     signal pauzaProszona()
     signal zamkniecieProszone()
@@ -112,9 +117,10 @@ PanelWindow {
     WlrLayershell.namespace: "quickshell-kafle"
     WlrLayershell.layer: WlrLayer.Top
 
-    // Keyboard only in pause. At rest the row must not steal
-    // typing from the windows underneath.
-    WlrLayershell.keyboardFocus: root.pauza
+    // Keyboard in pause, and at rest on an empty desktop - there are no
+    // windows to steal typing from, so the arrows can walk the row right away.
+    // As soon as a window appears (or another panel opens) the row lets go.
+    WlrLayershell.keyboardFocus: root.klawiatura
         ? WlrKeyboardFocus.Exclusive
         : WlrKeyboardFocus.None
 
@@ -263,6 +269,9 @@ PanelWindow {
 
     readonly property bool pokazany: pustyPulpit || odsloniety || pauza
 
+    // Row holds the keyboard - see WlrLayershell.keyboardFocus above.
+    readonly property bool klawiatura: pauza || (pustyPulpit && !innyPanel)
+
     // Delay before hiding. Without it, sliding two pixels off a tile -
     // or moving the mouse diagonally - would hide the row exactly when
     // you are aiming at something. 450 ms is the value from the old dock.lua (4 ticks
@@ -320,17 +329,49 @@ PanelWindow {
     //  KEYBOARD - one focus owner (pitfall 15 in the notes:
     //  a second element with "focus" stole focus on opening).
     // ---------------------------------------------------------------
-    onPauzaChanged: {
-        if (pauza) Qt.callLater(() => klawiatura.forceActiveFocus());
-        else poziom = 0;
+    onPauzaChanged: if (!pauza) poziom = 0;
+
+    onKlawiaturaChanged: {
+        if (klawiatura) Qt.callLater(() => odbiornik.forceActiveFocus());
     }
 
     Item {
-        id: klawiatura
+        id: odbiornik
         focus: true
 
         Keys.onPressed: function (zdarzenie) {
-            if (!root.pauza) return;
+            if (!root.klawiatura) return;
+
+            // At rest on an empty desktop: arrows walk the row, Enter / Down
+            // uses the tile (content tiles open the pause), typing at the
+            // Arsenal opens the pause straight into the search. Esc has nothing to close.
+            if (!root.pauza) {
+                switch (zdarzenie.key) {
+                case Qt.Key_Left:
+                    root.wybrany = Nawigacja.zawin(root.wybrany, -1, root.kafle.length);
+                    break;
+                case Qt.Key_Right:
+                    root.wybrany = Nawigacja.zawin(root.wybrany, 1, root.kafle.length);
+                    break;
+                case Qt.Key_Down:
+                case Qt.Key_Return:
+                case Qt.Key_Enter:
+                    root.uzyjWybranego();
+                    break;
+                default:
+                    // Only typing opens the Arsenal - Esc, Tab and the rest
+                    // must not open the pause.
+                    if (root.kafel.klucz !== "uzbrojenie" || !uzbrojenie.jestTekstem(zdarzenie))
+                        return;
+                    // Pause first: opening the Arsenal clears its search,
+                    // so the typed letter has to come after.
+                    root.pauzaProszona();
+                    root.poziom = 1;
+                    uzbrojenie.klawisz(zdarzenie);
+                }
+                zdarzenie.accepted = true;
+                return;
+            }
 
             // Content level: the content first, and an Esc it did not
             // handle goes back to the row.

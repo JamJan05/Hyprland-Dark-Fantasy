@@ -12,6 +12,10 @@
 //  The charge limit is written by services/Ladowanie.qml via the
 //  local/bin/limit-ladowania script. The row shows only for a battery
 //  with charge_control_* files in sysfs (on a ThinkPad: thinkpad_acpi).
+//
+//  The CPU power limit - one slider per profile - is applied by
+//  services/LimitMocy.qml. The rows show once its script has answered;
+//  with the script installed but not working, an error line says what is missing.
 // -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- --
 
 import QtQuick
@@ -57,6 +61,49 @@ SekcjaOpcji {
 
     // Thresholds are read on every section open - sysfs does not report changes.
     Component.onCompleted: Ladowanie.odswiez()
+
+    WierszOpcji {
+        width: root.width
+        visible: LimitMocy.obslugiwany
+        etykieta: Tr.t("CPU power limit", "Limit mocy procesora")
+        typ: "info"
+        tekst: Math.round(LimitMocy.obecny) + " W"
+            + Tr.t(" (factory ", " (fabrycznie ") + Math.round(LimitMocy.fabryczny) + " W)"
+    }
+
+    // One step above LimitMocy.maksimum = the factory limit of that profile.
+    Repeater {
+        model: LimitMocy.obslugiwany ? root.profile : []
+
+        delegate: WierszOpcji {
+            required property var modelData
+
+            width: root.width
+            etykieta: Tr.t("Limit: ", "Limit: ") + modelData.nazwa
+            typ: "suwak"; od: 5; doo: LimitMocy.maksimum + 1; krok: 1
+            wartosc: {
+                const w = UstawieniaPowloki.limitMocy(modelData.kod);
+                return w > 0 ? Math.min(w, LimitMocy.maksimum) : LimitMocy.maksimum + 1;
+            }
+            formatuj: v => Math.round(v) > LimitMocy.maksimum
+                ? Tr.t("factory", "fabryczny") : Math.round(v) + " W"
+            onZmieniono: function (v) {
+                const w = Math.round(v);
+                UstawieniaPowloki.ustawLimitMocy(modelData.kod, w > LimitMocy.maksimum ? 0 : w);
+            }
+        }
+    }
+
+    Label {
+        width: root.width
+        visible: LimitMocy.zainstalowany && LimitMocy.blad !== ""
+        leftPadding: Theme.spacingMd
+        wrapMode: Text.Wrap
+        elide: Text.ElideNone
+        font.pixelSize: Theme.fontSizeSmall
+        color: Theme.ember
+        text: LimitMocy.blad
+    }
 
     WierszOpcji {
         width: root.width

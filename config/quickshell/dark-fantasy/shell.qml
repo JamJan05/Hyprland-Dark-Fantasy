@@ -123,7 +123,11 @@ ShellRoot {
     // The charge limit has to be restored at session start, not on the first
     // Cogwheel opening - a singleton is only created on first
     // reference, so we wake it up here.
-    Component.onCompleted: Ladowanie.odswiez()
+    Component.onCompleted: {
+        Ladowanie.odswiez();
+        // Also wakes the singleton, which then follows profile changes itself.
+        LimitMocy.zastosuj();
+    }
 
     // Player. A separate panel, slides out from the MIDDLE of the bar - from
     // under the media module.
@@ -171,6 +175,7 @@ ShellRoot {
         id: kafle
 
         pauza: root.pauzaOpen
+        innyPanel: root.mediaOpen || root.quickMode !== ""
         onPauzaProszona: root.pauzaOpen = true
         onZamkniecieProszone: root.pauzaOpen = false
 

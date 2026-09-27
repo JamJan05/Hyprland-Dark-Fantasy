@@ -67,6 +67,9 @@ Column {
                 : Tr.t("Battery  ", "Bateria  ") + root.procent(Battery.poziom) + "\n"
                   + (Battery.laduje ? Tr.t("charging", "ładowanie")
                      : Battery.naKablu ? Tr.t("plugged in", "zasilanie z sieci")
+                     : Battery.pozostalo > 0
+                       ? Tr.t("on battery, ", "na baterii, zostało ") + Battery.czas(Battery.pozostalo)
+                         + Tr.t(" left", "")
                      : Tr.t("on battery", "na baterii"))
                   + "\n" + Tr.t("health ", "kondycja ") + root.procent(Battery.kondycja)
                   + " (" + Math.round(Battery.projektWh) + Tr.t(" Wh design)", " Wh projektowo)"), hovered)

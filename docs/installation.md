@@ -145,7 +145,8 @@ It also does two more things:
 1. **Portage files**, unless `bootstrap.sh` already copied them (see Option B).
 2. **Login screen** (optional): `cd sddm && ./install-theme.sh --apply`.
 3. **Battery charge limit without a password prompt**, on laptops with charge thresholds: see [the udev rule](#battery-charge-limit-udev-rule).
-4. **Reload**: `hyprctl reload`, or start Hyprland (from a TTY: `Hyprland`).
+4. **CPU power limit per profile** (optional, AMD Ryzen laptops): see [CPU power limit](#cpu-power-limit-ryzenadj).
+5. **Reload**: `hyprctl reload`, or start Hyprland (from a TTY: `Hyprland`).
 
 `bootstrap.sh` adds one more: **Bluetooth**. The bar shows Bluetooth as off until the service runs.
 
@@ -200,6 +201,38 @@ sudo udevadm trigger --subsystem-match=power_supply --action=change
 
 `bootstrap.sh` installs the rule automatically when `/sys/class/power_supply/BAT*/charge_control_end_threshold` exists. For more on the charge limit, see [cogwheel.md](cogwheel.md#power-profile-and-charge-limit).
 
+## CPU power limit (ryzenadj)
+
+Cogwheel → System → Power can set a hard CPU power limit for each power profile, for example 7 W in power saver and 15 W in balanced. It works on AMD Ryzen laptops through [ryzenadj](https://github.com/FlyGoat/RyzenAdj). The shell calls the root-owned `/usr/local/sbin/df-limit-mocy`, which calls ryzenadj. Until all three steps are done, the rows stay hidden. Neither `install.sh` nor `bootstrap.sh` does them.
+
+**1. ryzenadj.** It is not in the Gentoo tree or GURU. Build it from source (needs `sys-apps/pciutils`):
+
+```sh
+git clone https://github.com/FlyGoat/RyzenAdj.git && cd RyzenAdj
+mkdir build && cd build && cmake -DCMAKE_BUILD_TYPE=Release .. && make
+sudo install -o root -g root -m 0755 ryzenadj /usr/local/bin/
+```
+
+**2. The script and the sudo rule.** The rule lets the `wheel` group run that one script without a password and without a log line each time (the shell re-checks the limit once a minute). Run from the repository:
+
+```sh
+sudo install -o root -g root -m 0755 sbin/df-limit-mocy /usr/local/sbin/
+sudo install -d -o root -g root -m 0750 /etc/sudoers.d     # may not exist on Gentoo
+sudo visudo -cf sudoers/dark-fantasy-moc && sudo install -o root -g root -m 0440 sudoers/dark-fantasy-moc /etc/sudoers.d/
+sudo grep -n includedir /etc/sudoers                         # must print @includedir /etc/sudoers.d
+```
+
+If the last command prints nothing, add `@includedir /etc/sudoers.d` at the end of `/etc/sudoers` with `sudo visudo`. Never copy a file into `/etc/sudoers.d` without `visudo -c` first: a broken one locks sudo out.
+
+**3. `iomem=relaxed`.** ryzenadj reaches the CPU through `/dev/mem`, which the kernel blocks with `CONFIG_STRICT_DEVMEM=y`, as in the Gentoo dist kernel. The parameter relaxes that block, which slightly weakens the protection of hardware memory from root. With GRUB (if `/etc/default/grub` already has an active `GRUB_CMDLINE_LINUX_DEFAULT`, add the parameter to it instead):
+
+```sh
+echo 'GRUB_CMDLINE_LINUX_DEFAULT="iomem=relaxed"' | sudo tee -a /etc/default/grub
+sudo grub-mkconfig -o /boot/grub/grub.cfg
+```
+
+After a reboot, `sudo df-limit-mocy` should print six numbers: the current limits and the factory ones, in watts. More in [cogwheel.md](cogwheel.md#cpu-power-limit).
+
 ## Backup and restore
 
 ### The repository is the backup
@@ -224,11 +257,12 @@ These live in system directories and need root. If you change them, copy them ba
 | `/etc/portage/package.accept_keywords/hyprland-desktop`, `/etc/portage/package.use/hyprland-desktop` | `bootstrap.sh` or by hand |
 | `/usr/share/sddm/themes/dark-fantasy/` | `sddm/install-theme.sh` |
 | `/etc/udev/rules.d/99-dark-fantasy-bateria.rules` | `bootstrap.sh` or by hand |
+| `/usr/local/sbin/df-limit-mocy`, `/etc/sudoers.d/dark-fantasy-moc`, `/usr/local/bin/ryzenadj`, `iomem=relaxed` in `/etc/default/grub` | By hand, see [CPU power limit](#cpu-power-limit-ryzenadj) |
 
 Some state is deliberately **outside** the repository, because it belongs to one computer and is not part of the desktop configuration:
 
 - `~/.config/hypr/ustawienia.lua`: Hyprland settings from the Cogwheel (also listed in `.gitignore`),
-- `~/.local/state/dark-fantasy/powloka.json`: shell settings (language, HUD bars, charge limit).
+- `~/.local/state/dark-fantasy/powloka.json`: shell settings (language, HUD bars, charge limit, CPU power limits).
 
 **The wallpaper is local too.** Choosing a wallpaper in the Cogwheel rewrites `path` in `~/.config/hypr/hyprpaper.conf` and `$tapeta` in `~/.config/hypr/hyprlock.conf`. Those are copies, so the change is local: it does not show up in `git status`, and `install.sh --apply` keeps it unless the repo's version of either file changed since the last install (then your version goes to a `.bak-*` backup and you pick the wallpaper again). Copy these files into the repo only if the image path also exists on your other machines.
 
