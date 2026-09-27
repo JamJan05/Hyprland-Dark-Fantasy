@@ -171,6 +171,7 @@ ShellRoot {
         id: kafle
 
         pauza: root.pauzaOpen
+        innyPanel: root.mediaOpen || root.quickMode !== ""
         onPauzaProszona: root.pauzaOpen = true
         onZamkniecieProszone: root.pauzaOpen = false
 
