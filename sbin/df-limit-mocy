@@ -26,6 +26,11 @@
 # yet), and they say nothing about the factory. Until a profile has its own
 # record, the first one recorded stands in for it.
 #
+# STAPM IS NOT PART OF IT. On a profile change the ThinkPad firmware resets
+# PPT fast and slow, but leaves STAPM at whatever was set last - so a recorded
+# STAPM means nothing. The factory STAPM of a profile is taken as its factory
+# PPT slow: both are sustained limits, and at boot (low-power) both are 10 W.
+#
 # One exception: the firmware may set the new profile to exactly the value
 # written last. So the last write remembers its profile too, and once a
 # profile change has been SEEN to reset the limits, a profile change alone is
@@ -120,6 +125,9 @@ elif [[ -s $STAN/pierwszy ]]; then
 else
     fabryczne="$obecne"
 fi
+# Factory STAPM = factory PPT slow - see "STAPM IS NOT PART OF IT" above.
+read -r fa fb fc <<< "$fabryczne"
+fabryczne="$fc $fb $fc"
 
 if [[ $# -eq 0 ]]; then
     echo "$obecne $fabryczne"
@@ -139,7 +147,9 @@ if [[ "$(mw3 "$oa" "$ob" "$oc")" != "$(mw3 "$a" "$b" "$c")" ]]; then
     "$RYZENADJ" --stapm-limit="$(mw "$a")" --fast-limit="$(mw "$b")" \
                 --slow-limit="$(mw "$c")" >/dev/null
     echo "$PROFIL $(mw3 "$a" "$b" "$c")" > "$OSTATNI"
-    obecne="$(odczyt || echo "$a $b $c")"
+    # What was written, not a fresh read: the SMU reports a new STAPM only
+    # about half a second later, and Cogwheel would show the old one for a minute.
+    obecne="$(awk -v a="$a" -v b="$b" -v c="$c" 'BEGIN { printf "%.3f %.3f %.3f", a, b, c }')"
 fi
 
 echo "$obecne $fabryczne"
