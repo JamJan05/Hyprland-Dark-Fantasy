@@ -12,6 +12,10 @@ Each item below was found while building this configuration. Most of them fail s
 
 **The charge-limit rows are missing.** The battery has no `charge_control_*` files in sysfs, so the option is not available on this hardware.
 
+**The CPU power limit rows are missing.** The shell cannot run `sudo -n /usr/local/sbin/df-limit-mocy`: the script or the sudo rule is not installed. See [installation.md](installation.md#cpu-power-limit-ryzenadj). `sudo -n -l /usr/local/sbin/df-limit-mocy` should print the path without asking for a password.
+
+**Cogwheel says "iomem=relaxed is missing".** ryzenadj cannot reach the CPU. Check `grep -o iomem=relaxed /proc/cmdline`; if it prints nothing, the parameter did not make it into the boot loader config, or the machine was not rebooted.
+
 **The wallpaper went back to the default after `./install.sh --apply`.** The wallpaper you pick in the Cogwheel is saved in `hyprpaper.conf` and `hyprlock.conf` as a local change. The installer keeps it unless the repo's version of those files changed; then your version is in a `.bak-*` file next to it. Pick the wallpaper again in the Cogwheel. See [installation.md](installation.md#what-installsh-does-not-cover).
 
 **A setting from the Cogwheel broke Hyprland.** Hyprland shows a notification pointing to `ustawienia.lua`. Use Cogwheel → Hyprland → Restore defaults, or delete `~/.config/hypr/ustawienia.lua` and run `hyprctl reload`.

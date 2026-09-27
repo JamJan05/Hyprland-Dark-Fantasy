@@ -18,6 +18,8 @@ local/
   share/dbus-1/      wskazanie powłoki jako demona powiadomień
 gentoo/              keywordy i flagi USE dla Portage
 udev/                reguła: progi ładowania baterii zapisywalne dla wheel
+sbin/                df-limit-mocy: limit mocy procesora przez ryzenadj (root, /usr/local/sbin)
+sudoers/             reguła: df-limit-mocy bez hasła dla wheel
 sddm/                motyw logowania (QML) i jego instalator
 tools/               skalowanie ikon, tekstury i generatory glifów dla powłoki
 install.sh           kopiuje config/ do ~/.config
