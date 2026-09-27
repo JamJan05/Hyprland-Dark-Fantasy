@@ -26,6 +26,13 @@
 # yet), and they say nothing about the factory. Until a profile has its own
 # record, the first one recorded stands in for it.
 #
+# STAPM IS READ LATE. On a profile change the ThinkPad firmware sets all
+# three limits, but the SMU reports the new STAPM only 1.5-2 s later (measured
+# with nothing else writing), while the first call in a new profile comes
+# after 0.8 s. So before recording a profile's factory values the script
+# waits CZEKAJ seconds and reads again - once per profile per boot, and
+# the shell runs the script in the background anyway.
+#
 # One exception: the firmware may set the new profile to exactly the value
 # written last. So the last write remembers its profile too, and once a
 # profile change has been SEEN to reset the limits, a profile change alone is
@@ -60,6 +67,9 @@ FABRYCZNE=$STAN/fabryczne-$PROFIL
 
 MIN_W=4
 MAX_W=54
+
+# Seconds to wait before recording a profile's factory limits.
+CZEKAJ=3
 
 (( EUID == 0 )) || { echo "df-limit-mocy: run as root (sudo)" >&2; exit 3; }
 [[ -x $RYZENADJ ]] || { echo "df-limit-mocy: $RYZENADJ not found" >&2; exit 2; }
@@ -109,6 +119,11 @@ if [[ ! -s $FABRYCZNE ]]; then
         zapisz=1
     fi
     if (( zapisz )); then
+        sleep "$CZEKAJ"
+        # odczyt exits 0 even when it prints nothing - keep the first read then.
+        ponowny="$(odczyt || true)"
+        [[ -n $ponowny ]] && obecne=$ponowny
+        read -r oa ob oc <<< "$obecne"
         echo "$obecne" > "$FABRYCZNE"
         [[ -s $STAN/pierwszy ]] || echo "$obecne" > "$STAN/pierwszy"
     fi
@@ -139,7 +154,9 @@ if [[ "$(mw3 "$oa" "$ob" "$oc")" != "$(mw3 "$a" "$b" "$c")" ]]; then
     "$RYZENADJ" --stapm-limit="$(mw "$a")" --fast-limit="$(mw "$b")" \
                 --slow-limit="$(mw "$c")" >/dev/null
     echo "$PROFIL $(mw3 "$a" "$b" "$c")" > "$OSTATNI"
-    obecne="$(odczyt || echo "$a $b $c")"
+    # What was written, not a fresh read: the SMU reports a new STAPM only
+    # 1.5-2 s later, and Cogwheel would show the old one for a minute.
+    obecne="$(awk -v a="$a" -v b="$b" -v c="$c" 'BEGIN { printf "%.3f %.3f %.3f", a, b, c }')"
 fi
 
 echo "$obecne $fabryczne"
