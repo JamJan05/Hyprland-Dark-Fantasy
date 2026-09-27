@@ -120,7 +120,9 @@ if [[ ! -s $FABRYCZNE ]]; then
     fi
     if (( zapisz )); then
         sleep "$CZEKAJ"
-        obecne="$(odczyt || echo "$obecne")"
+        # odczyt exits 0 even when it prints nothing - keep the first read then.
+        ponowny="$(odczyt || true)"
+        [[ -n $ponowny ]] && obecne=$ponowny
         read -r oa ob oc <<< "$obecne"
         echo "$obecne" > "$FABRYCZNE"
         [[ -s $STAN/pierwszy ]] || echo "$obecne" > "$STAN/pierwszy"
