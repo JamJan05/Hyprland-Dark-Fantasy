@@ -13,6 +13,8 @@ pragma Singleton
 //    limitLadowania  - the last battery charge limit chosen in the Cogwheel,
 //                      restored at startup (services/Ladowanie.qml).
 //                      0 = never set, nothing is restored.
+//    moc*            - CPU power limit in W for each power profile
+//                      (services/LimitMocy.qml). 0 = factory limit.
 //
 //  ---------------------------------------------------------------
 //  WHY ~/.local/state AND NOT THE REPOSITORY
@@ -33,6 +35,7 @@ pragma Singleton
 import QtQml
 import Quickshell
 import Quickshell.Io
+import Quickshell.Services.UPower
 import qs
 
 Singleton {
@@ -52,6 +55,23 @@ Singleton {
 
     function ustawLimitLadowania(procent: int): void {
         dane.limitLadowania = procent;
+    }
+
+    function limitMocy(profil: int): int {
+        switch (profil) {
+        case PowerProfile.PowerSaver:  return dane.mocOszczedny;
+        case PowerProfile.Balanced:    return dane.mocZrownowazony;
+        case PowerProfile.Performance: return dane.mocWydajny;
+        }
+        return 0;
+    }
+
+    function ustawLimitMocy(profil: int, waty: int): void {
+        switch (profil) {
+        case PowerProfile.PowerSaver:  dane.mocOszczedny = waty; break;
+        case PowerProfile.Balanced:    dane.mocZrownowazony = waty; break;
+        case PowerProfile.Performance: dane.mocWydajny = waty; break;
+        }
     }
 
     // Interface language: "en" (default) or "pl". Read through Tr.
@@ -82,6 +102,9 @@ Singleton {
             id: dane
             property bool hudBars: Theme.hudBars
             property int limitLadowania: 0
+            property int mocOszczedny: 0
+            property int mocZrownowazony: 0
+            property int mocWydajny: 0
             property string jezyk: "en"
         }
     }

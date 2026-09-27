@@ -1,0 +1,21 @@
+# -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- --
+# CPU POWER LIMIT WITHOUT A PASSWORD FOR THE wheel GROUP.
+#
+# Cogwheel sets the limit of the current power profile through
+# /usr/local/sbin/df-limit-mocy (sbin/df-limit-mocy in the repo), which needs
+# root for ryzenadj. The shell calls it on every profile change and once a
+# minute, so it has to go without a password - and without a syslog line and
+# a PAM session each time, or the log would get one entry a minute.
+#
+# Only that one root-owned script, which validates its arguments. Never point
+# a rule like this at a file in the home directory - whoever can edit the file
+# gets root.
+#
+# Installation (root) - ALWAYS through visudo -c first, a broken file in
+# /etc/sudoers.d locks sudo out completely:
+#   install -o root -g root -m 0755 sbin/df-limit-mocy /usr/local/sbin/
+#   visudo -cf sudoers/dark-fantasy-moc
+#   install -o root -g root -m 0440 sudoers/dark-fantasy-moc /etc/sudoers.d/
+# -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- --
+Defaults!/usr/local/sbin/df-limit-mocy !syslog, !pam_session
+%wheel ALL=(root) NOPASSWD: /usr/local/sbin/df-limit-mocy

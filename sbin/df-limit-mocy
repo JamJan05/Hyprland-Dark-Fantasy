@@ -1,0 +1,121 @@
+#!/bin/bash
+#
+# df-limit-mocy - hard CPU power limit on AMD Ryzen mobile, via ryzenadj.
+#
+#   df-limit-mocy             prints "stapm fast slow fstapm ffast fslow" in W:
+#                             the current limits, then the factory ones
+#   df-limit-mocy 7           sets STAPM, PPT fast and PPT slow to 7 W
+#   df-limit-mocy fabryczny   restores the factory limits
+#
+# Called by Cogwheel (services/LimitMocy.qml) through sudo, on every power
+# profile change and once a minute.
+#
+# THREE LIMITS, ONE NUMBER. The SMU has a sustained limit (STAPM), a short
+# burst limit (PPT fast) and an average one (PPT slow). Setting all three to
+# the same value makes it a hard ceiling - no boost above it, not even for a
+# few seconds. The limit covers the CPU with its integrated GPU, not the whole
+# laptop: the screen, Wi-Fi and disk come on top.
+#
+# FACTORY LIMITS ARE PER PLATFORM PROFILE. On a ThinkPad the firmware sets
+# its own limits on every platform_profile change (low-power, balanced,
+# performance) - on this laptop low-power alone is 10 W. So the factory values
+# are kept separately for each profile, in /run (tmpfs, cleared at shutdown),
+# and recorded on the first call in that profile - but only when the current
+# limits are not the ones this script wrote last. Otherwise the firmware did
+# not touch them (a laptop without per-profile limits, or no profile change
+# yet), and they say nothing about the factory. Until a profile has its own
+# record, the first one recorded stands in for it.
+#
+# IDEMPOTENT. A write happens only when the current limits differ from the
+# requested ones. Some firmware quietly restores its own limits (charger
+# plugged in, resume), which is why the shell repeats the call every minute;
+# most of those calls only read.
+#
+# ROOT, NOT A USER SCRIPT. ryzenadj talks to the SMU through /dev/mem, so it
+# needs root and the iomem=relaxed kernel parameter (with STRICT_DEVMEM). The
+# script lives in /usr/local/sbin owned by root, and sudoers
+# (sudoers/dark-fantasy-moc) lets the wheel group run it without a password.
+# That is why it does not sit in ~/.local/bin next to limit-ladowania: a
+# passwordless sudo rule for a file the user can edit would be root for
+# anything. The arguments are validated below for the same reason.
+#
+# EXIT CODES (translated in Cogwheel): 2 no ryzenadj, 3 not root,
+# 4 no SMU access (iomem=relaxed missing), 5 bad argument.
+
+set -euo pipefail
+PATH=/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
+
+RYZENADJ=/usr/local/bin/ryzenadj
+STAN=/run/df-limit-mocy
+OSTATNI=$STAN/ustawiony
+
+PROFIL="$(cat /sys/firmware/acpi/platform_profile 2>/dev/null || true)"
+[[ $PROFIL =~ ^[a-z-]+$ ]] || PROFIL=brak
+FABRYCZNE=$STAN/fabryczne-$PROFIL
+
+MIN_W=4
+MAX_W=54
+
+(( EUID == 0 )) || { echo "df-limit-mocy: run as root (sudo)" >&2; exit 3; }
+[[ -x $RYZENADJ ]] || { echo "df-limit-mocy: $RYZENADJ not found" >&2; exit 2; }
+
+# "stapm fast slow" in W from the ryzenadj --info table, e.g. "28.000 35.000 30.000".
+odczyt() {
+    "$RYZENADJ" --info 2>/dev/null | awk -F'|' '
+        { gsub(/^ +| +$/, "", $2); gsub(/ /, "", $3) }
+        $2 == "STAPM LIMIT"    { a = $3 }
+        $2 == "PPT LIMIT FAST" { b = $3 }
+        $2 == "PPT LIMIT SLOW" { c = $3 }
+        END { if (a != "" && b != "" && c != "") print a, b, c }'
+}
+
+obecne="$(odczyt || true)"
+if [[ -z $obecne ]]; then
+    echo "df-limit-mocy: no SMU access - is iomem=relaxed on the kernel command line?" >&2
+    exit 4
+fi
+
+# Watts as mW integers; the SMU reports with three decimals.
+mw() { awk -v w="$1" 'BEGIN { printf "%d", w * 1000 + 0.5 }'; }
+mw3() { echo "$(mw "$1") $(mw "$2") $(mw "$3")"; }
+
+mkdir -p "$STAN"
+read -r oa ob oc <<< "$obecne"
+if [[ ! -s $FABRYCZNE ]] && [[ ! -s $OSTATNI || "$(<"$OSTATNI")" != "$(mw3 "$oa" "$ob" "$oc")" ]]; then
+    echo "$obecne" > "$FABRYCZNE"
+    [[ -s $STAN/pierwszy ]] || echo "$obecne" > "$STAN/pierwszy"
+fi
+if [[ -s $FABRYCZNE ]]; then
+    fabryczne="$(<"$FABRYCZNE")"
+elif [[ -s $STAN/pierwszy ]]; then
+    fabryczne="$(<"$STAN/pierwszy")"
+else
+    fabryczne="$obecne"
+fi
+
+if [[ $# -eq 0 ]]; then
+    echo "$obecne $fabryczne"
+    exit 0
+fi
+
+case "$1" in
+fabryczny)
+    read -r a b c <<< "$fabryczne"
+    ;;
+*)
+    if ! [[ $1 =~ ^[0-9]+$ ]] || (( $1 < MIN_W || $1 > MAX_W )); then
+        echo "df-limit-mocy: the limit must be a whole number of watts, $MIN_W-$MAX_W, or \"fabryczny\"" >&2
+        exit 5
+    fi
+    a=$1 b=$1 c=$1
+    ;;
+esac
+
+if [[ "$(mw3 "$oa" "$ob" "$oc")" != "$(mw3 "$a" "$b" "$c")" ]]; then
+    "$RYZENADJ" --stapm-limit="$(mw "$a")" --fast-limit="$(mw "$b")" \
+                --slow-limit="$(mw "$c")" >/dev/null
+    mw3 "$a" "$b" "$c" > "$OSTATNI"
+    obecne="$(odczyt || echo "$a $b $c")"
+fi
+
+echo "$obecne $fabryczne"
