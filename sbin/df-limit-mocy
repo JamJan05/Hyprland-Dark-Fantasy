@@ -26,6 +26,11 @@
 # yet), and they say nothing about the factory. Until a profile has its own
 # record, the first one recorded stands in for it.
 #
+# One exception: the firmware may set the new profile to exactly the value
+# written last. So the last write remembers its profile too, and once a
+# profile change has been SEEN to reset the limits, a profile change alone is
+# enough to record the new profile's factory values.
+#
 # IDEMPOTENT. A write happens only when the current limits differ from the
 # requested ones. Some firmware quietly restores its own limits (charger
 # plugged in, resume), which is why the shell repeats the call every minute;
@@ -81,9 +86,23 @@ mw3() { echo "$(mw "$1") $(mw "$2") $(mw "$3")"; }
 
 mkdir -p "$STAN"
 read -r oa ob oc <<< "$obecne"
-if [[ ! -s $FABRYCZNE ]] && [[ ! -s $OSTATNI || "$(<"$OSTATNI")" != "$(mw3 "$oa" "$ob" "$oc")" ]]; then
-    echo "$obecne" > "$FABRYCZNE"
-    [[ -s $STAN/pierwszy ]] || echo "$obecne" > "$STAN/pierwszy"
+if [[ ! -s $FABRYCZNE ]]; then
+    # "profile stapm fast slow" of the last write, the values in mW.
+    lp="" lw=""
+    [[ -s $OSTATNI ]] && read -r lp lw <<< "$(<"$OSTATNI")"
+    zapisz=0
+    if [[ -z $lp ]]; then
+        zapisz=1
+    elif [[ $lw != "$(mw3 "$oa" "$ob" "$oc")" ]]; then
+        zapisz=1
+        [[ $lp != "$PROFIL" ]] && touch "$STAN/firmware-resetuje"
+    elif [[ $lp != "$PROFIL" && -e $STAN/firmware-resetuje ]]; then
+        zapisz=1
+    fi
+    if (( zapisz )); then
+        echo "$obecne" > "$FABRYCZNE"
+        [[ -s $STAN/pierwszy ]] || echo "$obecne" > "$STAN/pierwszy"
+    fi
 fi
 if [[ -s $FABRYCZNE ]]; then
     fabryczne="$(<"$FABRYCZNE")"
@@ -103,7 +122,9 @@ fabryczny)
     read -r a b c <<< "$fabryczne"
     ;;
 *)
-    if ! [[ $1 =~ ^[0-9]+$ ]] || (( $1 < MIN_W || $1 > MAX_W )); then
+    # At most two digits, no leading zero: bash reads "0060" as octal 48,
+    # which would pass the range check while awk below makes it 60 W.
+    if ! [[ $1 =~ ^[1-9][0-9]?$ ]] || (( 10#$1 < MIN_W || 10#$1 > MAX_W )); then
         echo "df-limit-mocy: the limit must be a whole number of watts, $MIN_W-$MAX_W, or \"fabryczny\"" >&2
         exit 5
     fi
@@ -114,7 +135,7 @@ esac
 if [[ "$(mw3 "$oa" "$ob" "$oc")" != "$(mw3 "$a" "$b" "$c")" ]]; then
     "$RYZENADJ" --stapm-limit="$(mw "$a")" --fast-limit="$(mw "$b")" \
                 --slow-limit="$(mw "$c")" >/dev/null
-    mw3 "$a" "$b" "$c" > "$OSTATNI"
+    echo "$PROFIL $(mw3 "$a" "$b" "$c")" > "$OSTATNI"
     obecne="$(odczyt || echo "$a $b $c")"
 fi
 

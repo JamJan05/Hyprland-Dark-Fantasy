@@ -359,12 +359,15 @@ PanelWindow {
                     root.uzyjWybranego();
                     break;
                 default:
-                    if (root.kafel.klucz !== "uzbrojenie") return;
+                    // Only typing opens the Arsenal - Esc, Tab and the rest
+                    // must not open the pause.
+                    if (root.kafel.klucz !== "uzbrojenie" || !uzbrojenie.jestTekstem(zdarzenie))
+                        return;
                     // Pause first: opening the Arsenal clears its search,
                     // so the typed letter has to come after.
                     root.pauzaProszona();
                     root.poziom = 1;
-                    if (!uzbrojenie.klawisz(zdarzenie)) return;
+                    uzbrojenie.klawisz(zdarzenie);
                 }
                 zdarzenie.accepted = true;
                 return;

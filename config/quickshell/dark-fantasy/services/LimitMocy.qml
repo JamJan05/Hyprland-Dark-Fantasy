@@ -66,7 +66,10 @@ Singleton {
             ponownie = true;
             return;
         }
-        proces.command = ["sudo", "-n", skrypt].concat(argumenty);
+        // Exit 90 = the script is not there; checked before sudo, so that
+        // a missing sudo rule can be told apart from a missing setup.
+        proces.command = ["sh", "-c", "test -x \"$0\" || exit 90; exec sudo -n \"$0\" \"$@\"", skrypt]
+            .concat(argumenty);
         proces.running = true;
     }
 
@@ -97,10 +100,13 @@ Singleton {
                 root.fabryczny = Number(c[3]);
                 root.blad = "";
             } else {
-                // sudo -n without the rule (or without the script) returns 1 with
-                // a message from sudo - the setup is absent, the rows stay hidden.
-                root.zainstalowany = kod !== 1 || !bledy.text.includes("sudo");
-                root.blad = kod === 4
+                // No script - no setup at all, the rows stay hidden.
+                root.zainstalowany = kod !== 90;
+                // sudo -n itself fails with 1 and a "sudo:" message when the rule is missing.
+                root.blad = kod === 1 && bledy.text.includes("sudo:")
+                    ? Tr.t("No sudo rule for df-limit-mocy (sudoers/dark-fantasy-moc).",
+                           "Brak reguły sudo dla df-limit-mocy (sudoers/dark-fantasy-moc).")
+                    : kod === 4
                     ? Tr.t("No access to the CPU - the iomem=relaxed kernel parameter is missing.",
                            "Brak dostępu do procesora - brakuje parametru jądra iomem=relaxed.")
                     : kod === 2
