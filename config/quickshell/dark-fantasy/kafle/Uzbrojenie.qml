@@ -191,8 +191,10 @@ Item {
     // opens the pause from rest only for typing.
     function jestTekstem(zdarzenie: var): bool {
         const mody = Qt.ControlModifier | Qt.AltModifier | Qt.MetaModifier;
+        // One code point, not one UTF-16 unit - an emoji is two units.
         const t = zdarzenie.text;
-        return t.length === 1 && t.charCodeAt(0) >= 32 && t.charCodeAt(0) !== 127
+        const kod = t.codePointAt(0);
+        return [...t].length === 1 && kod >= 32 && kod !== 127
             && (zdarzenie.modifiers & mody) === 0;
     }
 
