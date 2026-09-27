@@ -45,9 +45,10 @@ Singleton {
     property real obecny: 0
     property real fabryczny: 0
 
-    // Highest limit a slider in Cogwheel can set: the top of the Ryzen 7 250's
-    // configurable TDP. One step above it on the slider means "factory".
-    readonly property int maksimum: 30
+    // Highest limit a slider in Cogwheel can set: the ThinkPad's own
+    // performance profile allows 40 W in bursts (35 W sustained), so the
+    // scale reaches that. One step above it on the slider means "factory".
+    readonly property int maksimum: 40
 
     // What the current profile wants; 0 = factory.
     readonly property int profil: PowerProfiles.profile

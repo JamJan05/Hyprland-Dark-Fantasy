@@ -35,7 +35,7 @@ Konfiguracja jest przygotowana pod Gentoo i była używana tylko tam. Te miejsca
 | HUD, pasek HP (`services/Battery.qml`) | Zakłada obecność baterii | Bez baterii HP to pełny pasek o stałej długości (`Theme.hudHpBezBaterii`) |
 | Zębatka → Zasilanie | Wymaga `sys-power/power-profiles-daemon` | Profil „wydajność” pojawia się tylko, gdy sprzęt go zgłasza |
 | Zębatka → Zasilanie, limit ładowania | Pliki `charge_control_*` baterii (ThinkPad: `thinkpad_acpi`) | Bez nich rzędy limitu się nie pokazują |
-| Zębatka → Zasilanie, limit mocy procesora | Mobilny AMD Ryzen obsługiwany przez ryzenadj; suwak do 30 W, czyli górnej granicy konfigurowalnego TDP Ryzena 7 250 | Bez konfiguracji roota rzędy się nie pokazują; dla innego procesora zmień `maksimum` w `services/LimitMocy.qml` |
+| Zębatka → Zasilanie, limit mocy procesora | Mobilny AMD Ryzen obsługiwany przez ryzenadj; suwak do 40 W, czyli chwilowego limitu profilu wydajności ThinkPada (Ryzen 7 250) | Bez konfiguracji roota rzędy się nie pokazują; dla innego procesora zmień `maksimum` w `services/LimitMocy.qml` |
 | Zębatka → Hyprland → Ekran | Skale i odświeżanie | Liczone z `hyprctl monitors` dla bieżącej rozdzielczości; nic nie trzeba zmieniać |
 | Zębatka → Wejście, czułość touchpada | Reguła urządzenia dla touchpada z `hyprctl devices` | Bez touchpada rząd jest przygaszony |
 

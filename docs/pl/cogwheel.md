@@ -60,7 +60,7 @@ Skale są ograniczone do „czystych” wartości, bo rozdzielczość podzielona
 
 ## Limit mocy procesora
 
-Twardy sufit mocy procesora dla każdego profilu zasilania, np. 7 W w oszczędnym i 15 W w zrównoważonym. Jeden suwak na profil, 5-30 W; krok za 30 W oznacza limit fabryczny. Wiersz „Limit mocy procesora” pokazuje obecny limit i fabryczny limit bieżącego profilu.
+Twardy sufit mocy procesora dla każdego profilu zasilania, np. 7 W w oszczędnym i 15 W w zrównoważonym. Jeden suwak na profil, 5-40 W; krok za 40 W oznacza limit fabryczny. Wiersz „Limit mocy procesora” pokazuje obecny limit i fabryczny limit bieżącego profilu.
 
 - Limit obejmuje procesor z wbudowaną grafiką, a nie cały laptop: ekran, Wi-Fi i dysk biorą swoje ponad to. Na pustym pulpicie nic nie zmienia, bo procesor i tak bierze mniej. Działa pod obciążeniem: przy kompilacji, grach, ciężkich stronach.
 - STAPM, PPT fast i PPT slow dostają tę samą wartość, więc nie ma też chwilowego przekraczania limitu.

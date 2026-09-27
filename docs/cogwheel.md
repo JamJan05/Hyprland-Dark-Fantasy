@@ -58,7 +58,7 @@ Scales are limited to "clean" values because the resolution divided by the scale
 
 ## CPU power limit
 
-A hard ceiling on CPU power for each power profile, for example 7 W in power saver and 15 W in balanced. One slider per profile, 5-30 W; one step past 30 W means the factory limit. The "CPU power limit" row shows the current limit and the factory one of the current profile.
+A hard ceiling on CPU power for each power profile, for example 7 W in power saver and 15 W in balanced. One slider per profile, 5-40 W; one step past 40 W means the factory limit. The "CPU power limit" row shows the current limit and the factory one of the current profile.
 
 - The limit covers the CPU with its integrated GPU, not the whole laptop: the screen, Wi-Fi and disk come on top. On an idle desktop it changes nothing, because the CPU draws less anyway. It matters under load: compiling, games, heavy web pages.
 - STAPM, PPT fast and PPT slow are all set to the same value, so there is no short boost above it either.

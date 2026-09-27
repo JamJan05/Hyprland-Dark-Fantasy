@@ -35,7 +35,7 @@ This setup targets Gentoo and has only been used there. The following places ass
 | HUD, HP bar (`services/Battery.qml`) | Assumes a battery | Without one, HP is a full bar of fixed length (`Theme.hudHpBezBaterii`) |
 | Cogwheel → Power | Requires `sys-power/power-profiles-daemon` | "Performance" appears only when the hardware reports it |
 | Cogwheel → Power, charge limit | Battery `charge_control_*` files (ThinkPad: `thinkpad_acpi`) | Without them the rows are hidden |
-| Cogwheel → Power, CPU power limit | AMD Ryzen mobile supported by ryzenadj; slider top 30 W, the configurable TDP ceiling of the Ryzen 7 250 | Without the root setup the rows are hidden; for another CPU change `maksimum` in `services/LimitMocy.qml` |
+| Cogwheel → Power, CPU power limit | AMD Ryzen mobile supported by ryzenadj; slider top 40 W, the burst limit of the ThinkPad's performance profile (Ryzen 7 250) | Without the root setup the rows are hidden; for another CPU change `maksimum` in `services/LimitMocy.qml` |
 | Cogwheel → Monitor | Scales and refresh rates | Computed from `hyprctl monitors` for the current resolution; nothing to change |
 | Cogwheel → Input, touchpad sensitivity | A device rule for the touchpad found in `hyprctl devices` | Without a touchpad the row is dimmed |
 
