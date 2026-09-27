@@ -14,6 +14,10 @@
 //  (Theme.barHeight, barMarginTop, barMarginSide, border), so it reads
 //  as the left part of the bar. Waybar shifts the window title by Theme.hudWidth + 8 px.
 //
+//  RIGHT OF THE BARS, only on battery: how long it will last ("3 h 42 min").
+//  The one number the HUD draws - it cannot be read from the bar, since the
+//  fill says how much is left, not how fast it is going.
+//
 //  ---------------------------------------------------------------
 //  BARS DISABLED
 //
@@ -112,6 +116,17 @@ PanelWindow {
             dymek: dymek
         }
 
+        Label {
+            x: paskiStatystyk.x + paskiStatystyk.width + 8
+            width: ramka.width - x - 6
+            anchors.verticalCenter: paskiStatystyk.verticalCenter
+            visible: root.paski && Battery.pozostalo > 0
+            horizontalAlignment: Text.AlignRight
+            font.pixelSize: Theme.fontSizeSmall
+            color: Theme.textMuted
+            text: Battery.czas(Battery.pozostalo)
+        }
+
         Row {
             id: dolnyRzad
 
@@ -208,9 +223,12 @@ PanelWindow {
             krytyczna = !Battery.laduje && !Battery.naKablu && Battery.poziom <= 0.12;
             czesci.push(ikona(Icons.battery(Battery.poziom, Battery.laduje, Battery.naKablu),
                               krytyczna ? zar : zloto) + " " + proc(Battery.poziom));
+            if (Battery.pozostalo > 0) czesci[czesci.length - 1] += " (" + Battery.czas(Battery.pozostalo) + ")";
             dymekPaska.push(Tr.t("Battery: ", "Bateria: ") + proc(Battery.poziom)
                 + (Battery.laduje ? Tr.t(", charging", ", ładowanie")
-                   : Battery.naKablu ? Tr.t(", plugged in", ", z sieci") : ""));
+                   : Battery.naKablu ? Tr.t(", plugged in", ", z sieci")
+                   : Battery.pozostalo > 0 ? Tr.t(", ", ", zostało ") + Battery.czas(Battery.pozostalo)
+                     + Tr.t(" left", "") : ""));
         }
 
         return JSON.stringify({
