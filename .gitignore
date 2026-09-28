@@ -104,9 +104,10 @@ config/hypr/ustawienia.lua
 # them would duplicate the same images in a second size.
 assets/ikony-menu/256/
 
-# assets/ IS versioned (tile icons, screenshots). The wallpaper is not in it -
-# it is someone else's image. sddm/dark-fantasy/backgrounds/ is only the place
-# install-theme.sh COPIES the wallpaper to before installing the theme into /usr/share.
+# assets/ IS versioned (tile icons, screenshots and the default wallpaper
+# assets/wallpaper.png - the author's own work, see README).
+# sddm/dark-fantasy/backgrounds/ is only the place install-theme.sh COPIES the
+# wallpaper to before installing the theme into /usr/share.
 # Versioning that copy would duplicate the same file in the repo.
 sddm/dark-fantasy/backgrounds/*
 !sddm/dark-fantasy/backgrounds/.gitkeep
