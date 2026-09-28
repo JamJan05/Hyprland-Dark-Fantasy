@@ -91,7 +91,10 @@ Singleton {
 
     function domyslnyStan(): var {
         return { opcje: {}, tempo: 1, czuloscTouchpada: null, pietra: 10, nazwy: [],
-                 gesty: true, monitor: null, drugiMonitor: null };
+                 gesty: true, monitor: null, drugiMonitor: null,
+                 // zmiany: { id: keys } - shortcuts moved away from their default,
+                 // wlasne: [{ klawisze, nazwa, komenda }] - application shortcuts.
+                 skroty: { zmiany: {}, wlasne: [] } };
     }
 
     property bool gotowe: false
@@ -421,21 +424,221 @@ Singleton {
             + "sleep 0.4; setsid -f hyprpaper >/dev/null 2>&1"]);
     }
 
-    // ---------------- SHORTCUTS - preview only ----------------
-    // Raw binds from "hyprctl binds" (only those with a description).
+    // ---------------- SHORTCUTS ----------------
+    //
+    // Three kinds, see "EDITABLE SHORTCUTS" in hyprland.lua:
+    //   edytowalne  registered with skrot() - can be moved to other keys
+    //   wlasne      application shortcuts added here
+    //   skroty      the rest (desktops, mouse, media keys) - view only
+    //
+    // The first two come from skroty.json, which hyprland.lua writes into the
+    // instance directory after every change; the fixed ones from "hyprctl binds".
+
+    // Raw binds from "hyprctl binds" of the main map (only those with a description).
     property var bindy: []
 
-    // A binding, not an assignment in onExited - key names follow
-    // a language change without re-reading.
+    // skroty.json: { edytowalne: [{ id, klawisze, domyslne, opis }], wlasne: [{ klawisze, nazwa, komenda }] }
+    property var listaSkrotow: ({ edytowalne: [], wlasne: [] })
+
+    readonly property var edytowalne: listaSkrotow.edytowalne || []
+    readonly property var wlasne: listaSkrotow.wlasne || []
+
+    // Modifier mask bits per wlr/xkb: 1 SHIFT, 4 CTRL, 8 ALT, 64 SUPER.
+    readonly property var mody: [[64, "SUPER"], [4, "CTRL"], [8, "ALT"], [1, "SHIFT"]]
+
+    // "SUPER + SHIFT + s" -> { maska: 65, klawisz: "s" } - the same comparison
+    // Hyprland makes (modmask + key, case does not matter).
+    function rozbierz(klawisze: string): var {
+        const czesci = klawisze.split("+").map(c => c.trim()).filter(c => c !== "");
+        let maska = 0;
+        for (const c of czesci.slice(0, -1)) {
+            const d = c.toUpperCase();
+            if (d === "SUPER" || d === "WIN" || d === "LOGO" || d === "META" || d === "MOD4") maska |= 64;
+            else if (d === "CTRL" || d === "CONTROL") maska |= 4;
+            else if (d === "ALT" || d === "MOD1") maska |= 8;
+            else if (d === "SHIFT") maska |= 1;
+        }
+        return { maska: maska, klawisz: (czesci.length > 0 ? czesci[czesci.length - 1] : "").toLowerCase() };
+    }
+
+    function tenSam(a: var, b: var): bool {
+        return a.maska === b.maska && a.klawisz === b.klawisz;
+    }
+
+    // Keys for display: modifiers as they are, the key by its name on the keyboard.
+    function ladnie(klawisze: string): string {
+        const r = rozbierz(klawisze);
+        const czesci = klawisze.split("+").map(c => c.trim());
+        const klawisz = czesci[czesci.length - 1];
+        return mody.filter(m => (r.maska & m[0]) !== 0).map(m => m[1])
+            .concat([nazwyKlawiszy[klawisz] ?? klawisz]).join(" + ");
+    }
+
+    // The fixed shortcuts: every described bind of the main map that is
+    // neither editable nor an application shortcut. A binding, not an
+    // assignment in onExited - key names follow a language change without re-reading.
     readonly property var skroty: {
-        // Modifier mask bits per wlr/xkb: 1 SHIFT, 4 CTRL, 8 ALT, 64 SUPER.
-        const mody = [[64, "SUPER"], [4, "CTRL"], [8, "ALT"], [1, "SHIFT"]];
+        const zajete = edytowalne.map(e => rozbierz(e.klawisze))
+            .concat(wlasne.map(w => rozbierz(w.klawisze)));
         const nazwy = nazwyKlawiszy;
-        return bindy.map(b => ({
-            klawisze: mody.filter(m => (b.modmask & m[0]) !== 0).map(m => m[1])
-                          .concat([nazwy[b.key] ?? b.key]).join(" + "),
-            opis: b.description
-        }));
+        return bindy
+            .filter(b => !zajete.some(z => tenSam(z, { maska: b.modmask, klawisz: b.key.toLowerCase() })))
+            .map(b => ({
+                klawisze: mody.filter(m => (b.modmask & m[0]) !== 0).map(m => m[1])
+                              .concat([nazwy[b.key] ?? b.key]).join(" + "),
+                opis: b.description
+            }));
+    }
+
+    // Which bind already sits on these keys - its description, or "" when they
+    // are free. "pomin" = the keys of the shortcut being changed, which may
+    // keep its own keys. Checked against everything Hyprland has, not only
+    // the described binds.
+    property var wszystkieBindy: []
+
+    function kolizja(klawisze: string, pomin: string): string {
+        const r = rozbierz(klawisze);
+        if (pomin !== "" && tenSam(r, rozbierz(pomin))) return "";
+        for (const b of wszystkieBindy) {
+            if (tenSam(r, { maska: b.modmask, klawisz: b.key.toLowerCase() }))
+                return b.description !== "" ? b.description : Tr.t("another shortcut", "inny skrót");
+        }
+        return "";
+    }
+
+    function zapiszZmianySkrotow(zmiany: var, wlasneStan: var): void {
+        zmienStan("skroty", { zmiany: zmiany, wlasne: wlasneStan });
+        ponownyOdczytSkrotow.restart();
+    }
+
+    // An editable shortcut on new keys. Back on its default keys it drops out
+    // of the settings file.
+    function zmienSkrot(id: string, klawisze: string): void {
+        const e = edytowalne.find(x => x.id === id);
+        if (!e) return;
+        const zmiany = Object.assign({}, stan.skroty.zmiany);
+        if (tenSam(rozbierz(klawisze), rozbierz(e.domyslne))) delete zmiany[id];
+        else zmiany[id] = klawisze;
+        wykonajLua("przypiszSkrot(" + literal(id) + ", " + literal(klawisze) + ")");
+        zapiszZmianySkrotow(zmiany, stan.skroty.wlasne);
+    }
+
+    function przywrocSkrot(id: string): void {
+        const e = edytowalne.find(x => x.id === id);
+        if (e) zmienSkrot(id, e.domyslne);
+    }
+
+    // Application shortcut. "gtk-launch <desktop id>" starts the program the
+    // same way the Arsenal does (Exec, Terminal=, field codes), without
+    // copying the Exec line into the settings file. The id is checked, because
+    // it goes into a shell command.
+    function komendaAplikacji(wpis: var): string {
+        if (!wpis) return "";
+        const id = String(wpis.id).replace(/\.desktop$/, "");
+        return /^[A-Za-z0-9._-]+$/.test(id) ? "gtk-launch " + id : "";
+    }
+
+    function dodajWlasny(klawisze: string, nazwa: string, komenda: string): void {
+        if (klawisze === "" || komenda === "") return;
+        const lista = stan.skroty.wlasne.filter(w => !tenSam(rozbierz(w.klawisze), rozbierz(klawisze)));
+        lista.push({ klawisze: klawisze, nazwa: nazwa, komenda: komenda });
+        wykonajLua("wlasnySkrot(" + literal(klawisze) + ", " + literal(komenda) + ", " + literal(nazwa) + ")");
+        zapiszZmianySkrotow(stan.skroty.zmiany, lista);
+    }
+
+    function usunWlasny(klawisze: string): void {
+        wykonajLua("usunWlasnySkrot(" + literal(klawisze) + ")");
+        zapiszZmianySkrotow(stan.skroty.zmiany,
+            stan.skroty.wlasne.filter(w => w.klawisze !== klawisze));
+    }
+
+    function przeniesWlasny(stare: string, nowe: string): void {
+        const w = stan.skroty.wlasne.find(x => x.klawisze === stare);
+        if (!w) return;
+        wykonajLua("usunWlasnySkrot(" + literal(stare) + ")");
+        const lista = stan.skroty.wlasne.filter(x => x.klawisze !== stare);
+        zapiszZmianySkrotow(stan.skroty.zmiany, lista);
+        dodajWlasny(nowe, w.nazwa, w.komenda);
+    }
+
+    // Capturing keys: Hyprland goes into the empty "df-przechwyt" submap
+    // (hyprland.lua), so no bind fires and the shell gets every combination.
+    property bool przechwytywanie: false
+
+    function przechwytuj(wl: bool): void {
+        if (wl === przechwytywanie) return;
+        przechwytywanie = wl;
+        wykonajLua("hl.dispatch(hl.dsp.submap(" + literal(wl ? "df-przechwyt" : "reset") + "))");
+    }
+
+    // A key event -> keys in Hyprland's notation ("SUPER + SHIFT + T"), or ""
+    // while only a modifier is held or for a key that cannot be bound.
+    function klawiszeZeZdarzenia(z: var): string {
+        const nazwa = nazwaKlawisza(z.key);
+        if (nazwa === "") return "";
+        const m = [];
+        if (z.modifiers & Qt.MetaModifier) m.push("SUPER");
+        if (z.modifiers & Qt.ControlModifier) m.push("CTRL");
+        if (z.modifiers & Qt.AltModifier) m.push("ALT");
+        if (z.modifiers & Qt.ShiftModifier) m.push("SHIFT");
+        return m.concat([nazwa]).join(" + ");
+    }
+
+    // A key without SUPER, CTRL or ALT would take that key away from typing
+    // in every program. Allowed alone: F keys and PrtSc.
+    function bezpieczny(klawisze: string): bool {
+        const r = rozbierz(klawisze);
+        return (r.maska & (64 | 4 | 8)) !== 0 || /^(f([1-9]|1[0-2])|print)$/.test(r.klawisz);
+    }
+
+    // Qt key -> xkb keysym name as Hyprland accepts it in hl.bind.
+    function nazwaKlawisza(k: int): string {
+        if (k >= Qt.Key_A && k <= Qt.Key_Z) return String.fromCharCode(k);
+        if (k >= Qt.Key_0 && k <= Qt.Key_9) return String.fromCharCode(k);
+        if (k >= Qt.Key_F1 && k <= Qt.Key_F12) return "F" + (k - Qt.Key_F1 + 1);
+        // With SHIFT held Qt reports the symbol on the digit key; Hyprland binds
+        // the digit itself ("SUPER + SHIFT + 1"), like the desktop shortcuts.
+        const cyfry = { [Qt.Key_Exclam]: "1", [Qt.Key_At]: "2", [Qt.Key_NumberSign]: "3",
+                        [Qt.Key_Dollar]: "4", [Qt.Key_Percent]: "5", [Qt.Key_AsciiCircum]: "6",
+                        [Qt.Key_Ampersand]: "7", [Qt.Key_Asterisk]: "8", [Qt.Key_ParenLeft]: "9",
+                        [Qt.Key_ParenRight]: "0" };
+        if (cyfry[k] !== undefined) return cyfry[k];
+        const inne = {
+            [Qt.Key_Left]: "left", [Qt.Key_Right]: "right", [Qt.Key_Up]: "up", [Qt.Key_Down]: "down",
+            [Qt.Key_Space]: "space", [Qt.Key_Return]: "Return", [Qt.Key_Enter]: "Return",
+            [Qt.Key_Tab]: "Tab", [Qt.Key_Backspace]: "BackSpace", [Qt.Key_Delete]: "Delete",
+            [Qt.Key_Insert]: "Insert", [Qt.Key_Home]: "Home", [Qt.Key_End]: "End",
+            [Qt.Key_PageUp]: "Prior", [Qt.Key_PageDown]: "Next", [Qt.Key_Print]: "Print",
+            [Qt.Key_Comma]: "comma", [Qt.Key_Period]: "period", [Qt.Key_Minus]: "minus",
+            [Qt.Key_Equal]: "equal", [Qt.Key_Slash]: "slash", [Qt.Key_Backslash]: "backslash",
+            [Qt.Key_Semicolon]: "semicolon", [Qt.Key_Apostrophe]: "apostrophe",
+            [Qt.Key_BracketLeft]: "bracketleft", [Qt.Key_BracketRight]: "bracketright",
+            [Qt.Key_QuoteLeft]: "grave"
+        };
+        return inne[k] ?? "";
+    }
+
+    FileView {
+        id: plikSkrotow
+        path: {
+            const runtime = Quickshell.env("XDG_RUNTIME_DIR");
+            const podpis = Quickshell.env("HYPRLAND_INSTANCE_SIGNATURE");
+            return runtime && podpis ? runtime + "/hypr/" + podpis + "/skroty.json" : "";
+        }
+        watchChanges: true
+        printErrors: false
+        onFileChanged: reload()
+        onLoaded: {
+            try { root.listaSkrotow = JSON.parse(text()); } catch (e) {}
+        }
+    }
+
+    // After a live change hyprland.lua rewrites skroty.json itself; the
+    // fixed list from "hyprctl binds" has to be read again.
+    Timer {
+        id: ponownyOdczytSkrotow
+        interval: 300
+        onTriggered: odczytSkrotow.running = true
     }
 
     // Key names as they appear on the keyboard, not as xkb calls
@@ -459,7 +662,10 @@ Singleton {
         onExited: {
             let lista;
             try { lista = JSON.parse(wyjscieSkrotow.text); } catch (e) { return; }
-            root.bindy = lista.filter(b => b.description !== "");
+            // Binds of a submap (the capture's way out) are not active in the main map.
+            const glowne = lista.filter(b => b.submap === "");
+            root.wszystkieBindy = glowne;
+            root.bindy = glowne.filter(b => b.description !== "");
         }
     }
 
@@ -516,12 +722,18 @@ Singleton {
         if (s.drugiMonitor)
             w.push("hl.monitor({ output = " + literal(s.drugiMonitor.nazwa) + ", mode = \"preferred\", position = "
                    + literal(s.drugiMonitor.pozycja) + ", scale = \"auto\" })");
+        const sk = s.skroty || { zmiany: {}, wlasne: [] };
+        for (const id of Object.keys(sk.zmiany || {}))
+            w.push("przypiszSkrot(" + literal(id) + ", " + literal(sk.zmiany[id]) + ")");
+        for (const x of sk.wlasne || [])
+            w.push("wlasnySkrot(" + literal(x.klawisze) + ", " + literal(x.komenda) + ", " + literal(x.nazwa) + ")");
         return w.join("\n") + "\n";
     }
 
     // ---------------- RESTORE DEFAULTS ----------------
     function przywrocDomyslne(): void {
         zapis.stop();
+        przechwytuj(false);
         stan = domyslnyStan();
         Quickshell.execDetached(["sh", "-c",
             "rm -f " + JSON.stringify(sciezkaUstawien) + " && hyprctl reload"]);

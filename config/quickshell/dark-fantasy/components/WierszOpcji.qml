@@ -12,6 +12,9 @@
 //      wybor        ‹ name › from the "opcje" list
 //      tekst        caption edited from the keyboard (floor names)
 //      przycisk     caption in gold, Enter or click
+//      skrot        keys of a shortcut: Enter or click waits for a new
+//                   combination (reported by "zmieniono"), Esc cancels,
+//                   Delete reports "wyczyszczono"
 //      info         value only, no change
 //
 //  KEYBOARD. Focus is held by the tile row (kafle/RzadKafli.qml), and the Cogwheel
@@ -59,6 +62,7 @@ Item {
     signal zmieniono(var nowa)
     signal uzyto()
     signal najechano()
+    signal wyczyszczono()
 
     implicitHeight: 34
     opacity: dostepny ? 1 : Theme.disabledOpacity
@@ -68,6 +72,19 @@ Item {
     // ---------------------------------------------------------------
     function klawisz(zdarzenie: var): bool {
         if (!dostepny) return false;
+
+        if (typ === "skrot" && edycja) {
+            if (zdarzenie.key === Qt.Key_Escape) {
+                edycja = false;
+                return true;
+            }
+            // A modifier alone or a key that cannot be bound - keep waiting.
+            const klawisze = UstawieniaHyprlanda.klawiszeZeZdarzenia(zdarzenie);
+            if (klawisze === "") return true;
+            edycja = false;
+            zmieniono(klawisze);
+            return true;    // while capturing nothing leaks to the row
+        }
 
         if (typ === "tekst" && edycja) {
             switch (zdarzenie.key) {
@@ -128,8 +145,26 @@ Item {
                 return true;
             }
             break;
+        case "skrot":
+            if (enter) {
+                edycja = true;
+                return true;
+            }
+            if (zdarzenie.key === Qt.Key_Delete || zdarzenie.key === Qt.Key_Backspace) {
+                wyczyszczono();
+                return true;
+            }
+            break;
         }
         return false;
+    }
+
+    // Capture that got no key in 10 s gives up - the section switches
+    // Hyprland back to its normal shortcuts when "edycja" drops.
+    Timer {
+        interval: 10000
+        running: root.typ === "skrot" && root.edycja
+        onTriggered: root.edycja = false
     }
 
     function przytnij(v: real): real {
@@ -286,15 +321,17 @@ Item {
             width: parent.width
             horizontalAlignment: Text.AlignRight
             elide: Text.ElideLeft
-            visible: root.typ === "tekst" || root.typ === "info" || root.typ === "przycisk"
+            visible: root.typ === "tekst" || root.typ === "info" || root.typ === "przycisk" || root.typ === "skrot"
             text: root.typ === "tekst"
                 ? (root.edycja ? root.roboczy + "_" : (root.tekst !== "" ? root.tekst : Tr.t("untitled", "bez nazwy")))
+                : root.typ === "skrot" && root.edycja
+                ? Tr.t("press the keys…  Esc - cancel", "naciśnij klawisze…  Esc - anuluj")
                 : root.tekst
             font.family: root.typ === "info" ? Theme.fontMono : Theme.fontDisplay
             font.pixelSize: root.typ === "info" ? Theme.fontSizeSmall + 1 : Theme.fontSizeNormal + 3
             font.capitalization: root.typ === "przycisk" ? Font.SmallCaps : Font.MixedCase
             font.italic: root.typ === "tekst" && root.tekst === "" && !root.edycja
-            color: root.typ === "przycisk" ? Theme.accent
+            color: root.typ === "przycisk" || (root.typ === "skrot" && root.edycja) ? Theme.accent
                  : root.edycja ? Theme.text
                  : root.zaznaczony ? Theme.text : Theme.textMuted
         }
@@ -315,6 +352,7 @@ Item {
         onClicked: {
             if (root.typ === "przycisk") root.uzyto();
             else if (root.typ === "tekst") { root.roboczy = root.tekst; root.edycja = true; }
+            else if (root.typ === "skrot") root.edycja = true;
             else if (root.typ === "przelacznik") root.zmieniono(!root.wlaczony);
         }
     }

@@ -2,7 +2,7 @@
 
 [← README](../README.md) · [Polski](pl/keybindings.md)
 
-Every binding is defined in `config/hypr/hyprland.lua` with a description. The same list, straight from the compositor, is in Cogwheel → Hyprland → Shortcuts.
+Every binding is defined in `config/hypr/hyprland.lua` with a description. The same list, straight from the compositor, is in Cogwheel → Hyprland → Shortcuts. There you can also move most of them to other keys and add your own application shortcuts (see [cogwheel.md](cogwheel.md#shortcuts)). The tables below show the default keys.
 
 ## Shell and apps
 

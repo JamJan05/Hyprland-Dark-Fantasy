@@ -2,7 +2,7 @@
 
 [← README](../../README.pl.md) · [English](../keybindings.md)
 
-Każdy skrót jest zdefiniowany w `config/hypr/hyprland.lua` razem z opisem. Tę samą listę, prosto z kompozytora, znajdziesz w Zębatce (Cogwheel) → Hyprland → Skróty.
+Każdy skrót jest zdefiniowany w `config/hypr/hyprland.lua` razem z opisem. Tę samą listę, prosto z kompozytora, znajdziesz w Zębatce (Cogwheel) → Hyprland → Skróty. Tam też przeniesiesz większość z nich na inne klawisze i dodasz własne skróty do aplikacji (patrz [cogwheel.md](cogwheel.md#skróty)). Tabele poniżej pokazują klawisze domyślne.
 
 ## Powłoka i programy
 
