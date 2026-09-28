@@ -12,6 +12,7 @@ config/              lustro ~/.config; install.sh kopiuje je jeden do jednego
   gtk-3.0/ gtk-4.0/  wygląd aplikacji GTK: motyw, ikony, kursor, paleta
   xdg-desktop-portal/ kolejność backendów portali
   fish/              interaktywna konfiguracja fish (fastfetch)
+  fastfetch/         moduły fastfetch: domyślne, bez lokalnego IP
 assets/              oryginały ikon kafli (ikony-menu/), wallpaper.png, zrzuty ekranu (zrzuty/)
 local/
   bin/               skrypty wołane przez Waybara, kafle i skróty

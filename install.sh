@@ -163,6 +163,8 @@ kopiuj config/swaync/style.css   "$HOME/.config/swaync/style.css"
 # shells, cluttering the output of "fish -c ...".
 info "fish shell"
 kopiuj config/fish/config.fish "$HOME/.config/fish/config.fish"
+# fastfetch without the local IP address - reason in the file's header.
+kopiuj config/fastfetch/config.jsonc "$HOME/.config/fastfetch/config.jsonc"
 
 info "rofi (clipboard history), kitty"
 kopiuj config/rofi/dark-fantasy.rasi      "$HOME/.config/rofi/dark-fantasy.rasi"
