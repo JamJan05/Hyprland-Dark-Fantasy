@@ -116,7 +116,9 @@ local function run_once(cmd, check)
                 " >/dev/null 2>&1 || { " .. cmd .. " >/dev/null 2>&1; }")
 end
 
-local function autostart()
+-- atLogin is true only for the real session start ("hyprland.start"),
+-- false for a manual __autostart() - see the PipeWire launcher below.
+local function autostart(atLogin)
    -- WELCOME LAYOUT
    --
    --     +------------------+------------------+
@@ -246,7 +248,17 @@ local function autostart()
    -- script from the media-video/pipewire package (it starts pipewire,
    -- pipewire-pulse and wireplumber). Without it neither the volume keys
    -- nor the volume indicator in the bar work.
-   hl.exec_cmd("gentoo-pipewire-launcher restart")
+   --
+   -- At login with "restart": elogind does not kill user processes on logout
+   -- by default, so a PipeWire left over from the previous session (tied to
+   -- its D-Bus session bus) may still be running; restart replaces it with
+   -- one from this session. A manual __autostart() must not cut the sound, so
+   -- there the launcher runs only when pipewire is not running at all.
+   if atLogin then
+      hl.exec_cmd("gentoo-pipewire-launcher restart")
+   else
+      run_once("gentoo-pipewire-launcher", "pgrep -u \"$USER\" -x pipewire")
+   end
 
    -- Hardware settings from before the shutdown: screen and keyboard
    -- backlight, volume and mute. Restores them, then saves every few seconds
@@ -261,16 +273,16 @@ local function autostart()
 end
 
 -- Registers the actual autostart at session start.
-hl.on("hyprland.start", autostart)
+hl.on("hyprland.start", function() autostart(true) end)
 
 -- The same function exposed globally, so it can be fired from outside
 -- to verify autostart without logging out:
 --
 --   hyprctl dispatch '(function() __autostart(); return hl.dsp.no_op() end)()'
 --
--- Calling it again is safe: every program starts through
--- run_once(), which first checks whether it is already running.
-_G.__autostart = autostart
+-- Calling it again is safe: every program starts through run_once() or its
+-- own check of whether it is already running, and PipeWire is not restarted.
+_G.__autostart = function() autostart(false) end
 
 
 

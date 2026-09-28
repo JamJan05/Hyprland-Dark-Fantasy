@@ -182,8 +182,8 @@ przywroc() {
     [[ ${stan[klawiatura_urzadzenie]:-} == "$KLAWIATURA" && -n $KLAWIATURA ]] &&
         ustaw_jasnosc "/sys/class/leds/$KLAWIATURA" "${stan[klawiatura]:-}" 0
 
-    # Audio: the autostart runs "gentoo-pipewire-launcher restart" at the same
-    # moment, so wait (up to 30 s) until WirePlumber has a default output.
+    # Audio: the autostart starts PipeWire (gentoo-pipewire-launcher) at the
+    # same moment, so wait (up to 30 s) until WirePlumber has a default output.
     command -v wpctl >/dev/null || return 0
     local i
     for (( i = 0; i < 60; i++ )); do
