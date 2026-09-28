@@ -34,6 +34,8 @@ hyprctl dispatch '(function() __autostart(); return hl.dsp.no_op() end)()'
 
 ### A change in `~/.config` is not in git
 
+For your own additions to Hyprland, such as an environment variable, a window rule or a bind, use `~/.config/hypr/lokalne.lua` instead of editing `hyprland.lua`. `install.sh` never touches it (see [installation.md](installation.md#what-installsh-does-not-cover)).
+
 `install.sh` copies the configuration, so `~/.config/...` and the repository are separate files. An edit on the system works, but `git status` in a clone does not see it. To keep it, copy the file into a clone and commit:
 
 ```sh
@@ -47,7 +49,7 @@ The other way round, an edit in the repo does nothing until you run `./install.s
 
 ### `.bak` files next to the config
 
-A file like `hyprland.lua.bak-20260912-143005` is a version that `install.sh --apply` moved aside because it could not keep it: since the last install both your copy and the repo file changed, or there was no record yet (a first install over an existing config). The repo version is now in place. Compare the two, carry over what you still want, then delete the backup:
+A file like `hyprland.lua.bak-20260912-143005` is a version that `install.sh --apply` moved aside because it could not keep it: since the last install both your copy and the repo file changed, or there was no record yet (a first install over an existing config). The repo version is now in place. Compare the two, carry over what you still want, then delete the backup. For your own lines in `hyprland.lua`, move them to `~/.config/hypr/lokalne.lua` so this does not happen again:
 
 ```sh
 diff ~/.config/hypr/hyprland.lua.bak-20260912-143005 ~/.config/hypr/hyprland.lua

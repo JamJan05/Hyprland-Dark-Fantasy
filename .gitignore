@@ -98,6 +98,12 @@ prompt-dark-souls-hyprland.md
 # outside the repository; the pattern is here in case someone copies it in.
 config/hypr/ustawienia.lua
 
+# ----- LOCAL ADDITIONS -----
+# ~/.config/hypr/lokalne.lua holds hand-written additions for one computer
+# (loaded by hyprland.lua, never touched by install.sh). Private by design -
+# the pattern is here in case someone copies it into the repository.
+config/hypr/lokalne.lua
+
 # ----- ASSETS -----
 # The 256 px tile icons are the OUTPUT of tools/skaluj-ikony-menu.py, not a source -
 # install.sh regenerates them from the originals in assets/ikony-menu/. Versioning

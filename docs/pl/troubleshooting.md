@@ -34,6 +34,8 @@ hyprctl dispatch '(function() __autostart(); return hl.dsp.no_op() end)()'
 
 ### Zmiana w `~/.config` nie trafia do gita
 
+Własne dodatki do Hyprlanda, np. zmienną środowiskową, regułę okna albo skrót, wpisuj do `~/.config/hypr/lokalne.lua` zamiast edytować `hyprland.lua`. `install.sh` nigdy tego pliku nie rusza (patrz [installation.md](installation.md#czego-installsh-nie-obejmuje)).
+
 `install.sh` kopiuje konfigurację, więc `~/.config/...` i repozytorium to osobne pliki. Zmiana w systemie działa, ale `git status` w klonie jej nie widzi. Żeby ją zachować, skopiuj plik do klonu i zrób commit:
 
 ```sh
@@ -47,7 +49,7 @@ W drugą stronę: zmiana w repo nic nie robi, dopóki nie uruchomisz `./install.
 
 ### Pliki `.bak` obok konfiguracji
 
-Plik w rodzaju `hyprland.lua.bak-20260912-143005` to wersja, którą `install.sh --apply` odłożył na bok, bo nie mógł jej zachować: od ostatniej instalacji zmieniła się i Twoja kopia, i plik w repo, albo nie było jeszcze zapisu (pierwsza instalacja na istniejącą konfigurację). Na miejscu jest teraz wersja z repo. Porównaj oba pliki, przenieś, co chcesz zachować, i usuń kopię:
+Plik w rodzaju `hyprland.lua.bak-20260912-143005` to wersja, którą `install.sh --apply` odłożył na bok, bo nie mógł jej zachować: od ostatniej instalacji zmieniła się i Twoja kopia, i plik w repo, albo nie było jeszcze zapisu (pierwsza instalacja na istniejącą konfigurację). Na miejscu jest teraz wersja z repo. Porównaj oba pliki, przenieś, co chcesz zachować, i usuń kopię. Własne linie z `hyprland.lua` przenieś do `~/.config/hypr/lokalne.lua`, żeby to się nie powtórzyło:
 
 ```sh
 diff ~/.config/hypr/hyprland.lua.bak-20260912-143005 ~/.config/hypr/hyprland.lua

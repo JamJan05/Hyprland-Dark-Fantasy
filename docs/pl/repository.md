@@ -37,6 +37,7 @@ Układ `config/` **celowo** odwzorowuje `~/.config`, zamiast trzymać `hypr/` i 
 | Kompozytor | `config/hypr/hyprland.lua` |
 | Piętra | `config/hypr/floors.lua` |
 | Ustawienia z Zębatki (generowane, poza repo) | `~/.config/hypr/ustawienia.lua` |
+| Własne dodatki do Hyprlanda (poza repo) | `~/.config/hypr/lokalne.lua` |
 | Ekran blokady | `config/hypr/hyprlock.conf` |
 | Bezczynność, wygaszanie, uśpienie | `config/hypr/hypridle.conf` |
 | Tapeta | `config/hypr/hyprpaper.conf`, `assets/wallpaper.png` |
@@ -89,4 +90,4 @@ Wszystkie wymagają Pythona 3; narzędzia graficzne także Pillow.
 
 ## Pliki ignorowane i generowane
 
-`.gitignore` wyklucza sekrety, kopie zapasowe (`*.bak-*` z instalatorów), cache, `config/hypr/ustawienia.lua`, `assets/ikony-menu/256/`, kopię tapety w `sddm/dark-fantasy/backgrounds/` oraz pliki `colors.css` / `window_decorations.css`, które generuje `kde-gtk-config`.
+`.gitignore` wyklucza sekrety, kopie zapasowe (`*.bak-*` z instalatorów), cache, `config/hypr/ustawienia.lua`, `config/hypr/lokalne.lua`, `assets/ikony-menu/256/`, kopię tapety w `sddm/dark-fantasy/backgrounds/` oraz pliki `colors.css` / `window_decorations.css`, które generuje `kde-gtk-config`.

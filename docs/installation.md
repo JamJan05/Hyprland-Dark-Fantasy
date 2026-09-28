@@ -285,11 +285,20 @@ These live in system directories and need root. If you change them, copy them ba
 Some state is deliberately **outside** the repository, because it belongs to one computer and is not part of the desktop configuration:
 
 - `~/.config/hypr/ustawienia.lua`: Hyprland settings from the Cogwheel (also listed in `.gitignore`),
+- `~/.config/hypr/lokalne.lua`: your own hand-written Hyprland additions for this computer (see below),
 - `~/.local/state/dark-fantasy/powloka.json`: shell settings (language, HUD bars, charge limit, CPU power limits).
 
 **The wallpaper is local too.** Choosing a wallpaper in the Cogwheel rewrites `path` in `~/.config/hypr/hyprpaper.conf` and `$tapeta` in `~/.config/hypr/hyprlock.conf`. Those are copies, so the change is local: it does not show up in `git status`, and `install.sh --apply` keeps it unless the repo's version of either file changed since the last install (then your version goes to a `.bak-*` backup and you pick the wallpaper again). Copy these files into the repo only if the image path also exists on your other machines.
 
 > [!NOTE]
+**Your own Hyprland additions go into `~/.config/hypr/lokalne.lua`**, not into `hyprland.lua`. Examples are an environment variable for one program, a window rule or an extra bind. `hyprland.lua` loads the file after its defaults, so it can override them, and before the Cogwheel's `ustawienia.lua`, so a Cogwheel setting still wins. `install.sh` never touches it, so it survives every reinstall, while a line added to `hyprland.lua` itself would end up in a `.bak-*` copy. It is plain Lua with the same `hl.*` API. Run `hyprctl reload` after editing it. If it has an error, Hyprland shows a notification naming the file, and the rest of the config still loads.
+
+```lua
+-- ~/.config/hypr/lokalne.lua
+hl.env("SOME_VARIABLE", "value")
+hl.window_rule({ name = "my-rule", match = { class = "^foo$" }, float = true })
+```
+
 > A `<file>.bak-YYYYMMDD-HHMMSS` next to a config file is a version that `install.sh` moved aside because both it and the repo file had changed (or it was the first install). Compare it with the new file, carry over what you need, then delete it. See [troubleshooting.md](troubleshooting.md#bak-files-next-to-the-config).
 
 ### Restoring after a system reinstall

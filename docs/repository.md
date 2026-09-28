@@ -37,6 +37,7 @@ docs/                documentation (docs/pl/ in Polish)
 | Compositor | `config/hypr/hyprland.lua` |
 | Floors | `config/hypr/floors.lua` |
 | Cogwheel settings (generated, not in the repo) | `~/.config/hypr/ustawienia.lua` |
+| Your own Hyprland additions (not in the repo) | `~/.config/hypr/lokalne.lua` |
 | Lock screen | `config/hypr/hyprlock.conf` |
 | Idle, screen off, suspend | `config/hypr/hypridle.conf` |
 | Wallpaper | `config/hypr/hyprpaper.conf`, `assets/wallpaper.png` |
@@ -89,4 +90,4 @@ All of them need Python 3; the image tools need Pillow.
 
 ## Ignored and generated files
 
-`.gitignore` excludes secrets, backups (`*.bak-*` from the installers), caches, `config/hypr/ustawienia.lua`, `assets/ikony-menu/256/`, the wallpaper copy in `sddm/dark-fantasy/backgrounds/`, and the `colors.css` / `window_decorations.css` files that `kde-gtk-config` generates.
+`.gitignore` excludes secrets, backups (`*.bak-*` from the installers), caches, `config/hypr/ustawienia.lua`, `config/hypr/lokalne.lua`, `assets/ikony-menu/256/`, the wallpaper copy in `sddm/dark-fantasy/backgrounds/`, and the `colors.css` / `window_decorations.css` files that `kde-gtk-config` generates.
