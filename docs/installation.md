@@ -15,13 +15,13 @@ Three scripts install this desktop. Each one **shows a plan and changes nothing*
 Show the plan first:
 
 ```sh
-curl -fsSL https://raw.githubusercontent.com/JamJan05/hyprland-dark-fantasy/main/bootstrap.sh | bash
+curl -fsSL https://raw.githubusercontent.com/JamJan05/Hyprland-Dark-Fantasy/main/bootstrap.sh | bash
 ```
 
 Then run it for real:
 
 ```sh
-curl -fsSL https://raw.githubusercontent.com/JamJan05/hyprland-dark-fantasy/main/bootstrap.sh | bash -s -- --apply
+curl -fsSL https://raw.githubusercontent.com/JamJan05/Hyprland-Dark-Fantasy/main/bootstrap.sh | bash -s -- --apply
 ```
 
 The dry run is the default on purpose. A script piped from `curl` into a shell should not install dozens of packages and change the system before you have seen what it is going to do.
@@ -42,7 +42,7 @@ The script is idempotent: running it again skips whatever is already done. `./bo
 If `sudo` cannot ask for a password because there is no terminal, download the script and run it directly:
 
 ```sh
-curl -fsSL https://raw.githubusercontent.com/JamJan05/hyprland-dark-fantasy/main/bootstrap.sh -o bootstrap.sh
+curl -fsSL https://raw.githubusercontent.com/JamJan05/Hyprland-Dark-Fantasy/main/bootstrap.sh -o bootstrap.sh
 bash bootstrap.sh --apply
 ```
 

@@ -15,13 +15,13 @@ Pulpit instalują trzy skrypty. Każdy z nich **pokazuje plan i niczego nie zmie
 Najpierw sam plan:
 
 ```sh
-curl -fsSL https://raw.githubusercontent.com/JamJan05/hyprland-dark-fantasy/main/bootstrap.sh | bash
+curl -fsSL https://raw.githubusercontent.com/JamJan05/Hyprland-Dark-Fantasy/main/bootstrap.sh | bash
 ```
 
 Potem wykonanie:
 
 ```sh
-curl -fsSL https://raw.githubusercontent.com/JamJan05/hyprland-dark-fantasy/main/bootstrap.sh | bash -s -- --apply
+curl -fsSL https://raw.githubusercontent.com/JamJan05/Hyprland-Dark-Fantasy/main/bootstrap.sh | bash -s -- --apply
 ```
 
 Próba na sucho jest domyślna celowo. Skrypt podany z `curl` wprost do powłoki nie powinien instalować kilkudziesięciu pakietów i przestawiać systemu, zanim zobaczysz, co zamierza zrobić.
@@ -42,7 +42,7 @@ Skrypt jest idempotentny: przy ponownym uruchomieniu pomija to, co już zrobione
 Jeśli `sudo` nie może zapytać o hasło, bo nie ma terminala, pobierz skrypt na dysk i uruchom go bezpośrednio:
 
 ```sh
-curl -fsSL https://raw.githubusercontent.com/JamJan05/hyprland-dark-fantasy/main/bootstrap.sh -o bootstrap.sh
+curl -fsSL https://raw.githubusercontent.com/JamJan05/Hyprland-Dark-Fantasy/main/bootstrap.sh -o bootstrap.sh
 bash bootstrap.sh --apply
 ```
 

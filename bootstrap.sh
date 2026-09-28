@@ -2,10 +2,10 @@
 #
 # From-scratch installer for the Hyprland dark fantasy configuration on Gentoo.
 #
-#   curl -fsSL https://raw.githubusercontent.com/JamJan05/hyprland-dark-fantasy/main/bootstrap.sh | bash
+#   curl -fsSL https://raw.githubusercontent.com/JamJan05/Hyprland-Dark-Fantasy/main/bootstrap.sh | bash
 #       -> SHOWS the plan, changes NOTHING
 #
-#   curl -fsSL https://raw.githubusercontent.com/JamJan05/hyprland-dark-fantasy/main/bootstrap.sh | bash -s -- --apply
+#   curl -fsSL https://raw.githubusercontent.com/JamJan05/Hyprland-Dark-Fantasy/main/bootstrap.sh | bash -s -- --apply
 #       -> does it
 #
 # The dry run is the default on purpose. A script fetched with curl and
