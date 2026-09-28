@@ -1090,20 +1090,27 @@ hl.window_rule({
 -- change. The price: after editing such a file by hand, run "hyprctl reload".
 --
 -- A broken file must not bring down the whole config - the rest has already
--- loaded. The notification says which file and how to get out.
+-- loaded. The notification says which file and how to get out. Only a
+-- MISSING file is silent (io.open's errno 2, ENOENT); a file that exists but
+-- cannot be read (permissions, a directory in its place) is reported too.
 local function wczytajOpcjonalny(nazwa, podpowiedz)
     local sciezka = (os.getenv("XDG_CONFIG_HOME") or (os.getenv("HOME") .. "/.config"))
         .. "/hypr/" .. nazwa
-    local plik = io.open(sciezka, "r")
-    if not plik then return end
-    plik:close()
-    local ok, blad = pcall(dofile, sciezka)
-    if not ok then
+    local function zglos(blad)
         pcall(hl.notification.create, {
             text    = nazwa .. ": " .. tostring(blad) .. podpowiedz,
             timeout = 15000,
         })
     end
+
+    local plik, bladOtwarcia, kod = io.open(sciezka, "r")
+    if not plik then
+        if kod ~= 2 then zglos(bladOtwarcia) end
+        return
+    end
+    plik:close()
+    local ok, blad = pcall(dofile, sciezka)
+    if not ok then zglos(blad) end
 end
 
 
