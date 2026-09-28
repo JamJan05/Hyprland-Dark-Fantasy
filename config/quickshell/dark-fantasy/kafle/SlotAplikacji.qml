@@ -13,10 +13,11 @@
 //  ICON FILTER
 //
 //  Icons from the theme are colourful and "flat", as if from another world. So they
-//  go through a MultiEffect (desaturation, slightly raised contrast) and under the
-//  vignette - the texture assets/winieta.png from tools/generuj-winiete.py, which
-//  darkens the slot edges. The selected slot gets less desaturation,
-//  a gold frame and a gold wash - "this is the item you hold in your hand".
+//  go through a MultiEffect (desaturation, a light old-gold tint, slightly
+//  raised contrast) and under the vignette - the texture assets/winieta.png
+//  from tools/generuj-winiete.py, which darkens the slot edges. The selected
+//  slot gets its full colours back, a gold frame and a gold wash - "this is
+//  the item you hold in your hand".
 //
 //  The effect only costs for slots visible on screen: the grid is a
 //  GridView, which creates delegates only for the visible slice of the list.
@@ -89,12 +90,17 @@ Item {
         source: ikona
         visible: root.sciezkaIkony !== "" && ikona.status === Image.Ready
         // -0.85, not -0.65: at -0.65 Spotify green and Brave orange
-        // still glowed against the stone (checked on a screenshot). The selected one
-        // regains some colour - it is the only item "in hand".
-        saturation: root.wybrany ? -0.35 : -0.85
+        // still glowed against the stone (checked on a screenshot). On top of
+        // that a light wash of Theme.accent (#b19a67), so the grey icons sit in
+        // the palette instead of looking like cut-outs. The selected one gets
+        // its full colours back - it is the only item "in hand".
+        saturation: root.wybrany ? 0 : -0.85
+        colorization: root.wybrany ? 0 : 0.25
+        colorizationColor: Theme.accent
         contrast: 0.15
 
         Behavior on saturation { NumberAnimation { duration: Theme.animNormal } }
+        Behavior on colorization { NumberAnimation { duration: Theme.animNormal } }
     }
 
     // Fallback glyph when the icon theme does not know the program.
