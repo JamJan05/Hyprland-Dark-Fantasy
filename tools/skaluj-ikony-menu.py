@@ -2,10 +2,10 @@
 # -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- --
 #  MENU TILE ICONS - 256 px versions from the originals.
 #
-#  assets/ikony-menu/ holds the originals: six tiles of approx. 1250 x 1250 px,
+#  assets/ikony-menu/ holds the originals: six tiles of 512 x 512 px,
 #  each with its own frame and bas-relief. The shell draws a tile at 76 px,
-#  so loading 1250 px would mean ~6 MB of texture per tile and scaling
-#  with a 16x reduction on every start - with visible aliasing
+#  so loading 512 px would mean ~1 MB of texture per tile and scaling
+#  with a ~7x reduction on every start - with visible aliasing
 #  on the fine relief. This script does it once, properly:
 #
 #      assets/ikony-menu/<nazwa>.png  ->  assets/ikony-menu/256/<nazwa>.png

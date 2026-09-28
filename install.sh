@@ -215,7 +215,7 @@ kopiuj local/share/dbus-1/services/org.freedesktop.Notifications.service \
 
 # Icons for the menu tiles at the bottom of the screen (kafle/Kafel.qml).
 #
-# The originals (~1250 px, assets/ikony-menu/) never go into the shell.
+# The originals (512 px, assets/ikony-menu/) never go into the shell.
 # The script makes 256 px versions of them in assets/ikony-menu/256/, and the shell
 # reads them from the FIXED path ~/.local/share/dark-fantasy/ikony-menu,
 # where they are copied. A fixed path, because the repository may not exist

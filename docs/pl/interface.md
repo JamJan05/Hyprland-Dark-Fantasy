@@ -82,7 +82,7 @@ Klawisze wewnątrz kafli są w [keybindings.md](keybindings.md#w-menu).
 
 ### Ikony kafli
 
-- Oryginały to sześć plików PNG ok. 1250 × 1250 px w `assets/ikony-menu/`: `uzbrojenie.png`, `sakwa.png`, `status.png`, `wiesci.png`, `zebatka.png`, `ognisko.png`. Każdy ma własną ramkę i relief, więc powłoka nie rysuje wokół kafla drugiej ramki.
+- Oryginały to sześć plików PNG 512 × 512 px w `assets/ikony-menu/`: `uzbrojenie.png`, `sakwa.png`, `status.png`, `wiesci.png`, `zebatka.png`, `ognisko.png`. Każdy ma własną ramkę i relief, więc powłoka nie rysuje wokół kafla drugiej ramki.
 - `tools/skaluj-ikony-menu.py` robi z nich kopie 256 × 256 (filtr Lanczos) w `assets/ikony-menu/256/`. Ten katalog to wynik, nie źródło, i jest w `.gitignore`.
 - `install.sh --apply` uruchamia skrypt i kopiuje `256/` do `~/.local/share/dark-fantasy/ikony-menu`, stałej ścieżki, z której czyta powłoka.
 - Ikony są autorstwa właściciela repozytorium. Nie pochodzą z gry.

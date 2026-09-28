@@ -82,7 +82,7 @@ Keys inside each tile are listed in [keybindings.md](keybindings.md#inside-the-m
 
 ### Tile icons
 
-- The originals are six PNG files of about 1250 × 1250 px in `assets/ikony-menu/`: `uzbrojenie.png`, `sakwa.png`, `status.png`, `wiesci.png`, `zebatka.png`, `ognisko.png`. Each has its own frame and relief, so the shell draws no second frame around the tile.
+- The originals are six PNG files of 512 × 512 px in `assets/ikony-menu/`: `uzbrojenie.png`, `sakwa.png`, `status.png`, `wiesci.png`, `zebatka.png`, `ognisko.png`. Each has its own frame and relief, so the shell draws no second frame around the tile.
 - `tools/skaluj-ikony-menu.py` makes 256 × 256 copies (Lanczos) in `assets/ikony-menu/256/`. That directory is build output and is listed in `.gitignore`.
 - `install.sh --apply` runs the script and copies `256/` to `~/.local/share/dark-fantasy/ikony-menu`, the fixed path the shell reads from.
 - The icons are the repository owner's own work. They are not taken from the game.
