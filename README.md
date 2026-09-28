@@ -24,7 +24,7 @@ A complete Hyprland desktop for Gentoo Linux that borrows the feel of the Dark S
 - **Floors**: up to ten floors of desktops, each with its own desktops 1-0, plus three-finger gestures.
 - **Live settings** in the Cogwheel: sound, brightness, power profile, battery charge limit, network, Bluetooth, gaps, blur, animation speed, wallpaper, keyboard layout, monitor scale, floors.
 - **A "now" frame on Waybar** with the clock, the date and the current track. The player zone appears only while some application is playing.
-- **Quickshell handles notifications, the OSD and the media panel**, so there is no separate daemon.
+- **Quickshell handles notifications, the OSD and the media panel**, so there is no separate daemon. swaync is installed only as a fallback notification daemon.
 - **The same look everywhere**: hyprlock, an SDDM login theme, GTK 3/4, kitty, yazi, btop and the rofi clipboard picker.
 - **English or Polish**, switched instantly.
 - **Installers that show a plan first**: a copying installer that keeps your local changes and backs up the rest, and a from-scratch Gentoo bootstrap.
