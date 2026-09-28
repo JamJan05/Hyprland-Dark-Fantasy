@@ -11,7 +11,7 @@
 # after a reboot (they depend on the order kernel modules are loaded in),
 # so we find the directory by the content of its "name" file, not by number.
 
-# From this many degrees the module turns ember-colored. 70, not 80 as before:
+# From this many degrees the module turns ember-colored. 70, because
 # the same threshold lights up the "temperatura" status in the left-corner HUD
 # (hud/StatusNarastajacy.qml), and the bar and the HUD must not disagree
 # on whether the CPU is hot.
@@ -58,8 +58,7 @@ klasa=""
 # bare, so that the style.css rule repaints the whole module in ember - a span
 # with a color would take precedence and the icon would stay gold.
 #
-# Gold, because #fab387 used to be here - an orange from the Catppuccin
-# palette, the only color outside the dark-fantasy palette on the whole bar.
+# Gold (#b19a67), so the icon stays inside the dark-fantasy palette.
 if [[ -n $klasa ]]; then
     tekst="󰸁 ${cpu}°C"
 else

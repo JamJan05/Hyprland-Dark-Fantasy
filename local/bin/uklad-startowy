@@ -21,12 +21,11 @@
 # Determinism comes from force_split = 2 set PERMANENTLY in hyprland.lua,
 # not here.
 #
-# The first version of this script tried to set that option on the fly via
-# "hyprctl keyword" and restore it at the end. It turned out that with
-# a Lua configuration "hyprctl keyword" simply DOES NOT WORK: reading right
-# after writing shows the old value, and there is no error at all. Because
-# of that the layout came out right one time and mirrored the next - in
-# reality the mouse position decided, not the script.
+# It cannot be set on the fly for the duration of the build: with a Lua
+# configuration "hyprctl keyword" simply DOES NOT WORK - reading right after
+# writing shows the old value, and there is no error at all. The layout then
+# comes out right one time and mirrored the next, because the mouse position
+# decides, not the script.
 #
 # Measured after setting it in hyprland.lua and reloading:
 #     force_split = 1  ->  NEW window to the LEFT / to the TOP

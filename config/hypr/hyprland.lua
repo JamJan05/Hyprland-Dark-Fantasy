@@ -68,23 +68,7 @@ local terminal    = "kitty"
 -- plain "yazi" would not open a window. Shortcut: SUPER+W (see below).
 local fileManager = "menedzer-plikow"
 
--- THE APP MENU AND THE DOCK LIVE IN THE QUICKSHELL SHELL - AS THE TILE ROW.
---
--- This used to hold nwg-drawer arguments (with margin arithmetic computed
--- from the screen resolution) and the nwg-dock command with the dock.lua module. Both
--- were replaced by the shell: first its own dock and menu, and since the
--- Dark Souls-style rebuild - a single row of six tiles at the bottom of the screen
--- (config/quickshell/dark-fantasy/kafle/RzadKafli.qml). Programs are under
--- the Arsenal tile; SUPER+R opens them through the global shortcut
--- "quickshell:menuToggle" (see below).
---
--- Reason for the first switch: the dock was supposed to show only windows
--- from the CURRENT desktop, and nwg-dock 0.4.8 only has a static flag for that,
--- "-iw", set once at startup. The tile row took over the dock's hiding
--- logic 1:1 - described in the RzadKafli.qml header.
---
--- The gui-apps/nwg-drawer and gui-apps/nwg-dock-hyprland packages are no
--- longer needed for anything.
+-- App menu and dock: the Quickshell tile row, see config/quickshell/dark-fantasy/kafle/RzadKafli.qml.
 
 -------------------
 ---- AUTOSTART ----
@@ -144,8 +128,8 @@ local function autostart()
    -- It is built by ~/.local/bin/uklad-startowy, not by three separate calls.
    -- Reason: dwindle picks the split side from the force_split option,
    -- whose default value means "wherever the mouse is" - the layout
-   -- would come out differently every time. The script sets it for the
-   -- duration of the build and restores it, and it also waits for each window instead of
+   -- would come out differently every time. force_split = 2 is set in the
+   -- dwindle section below; the script waits for each window instead of
    -- launching three at once and letting them race.
    --
    -- DELIBERATELY WITHOUT run_once - and this is not an oversight.
@@ -359,9 +343,9 @@ hl.config({
             -- at 20 % opacity (33 in hex) - exactly the "obwodka" border from
             -- waybar/style.css and Theme.border in the shell.
             --
-            -- There used to be a gradient from gold to ember here. In this theme ember means
-            -- ONLY alarm and charging; on the frame of every active window
-            -- it faked an alarm all day long, so it is gone.
+            -- No gradient to ember: in this theme ember means ONLY alarm and
+            -- charging, and on the frame of every active window it would fake
+            -- an alarm all day long.
             --   gold  #b19a67   ember #8f4935   iron  #55504a
             active_border   = "rgba(b19a67ff)",
             inactive_border = "rgba(b19a6733)",
@@ -381,8 +365,7 @@ hl.config({
 
     decoration = {
         -- Sharp rectangles - like the bar, the shell, hyprlock and SDDM.
-        -- rounding_power stops mattering at a zero radius,
-        -- so it went away together with the rounding.
+        -- rounding_power is not set: it has no effect at a zero radius.
         rounding = 0, -- window corner rounding radius in pixels (0 = sharp corners)
 
         -- Opacity of the active window and of inactive windows
@@ -455,10 +438,9 @@ hl.curve("quick",          { type = "bezier", points = { {0.15, 0},    {0.1, 1} 
 
 -- THERE ARE NO SPRINGS.
 --
--- There used to be an "easy" spring here (mass 1, stiffness 238, dampening 24), used
--- by windows. A spring by definition arrives with a bounce - and in the
--- Dark Souls style nothing bounces or pops out, things only slowly emerge.
--- Windows now fade in along the easeOutQuint curve, like the shell's panels.
+-- A spring by definition arrives with a bounce - and in the Dark Souls style
+-- nothing bounces or pops out, things only slowly emerge. Windows fade in
+-- along the easeOutQuint curve, like the shell's panels.
 
 -- Assigning animations to interface elements:
 -- leaf   - which element the animation applies to,
@@ -634,9 +616,8 @@ hl.config({
 -- TOUCHPAD GESTURES: three fingers sideways switch desktops, vertically floors.
 --
 -- Both gestures are further down, in the FLOORS AND DESKTOPS section, because they need
--- the floors module to be loaded already. There used to be the native
---     hl.gesture({ fingers = 3, direction = "horizontal", action = "workspace" })
--- here, but it knows nothing about floors and went from the last desktop of a floor
+-- the floors module to be loaded already. Not the native action = "workspace":
+-- it knows nothing about floors and goes from the last desktop of a floor
 -- to the next one. Rationale next to the gestures in floors.lua.
 
 
@@ -666,10 +647,8 @@ hl.bind(mainMod .. " + W", hl.dsp.exec_cmd(fileManager), { description = T("File
 hl.bind(mainMod .. " + P", hl.dsp.window.pseudo(), { description = T("Pseudotile", "Pseudokafelkowanie") }) -- pseudotiling: the window keeps its own size, but still takes up its place in the layout
 hl.bind(mainMod .. " + J", hl.dsp.layout("togglesplit"), { description = T("Toggle split direction", "Zmień kierunek podziału") }) -- change the split direction (vertical/horizontal); dwindle only
 
--- Cogwheel - settings (Quickshell). "U" as in Ustawienia (settings); checked
--- that SUPER+U was not taken before. Since stage 7 of the rebuild it opens
--- the tile row pause with the Cogwheel selected - the former System Control Center
--- is now its content above the row.
+-- Cogwheel - settings (Quickshell). "U" as in Ustawienia (settings). It opens
+-- the tile row pause with the Cogwheel selected; the settings show above the row.
 --
 -- hl.dsp.global sends the shortcut through the global-shortcuts protocol straight to
 -- the already running shell. This is NOT the same as exec_cmd - there every
@@ -684,7 +663,7 @@ hl.bind(mainMod .. " + J", hl.dsp.layout("togglesplit"), { description = T("Togg
 hl.bind(mainMod .. " + U", hl.dsp.global("quickshell:systemToggle"), { description = T("Cogwheel - settings", "Zębatka - ustawienia") })
 
 -- Media player panel. "O" as in Odtwarzacz (player) - just as "U" above stands for
--- Ustawienia (settings). Checked that SUPER+O was not taken.
+-- Ustawienia (settings).
 --
 -- The shortcut is NOT only for convenience: the media modules on the bar
 -- (track title and cover) disappear when nothing is playing, so without it, on a
@@ -695,7 +674,6 @@ hl.bind(mainMod .. " + O", hl.dsp.global("quickshell:mediaToggle"), { descriptio
 -- the shell (GlobalShortcut "profilZasilania" in shell.qml) through
 -- power-profiles-daemon over D-Bus, and it shows the OSD right away. The bind does not call
 -- powerprofilesctl, so that the switch and its confirmation live in one place.
--- Checked before adding: SUPER+B was not taken.
 hl.bind(mainMod .. " + B", hl.dsp.global("quickshell:profilZasilania"), { description = T("Power profile: next", "Profil zasilania: następny") })
 
 -- Changing the active window with mainMod + arrows
@@ -716,13 +694,10 @@ hl.bind(mainMod .. " + down",  hl.dsp.focus({ direction = "down" }), { descripti
 --   3 fingers left / right     next / previous desktop of the floor
 --   3 fingers up / down        floor up / down
 --
--- The shortcuts are FUNCTIONS, not ready-made dispatchers as they used to be.
+-- The shortcuts are FUNCTIONS, not ready-made dispatchers.
 -- hl.dsp.focus({ workspace = 3 }) computes the number once, when the
 -- config is read, and the same key has to mean something different on each floor -
 -- so the number must be computed at the moment of the key press.
---
--- Checked before the change: mainMod + CTRL + digits and mainMod + CTRL
--- + arrows were not taken.
 local floors = require("floors")
 floors.setup()
 
@@ -756,17 +731,16 @@ hl.gesture({
 
 -- Special desktop (scratchpad), i.e. a hidden desktop overlaid on the current one
 hl.bind(mainMod .. " + S",         hl.dsp.workspace.toggle_special("magic"), { description = T("Show / hide scratchpad", "Pokaż / ukryj scratchpad") }) -- show/hide the scratchpad
--- WARNING - SHORTCUT CHANGED. Moving a window to the scratchpad used to be on
--- SUPER+SHIFT+S, but that shortcut is now taken by the screenshot of a selected
--- area (see the SCREENSHOTS section below). Moved to SUPER+SHIFT+X.
+-- Moving a window to the scratchpad is on SUPER+SHIFT+X, not the usual
+-- SUPER+SHIFT+S - that one takes a screenshot of a selected area (see the
+-- SCREENSHOTS section below).
 hl.bind(mainMod .. " + SHIFT + X", hl.dsp.window.move({ workspace = "special:magic" }), { description = T("Move window to scratchpad", "Przenieś okno do scratchpada") }) -- move the window to the scratchpad
 
 -- Cycling through existing desktops with the mouse wheel: mainMod + scroll,
 -- wrapping around, but only within the CURRENT floor.
 --
--- There used to be "e+1" / "e-1" here, i.e. the next / previous existing
--- workspace overall. With floors that would mean jumping from the last
--- desktop of F1 straight to F2.
+-- Not "e+1" / "e-1", i.e. the next / previous existing workspace overall:
+-- with floors that would jump from the last desktop of F1 straight to F2.
 hl.bind(mainMod .. " + mouse_down", function() return hl.dispatch(floors.desktop_step(1)) end, { description = T("Next desktop on this floor", "Następny pulpit piętra") })
 hl.bind(mainMod .. " + mouse_up",   function() return hl.dispatch(floors.desktop_step(-1)) end, { description = T("Previous desktop on this floor", "Poprzedni pulpit piętra") })
 
@@ -794,9 +768,8 @@ hl.bind("XF86AudioPrev",  hl.dsp.exec_cmd("playerctl previous"),   { locked = tr
 -- SCREENSHOTS (hyprshot)
 --
 -- hyprshot wraps grim and slurp: it takes the shot, copies it to the clipboard
--- AND saves a file, and sends a notification itself. The previous custom script
--- ~/.local/bin/zrzut-ekranu is still on disk and works - if you prefer
--- to go back to it, replace the commands below.
+-- AND saves a file, and sends a notification itself. ~/.local/bin/zrzut-ekranu
+-- is an alternative without hyprshot - replace the commands below to use it.
 --
 --   -m region   rectangle selected with the mouse
 --   -m window   the pointed-at window
@@ -817,11 +790,6 @@ hl.bind(mainMod .. " + Print",     hl.dsp.exec_cmd(hyprshot .. "window"), { desc
 
 -- SCREEN LOCK AND CLIPBOARD
 
--- The app menu has two entry points, and there is deliberately NO third one here:
---   SUPER+R                     (above, in the basic shortcuts section)
---   the Arsenal tile in the tile row (it replaced the button on the left side of the dock)
--- The SUPER+D shortcut and the 󰮫 button in Waybar were removed on request.
-
 -- Screen lock on demand. The same hyprlock is also launched by hypridle after
 -- 10 minutes of idle (~/.config/hypr/hypridle.conf).
 --
@@ -836,10 +804,6 @@ hl.bind(mainMod .. " + Print",     hl.dsp.exec_cmd(hyprshot .. "window"), { desc
 hl.bind(mainMod .. " + L", hl.dsp.exec_cmd("pidof hyprlock || hyprlock"), { description = T("Lock screen", "Zablokuj ekran") })
 
 -- Clipboard history.
---
--- NOTE: the prompt suggested SUPER+V, but that shortcut is taken here by
--- toggling the window into floating mode (above). Clipboard history therefore
--- lives on SUPER+SHIFT+V.
 --
 -- cliphist list prints numbered entries, rofi shows them as a list,
 -- and cliphist decode turns the selected number back into the content.
