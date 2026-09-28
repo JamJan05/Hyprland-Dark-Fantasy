@@ -1094,8 +1094,13 @@ hl.window_rule({
 -- MISSING file is silent (io.open's errno 2, ENOENT); a file that exists but
 -- cannot be read (permissions, a directory in its place) is reported too.
 local function wczytajOpcjonalny(nazwa, podpowiedz)
-    local sciezka = (os.getenv("XDG_CONFIG_HOME") or (os.getenv("HOME") .. "/.config"))
-        .. "/hypr/" .. nazwa
+    -- An empty XDG_CONFIG_HOME counts as unset (XDG spec; in Lua "" is true),
+    -- the same as stateDir() at the top and the shell.
+    local konfig = os.getenv("XDG_CONFIG_HOME")
+    if not konfig or konfig == "" then
+        konfig = (os.getenv("HOME") or "") .. "/.config"
+    end
+    local sciezka = konfig .. "/hypr/" .. nazwa
     local function zglos(blad)
         pcall(hl.notification.create, {
             text    = nazwa .. ": " .. tostring(blad) .. podpowiedz,
