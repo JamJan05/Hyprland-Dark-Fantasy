@@ -18,6 +18,7 @@ local/
   share/dbus-1/      makes the shell the notification daemon
 gentoo/              keywords and USE flags for Portage
 udev/                rule: battery charge thresholds writable by wheel
+openrc/              dark-fantasy-stan: backlight and SDDM Num Lock before login
 sbin/                df-limit-mocy: CPU power limit via ryzenadj (root, /usr/local/sbin)
 sudoers/             rule: df-limit-mocy without a password for wheel
 sddm/                login theme (QML) and its installer
@@ -64,6 +65,7 @@ Many file and identifier names in the code are Polish (`kafle` = tiles, `Zebatka
 | `monitor-systemu` | Status tile | Runs btop in a panel window: class `df-panel` (rule in `hyprland.lua`) and the separate kitty config `panel.conf` |
 | `limit-ladowania` | Cogwheel → Power, terminal | Reads or sets the battery charge thresholds in the right order; uses `pkexec` without write access |
 | `pamiec-ustawien` | Autostart | Restores the screen and keyboard backlight, volume and mute from before the shutdown, then saves them every few seconds to `~/.local/state/dark-fantasy/ustawienia-sprzetu`. Num Lock from the same file is read by `hyprland.lua`. |
+| `df-agent-bt` | Autostart | Bluetooth pairing agent (NoInputNoOutput). BlueZ will not pair without an agent. It accepts pairing and services only for devices marked trusted, which the Cogwheel does before pairing. |
 | `uklad-startowy` | Autostart | Builds the welcome layout: terminal and `tty-clock` on the left, yazi on the right. Skips when the desktop already has a window. |
 | `df-jezyk` | Waybar scripts, hyprlock | Prints the interface language, `en` or `pl` |
 | `waybar-data` | `custom/data` | Date next to the clock in the interface language, without a leading zero |

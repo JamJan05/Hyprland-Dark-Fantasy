@@ -30,8 +30,8 @@
 -- their own on first entry and vanish once empty - nothing has to be
 -- set up in advance.
 --
--- F1 is exactly the old desktops 1..10. Anyone who does not change floors
--- has the same desktops as before.
+-- F1 is desktops 1..10, so without changing floors everything behaves like
+-- plain numbered workspaces.
 --
 -- ---------------------------------------------------------------
 -- WHICH FLOOR AM I ON
@@ -61,13 +61,9 @@
 -- directory, so it catches the file being replaced via rename (src/io/fileview.cpp,
 -- onWatchedDirectoryChanged in Quickshell 0.3.1).
 --
--- The floor and desktops used to be on Waybar: this file wrote eleven JSON
--- files for it (the floor pill and one per desktop) and woke it with the
--- SIGRTMIN+10 signal. The modules, files and signal were removed in the last
--- stage of the Dark Souls-style rebuild. The built-in hyprland/workspaces was
--- no good for this at all: it shows the workspaces of all floors at once,
--- and its click sends a dispatcher in the old syntax, which Hyprland
--- with a Lua config does not accept.
+-- Waybar's built-in hyprland/workspaces is no good for this: it shows the
+-- workspaces of all floors at once, and its click sends a dispatcher in the
+-- old syntax, which Hyprland with a Lua config does not accept.
 
 local M = {}
 
@@ -269,7 +265,8 @@ end
 --  ACTIONS
 --
 --  Each one RETURNS a dispatcher instead of executing it. That way the same
---  function is used by the shortcuts (hl.dispatch in hyprland.lua) and the bar:
+--  function is used by the shortcuts (hl.dispatch in hyprland.lua) and the HUD
+--  (services/Pietra.qml):
 --
 --      hyprctl dispatch 'floors.desktop(3)'
 --
@@ -281,7 +278,7 @@ function M.desktop(desktop)
     return hl.dsp.focus({ workspace = ws_id(floor, desktop) })
 end
 
--- The window goes along with the focus, just like the old SUPER+SHIFT+digit.
+-- The window goes along with the focus.
 function M.move(desktop)
     local floor = current()
     return hl.dsp.window.move({ workspace = ws_id(floor, desktop) })
@@ -321,8 +318,7 @@ local function floor_desktops()
 end
 
 -- Next (+1) or previous (-1) EXISTING desktop of the current floor,
--- wrapping around. Replaces the old "e+1" / "e-1", which went across all
--- floors at once.
+-- wrapping around. Unlike "e+1" / "e-1", it never crosses into another floor.
 function M.desktop_step(delta)
     local floor, desktop, list, index = floor_desktops()
     if not index then return hl.dsp.no_op() end
@@ -339,7 +335,7 @@ end
 --      left / right  -> next / previous desktop of the floor
 --      up / down     -> floor up / down
 --
---  Both in Lua - including the horizontal one, which used to be the native
+--  Both in Lua - including the horizontal one, instead of the native
 --  action = "workspace". The native swipe takes the nearest EXISTING
 --  workspace on the monitor, so from the last desktop of F1 it went straight
 --  to a desktop of F2, and it cannot be stopped at the edge of a floor.
@@ -516,7 +512,7 @@ function M.ustaw(opcje)
     refresh()
 end
 
--- Global, for the bar: hyprctl dispatch 'floors.desktop(3)'.
+-- Global, for the HUD: hyprctl dispatch 'floors.desktop(3)'.
 _G.floors = M
 
 return M

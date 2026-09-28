@@ -15,13 +15,13 @@ Three scripts install this desktop. Each one **shows a plan and changes nothing*
 Show the plan first:
 
 ```sh
-curl -fsSL https://raw.githubusercontent.com/JamJan05/hyprland-dark-fantasy/main/bootstrap.sh | bash
+curl -fsSL https://raw.githubusercontent.com/JamJan05/Hyprland-Dark-Fantasy/main/bootstrap.sh | bash
 ```
 
 Then run it for real:
 
 ```sh
-curl -fsSL https://raw.githubusercontent.com/JamJan05/hyprland-dark-fantasy/main/bootstrap.sh | bash -s -- --apply
+curl -fsSL https://raw.githubusercontent.com/JamJan05/Hyprland-Dark-Fantasy/main/bootstrap.sh | bash -s -- --apply
 ```
 
 The dry run is the default on purpose. A script piped from `curl` into a shell should not install dozens of packages and change the system before you have seen what it is going to do.
@@ -32,17 +32,18 @@ What `--apply` does, in order:
 2. Asks for the `sudo` password once, up front. With `curl | bash` it reads the password from `/dev/tty`.
 3. Enables the **GURU** and **hyproverlay** overlays with `eselect repository` and syncs them.
 4. Clones the repository into `~/hyprland-dark-fantasy`. Set `HYPR_REPO_DIR` to use a different path. If the script is run from inside a clone, it uses that clone.
-5. Copies `gentoo/package.accept_keywords/hyprland-desktop` and `gentoo/package.use/hyprland-desktop` into `/etc/portage/`, unless they already exist.
-6. Installs the packages with `emerge --ask --verbose --changed-use`. Compiling Hyprland and the Qt dependencies takes a while.
+5. Copies `gentoo/package.accept_keywords/hyprland-desktop` and `gentoo/package.use/hyprland-desktop` into `/etc/portage/`, unless they already exist. If Portage still cannot see `dev-libs/wayland` 1.26 (an older copy of the file), it appends that one entry.
+6. Upgrades `dev-libs/wayland` to 1.26 (`emerge --oneshot --update`), then installs the packages with `emerge --ask --verbose --changed-use`. Compiling Hyprland and the Qt dependencies takes a while.
 7. Runs `install.sh --apply`.
 8. Installs the battery udev rule, but only if the battery exposes charge thresholds.
+9. On OpenRC, installs and enables the [`dark-fantasy-stan` service](#state-before-login-openrc-service).
 
 The script is idempotent: running it again skips whatever is already done. `./bootstrap.sh --help` prints the same summary. The installed desktop does not need the clone in `~/hyprland-dark-fantasy`; you can delete it afterwards.
 
 If `sudo` cannot ask for a password because there is no terminal, download the script and run it directly:
 
 ```sh
-curl -fsSL https://raw.githubusercontent.com/JamJan05/hyprland-dark-fantasy/main/bootstrap.sh -o bootstrap.sh
+curl -fsSL https://raw.githubusercontent.com/JamJan05/Hyprland-Dark-Fantasy/main/bootstrap.sh -o bootstrap.sh
 bash bootstrap.sh --apply
 ```
 
@@ -65,6 +66,12 @@ sudo cp gentoo/package.accept_keywords/hyprland-desktop /etc/portage/package.acc
 sudo cp gentoo/package.use/hyprland-desktop             /etc/portage/package.use/
 ```
 
+Hyprland 0.56 does not work with the stable `dev-libs/wayland` 1.25, and 1.26 is still `~amd64`. The file above unmasks it; upgrade it first, as a dependency only:
+
+```sh
+sudo emerge --ask --oneshot --update ">=dev-libs/wayland-1.26.0"
+```
+
 Install the same list as the `PAKIETY` array in `bootstrap.sh`:
 
 ```sh
@@ -74,8 +81,9 @@ sudo emerge --ask --verbose --changed-use \
   app-misc/cliphist gui-apps/rofi-wayland sys-auth/hyprpolkitagent \
   gui-libs/xdg-desktop-portal-hyprland media-fonts/nerdfonts media-sound/playerctl \
   media-video/pipewire media-video/wireplumber gui-apps/grim gui-apps/slurp \
-  app-misc/jq x11-terms/kitty app-misc/brightnessctl media-sound/cava \
-  sys-power/power-profiles-daemon net-wireless/bluez app-misc/yazi app-misc/tty-clock \
+  app-misc/jq x11-terms/kitty app-misc/brightnessctl \
+  sys-power/power-profiles-daemon net-wireless/bluez dev-python/dbus-python dev-python/pygobject \
+  app-misc/yazi app-misc/tty-clock \
   media-fonts/eb-garamond x11-themes/adw-gtk3 x11-themes/papirus-icon-theme \
   x11-themes/bibata-xcursors sys-process/btop dev-python/pillow gui-apps/quickshell
 ```
@@ -146,7 +154,8 @@ It also does two more things:
 2. **Login screen** (optional): `cd sddm && ./install-theme.sh --apply`.
 3. **Battery charge limit without a password prompt**, on laptops with charge thresholds: see [the udev rule](#battery-charge-limit-udev-rule).
 4. **CPU power limit per profile** (optional, AMD Ryzen laptops): see [CPU power limit](#cpu-power-limit-ryzenadj).
-5. **Reload**: `hyprctl reload`, or start Hyprland (from a TTY: `Hyprland`).
+5. **Backlight and Num Lock before login** (OpenRC): see [the service](#state-before-login-openrc-service).
+6. **Reload**: `hyprctl reload`, or start Hyprland (from a TTY: `Hyprland`).
 
 `bootstrap.sh` adds one more: **Bluetooth**. The bar shows Bluetooth as off until the service runs.
 
@@ -200,6 +209,19 @@ sudo udevadm trigger --subsystem-match=power_supply --action=change
 ```
 
 `bootstrap.sh` installs the rule automatically when `/sys/class/power_supply/BAT*/charge_control_end_threshold` exists. For more on the charge limit, see [cogwheel.md](cogwheel.md#power-profile-and-charge-limit).
+
+## State before login (OpenRC service)
+
+`pamiec-ustawien` remembers the screen and keyboard backlight, volume, mute and Num Lock, but it runs from the Hyprland autostart, so the state comes back only after you log in. Before that the screen starts at full brightness and the SDDM greeter starts with Num Lock off.
+
+`openrc/dark-fantasy-stan` fills that gap. At boot, before the display manager, it reads the most recently modified `/home/*/.local/state/dark-fantasy/ustawienia-sprzetu` (the file `pamiec-ustawien` keeps up to date). Then it sets the screen and keyboard backlight and writes `Numlock=on|off` to `/etc/sddm.conf.d/zz-dark-fantasy-numlock.conf`. It checks every value from that user file before writing it as root. To use a different file, set `DF_STAN_PLIK=/path` in `/etc/conf.d/dark-fantasy-stan`.
+
+```sh
+sudo install -o root -g root -m 0755 openrc/dark-fantasy-stan /etc/init.d/
+sudo rc-update add dark-fantasy-stan default
+```
+
+`bootstrap.sh` does this on OpenRC. On systemd, `systemd-backlight` already restores the screen backlight.
 
 ## CPU power limit (ryzenadj)
 
@@ -257,6 +279,7 @@ These live in system directories and need root. If you change them, copy them ba
 | `/etc/portage/package.accept_keywords/hyprland-desktop`, `/etc/portage/package.use/hyprland-desktop` | `bootstrap.sh` or by hand |
 | `/usr/share/sddm/themes/dark-fantasy/` | `sddm/install-theme.sh` |
 | `/etc/udev/rules.d/99-dark-fantasy-bateria.rules` | `bootstrap.sh` or by hand |
+| `/etc/init.d/dark-fantasy-stan` (writes `/etc/sddm.conf.d/zz-dark-fantasy-numlock.conf` at boot) | `bootstrap.sh` or by hand, see [State before login](#state-before-login-openrc-service) |
 | `/usr/local/sbin/df-limit-mocy`, `/etc/sudoers.d/dark-fantasy-moc`, `/usr/local/bin/ryzenadj`, `iomem=relaxed` in `/etc/default/grub` | By hand, see [CPU power limit](#cpu-power-limit-ryzenadj) |
 
 Some state is deliberately **outside** the repository, because it belongs to one computer and is not part of the desktop configuration:

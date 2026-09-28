@@ -24,7 +24,7 @@ Network and Bluetooth need device lists, passwords and pairing, which do not fit
 | **Power** | Power profile, CPU power limit per profile, charge limit, resume charging threshold, battery state |
 | **Behavior** | Keep screen on (blocks screen off, lock and suspend), HUD bars |
 | **Network** | Wi-Fi toggle, network list, connecting with a password (NetworkManager) |
-| **Bluetooth** | Power, device list, connecting |
+| **Bluetooth** | Power (remembered across reboots), device list, connecting |
 | **Language** | English or Polish (see [Language](#language)) |
 
 ### Hyprland
@@ -37,8 +37,8 @@ Network and Bluetooth need device lists, passwords and pairing, which do not fit
 | **Input** | Touchpad sensitivity (a rule for the touchpad only, not the mouse), natural scrolling, keyboard layout, floor gestures (3 fingers) |
 | **Monitor** | Scale (only "clean" scales for the current resolution), refresh rate, position of a second monitor |
 | **Floors** | Number of floors (1-10) and a name for each floor |
-| **Shortcuts** | Read-only list of all keybindings with descriptions, taken from `hyprctl binds` |
-| **Restore defaults** | Deletes the settings file and reloads Hyprland. The first Enter asks, the second one runs it. |
+| **Shortcuts** | Your own application shortcuts, moving the main shortcuts to other keys, and a read-only list of the fixed ones (desktops, mouse, media keys). See [Shortcuts](#shortcuts) |
+| **Restore defaults** | Deletes the settings file and reloads Hyprland. It first asks "Restore defaults?" with Yes / No; the cursor starts on No. |
 
 Keyboard layouts offered: `pl`, `us`, `gb`, `de`, `fr`, `es`, `it`, `cz`, `sk`, `ua`.
 
@@ -66,6 +66,16 @@ A hard ceiling on CPU power for each power profile, for example 7 W in power sav
 - **ThinkPads have their own limits per profile.** The firmware changes them on every `platform_profile` change (on the tested laptop: 10 W in low-power). The factory value is therefore recorded separately for each profile, on the first call in it after boot.
 - **Setup needs root:** ryzenadj, the `df-limit-mocy` script with its sudo rule, and the `iomem=relaxed` kernel parameter. See [installation.md](installation.md#cpu-power-limit-ryzenadj). Until then the rows are hidden; with a partial setup, an error line says what is missing.
 - From a terminal: `sudo df-limit-mocy` prints the current and factory limits (six numbers in W), `sudo df-limit-mocy 7` sets 7 W, `sudo df-limit-mocy fabryczny` restores the factory limits.
+
+## Shortcuts
+
+- **Change keys:** select a shortcut, press Enter, then press the new combination. `Esc` cancels. `Delete` restores the default keys. A moved shortcut is marked with `*`.
+- **Application shortcut:** choose **New application shortcut**. Search with Enter and typing, pick the application with ← →, set the keys, then choose **save**. It starts the program through `gtk-launch <desktop id>`, like the Arsenal. `Delete` on the shortcut removes it.
+- **Refused keys:** keys already used by another shortcut, and keys without `SUPER`, `CTRL` or `ALT` (a single key would stop working for typing). F keys and PrtSc are allowed on their own.
+- **While the keys are captured**, Hyprland switches to an empty submap, `df-przechwyt`, so the combination you press does not trigger its current action. The Cogwheel switches back afterwards, and after 10 s without a key it gives up. If Hyprland ever stays stuck without shortcuts, `SUPER + Escape` leaves the submap.
+- **Fixed shortcuts** are desktops and floors, the mouse and the laptop's media keys. Change them in `hyprland.lua`.
+
+Changes apply at once and are saved in `ustawienia.lua` (`przypiszSkrot(...)` and `wlasnySkrot(...)` lines). **Restore defaults** removes them all.
 
 ## Wallpaper
 

@@ -26,7 +26,7 @@ W nawiasach nazwy z angielskiego interfejsu.
 | **Zasilanie** (Power) | Profil zasilania, limit mocy procesora dla każdego profilu, limit ładowania, próg wznowienia ładowania, stan baterii |
 | **Zachowanie** (Behavior) | Nie wygaszaj ekranu (wstrzymuje wygaszanie, blokadę i uśpienie), paski HUD-u |
 | **Sieć** (Network) | Przełącznik Wi-Fi, lista sieci, łączenie z hasłem (NetworkManager) |
-| **Bluetooth** | Zasilanie, lista urządzeń, łączenie |
+| **Bluetooth** | Zasilanie (zapamiętywane po ponownym uruchomieniu), lista urządzeń, łączenie |
 | **Język** (Language) | Angielski albo polski (patrz [Język](#język)) |
 
 ### Hyprland
@@ -39,8 +39,8 @@ W nawiasach nazwy z angielskiego interfejsu.
 | **Wejście** (Input) | Czułość touchpada (reguła tylko dla touchpada, nie dla myszy), naturalne przewijanie, układ klawiatury, gesty pięter (3 palce) |
 | **Ekran** (Monitor) | Skala (tylko „czyste” skale dla bieżącej rozdzielczości), odświeżanie, położenie drugiego monitora |
 | **Piętra** (Floors) | Liczba pięter (1-10) i nazwa każdego piętra |
-| **Skróty** (Shortcuts) | Podgląd wszystkich skrótów z opisami, prosto z `hyprctl binds` |
-| **Przywróć domyślne** (Restore defaults) | Usuwa plik ustawień i przeładowuje Hyprlanda. Pierwszy Enter pyta, drugi wykonuje. |
+| **Skróty** (Shortcuts) | Własne skróty do aplikacji, przenoszenie głównych skrótów na inne klawisze i podgląd skrótów stałych (pulpity, mysz, klawisze multimedialne). Patrz [Skróty](#skróty) |
+| **Przywróć domyślne** (Restore defaults) | Usuwa plik ustawień i przeładowuje Hyprlanda. Najpierw pyta „Przywrócić domyślne?” z wyborem Tak / Nie; kursor stoi na Nie. |
 
 Dostępne układy klawiatury: `pl`, `us`, `gb`, `de`, `fr`, `es`, `it`, `cz`, `sk`, `ua`.
 
@@ -68,6 +68,16 @@ Twardy sufit mocy procesora dla każdego profilu zasilania, np. 7 W w oszczędny
 - **ThinkPady mają własne limity dla każdego profilu.** Firmware zmienia je przy każdej zmianie `platform_profile` (na testowanym laptopie: 10 W w low-power). Dlatego wartość fabryczna jest zapisywana osobno dla każdego profilu, przy pierwszym wywołaniu w nim po starcie.
 - **Konfiguracja wymaga roota:** ryzenadj, skrypt `df-limit-mocy` z regułą sudo i parametr jądra `iomem=relaxed`. Patrz [installation.md](installation.md#limit-mocy-procesora-ryzenadj). Do tego czasu rzędy są ukryte; przy niepełnej konfiguracji wiersz błędu mówi, czego brakuje.
 - Z terminala: `sudo df-limit-mocy` wypisuje obecne i fabryczne limity (sześć liczb w W), `sudo df-limit-mocy 7` ustawia 7 W, `sudo df-limit-mocy fabryczny` przywraca limity fabryczne.
+
+## Skróty
+
+- **Zmiana klawiszy:** zaznacz skrót, naciśnij Enter i wciśnij nową kombinację. `Esc` anuluje. `Delete` przywraca domyślne klawisze. Przeniesiony skrót ma znak `*`.
+- **Skrót do aplikacji:** wybierz **Nowy skrót aplikacji**. Wyszukaj (Enter i pisanie), wybierz aplikację strzałkami ← →, ustaw klawisze i wybierz **zapisz**. Program startuje przez `gtk-launch <id pliku .desktop>`, tak jak z Uzbrojenia. `Delete` na skrócie go usuwa.
+- **Odrzucane klawisze:** zajęte przez inny skrót oraz takie bez `SUPER`, `CTRL` albo `ALT` (sam klawisz przestałby działać przy pisaniu). Klawisze F i PrtSc wolno ustawić same.
+- **Podczas łapania klawiszy** Hyprland przechodzi do pustego submapu `df-przechwyt`, więc wciśnięta kombinacja nie uruchamia swojej obecnej akcji. Zębatka potem wraca do zwykłych skrótów, a po 10 s bez klawisza rezygnuje. Gdyby Hyprland kiedyś został bez skrótów, `SUPER + Escape` wychodzi z submapu.
+- **Skróty stałe** to pulpity i piętra, mysz i klawisze multimedialne laptopa. Zmienia się je w `hyprland.lua`.
+
+Zmiany działają od razu i trafiają do `ustawienia.lua` (wiersze `przypiszSkrot(...)` i `wlasnySkrot(...)`). **Przywróć domyślne** usuwa je wszystkie.
 
 ## Tapeta
 

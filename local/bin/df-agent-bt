@@ -1,0 +1,174 @@
+#!/usr/bin/env python3
+#
+# df-agent-bt - the session's Bluetooth pairing agent.
+#
+# WHY IT IS NEEDED. BlueZ pairs only through an agent: in bluez 5.87
+# device_confirm_passkey() first calls new_auth(), which fails with "No agent
+# available" when no agent is registered - even for "Just Works" pairing that
+# we started ourselves, before BlueZ gets to auto-accepting it
+# (src/device.c). Quickshell registers no agent, and the one in bluetoothctl
+# lives only while bluetoothctl runs and asks its questions on a terminal. So
+# pairing headphones from the Cogwheel failed: "Connected" for a moment, then
+# nothing.
+#
+# WHAT IT ACCEPTS. Capability NoInputNoOutput: no PIN typing, no passkey on
+# screen. Trusted alone is NOT enough - the shell marks a device trusted for
+# the time of a pairing, and a trust left behind (a failed pairing, a session
+# torn down mid-pairing) must not open the door later:
+#
+#   pairing requests      (RequestConfirmation, RequestAuthorization,
+#                          RequestPinCode) - only for the device the shell is
+#                          pairing right now: its address is in
+#                          $XDG_RUNTIME_DIR/dark-fantasy/parowanie, written by
+#                          services/PamiecBluetooth.qml for the time of the
+#                          pairing. The runtime directory goes away with the
+#                          session, so the file cannot outlive it either.
+#   service authorization (AuthorizeService) - only for a device that is
+#                          trusted AND already paired or bonded.
+#
+# Anything else is refused, so being pairable does not let a stranger in.
+#
+# Legacy (pre-2.1) devices ask for a PIN; the device being paired gets "0000",
+# the PIN of practically every old headset.
+#
+# Registers again when bluetoothd restarts. Started from the Hyprland
+# autostart (run_once - the process name is "df-agent-bt").
+#
+# Requires dev-python/dbus-python and dev-python/pygobject.
+
+import os
+import sys
+
+import dbus
+import dbus.mainloop.glib
+import dbus.service
+from gi.repository import GLib
+
+BUS_NAME = "org.bluez"
+AGENT_PATH = "/org/darkfantasy/agent"
+AGENT_IFACE = "org.bluez.Agent1"
+CAPABILITY = "NoInputNoOutput"
+
+
+class Rejected(dbus.DBusException):
+    _dbus_error_name = "org.bluez.Error.Rejected"
+
+
+def wlasciwosci(bus, sciezka):
+    try:
+        props = dbus.Interface(bus.get_object(BUS_NAME, sciezka),
+                               "org.freedesktop.DBus.Properties")
+        return props.GetAll("org.bluez.Device1")
+    except dbus.DBusException:
+        return {}
+
+
+# The address the shell is pairing right now, or "".
+def parowany_adres():
+    runtime = os.environ.get("XDG_RUNTIME_DIR")
+    if not runtime:
+        return ""
+    try:
+        with open(os.path.join(runtime, "dark-fantasy", "parowanie")) as f:
+            return f.read(64).strip().upper()
+    except OSError:
+        return ""
+
+
+class Agent(dbus.service.Object):
+    def __init__(self, bus):
+        super().__init__(bus, AGENT_PATH)
+        self.bus = bus
+
+    # A pairing request: trusted and the device the shell is pairing now.
+    def sprawdz_parowanie(self, device):
+        w = wlasciwosci(self.bus, device)
+        adres = str(w.get("Address", "")).upper()
+        if not w.get("Trusted", False) or not adres or adres != parowany_adres():
+            raise Rejected("not the device being paired")
+
+    # A service: trusted and already paired or bonded.
+    def sprawdz_usluge(self, device):
+        w = wlasciwosci(self.bus, device)
+        if not w.get("Trusted", False) or not (w.get("Paired", False) or w.get("Bonded", False)):
+            raise Rejected("device is not trusted and paired")
+
+    @dbus.service.method(AGENT_IFACE, in_signature="", out_signature="")
+    def Release(self):
+        pass
+
+    @dbus.service.method(AGENT_IFACE, in_signature="os", out_signature="")
+    def AuthorizeService(self, device, uuid):
+        self.sprawdz_usluge(device)
+
+    @dbus.service.method(AGENT_IFACE, in_signature="o", out_signature="s")
+    def RequestPinCode(self, device):
+        self.sprawdz_parowanie(device)
+        return "0000"
+
+    @dbus.service.method(AGENT_IFACE, in_signature="o", out_signature="u")
+    def RequestPasskey(self, device):
+        # Needs the passkey typed on the other device's keypad - there is
+        # no one to type it here.
+        raise Rejected("no passkey input")
+
+    @dbus.service.method(AGENT_IFACE, in_signature="ouq", out_signature="")
+    def DisplayPasskey(self, device, passkey, entered):
+        pass
+
+    @dbus.service.method(AGENT_IFACE, in_signature="os", out_signature="")
+    def DisplayPinCode(self, device, pincode):
+        pass
+
+    @dbus.service.method(AGENT_IFACE, in_signature="ou", out_signature="")
+    def RequestConfirmation(self, device, passkey):
+        self.sprawdz_parowanie(device)
+
+    @dbus.service.method(AGENT_IFACE, in_signature="o", out_signature="")
+    def RequestAuthorization(self, device):
+        self.sprawdz_parowanie(device)
+
+    @dbus.service.method(AGENT_IFACE, in_signature="", out_signature="")
+    def Cancel(self):
+        pass
+
+
+def zarejestruj(bus):
+    try:
+        menedzer = dbus.Interface(bus.get_object(BUS_NAME, "/org/bluez"),
+                                  "org.bluez.AgentManager1")
+        menedzer.RegisterAgent(AGENT_PATH, CAPABILITY)
+        menedzer.RequestDefaultAgent(AGENT_PATH)
+        print("df-agent-bt: registered as the default agent", flush=True)
+    except dbus.DBusException as e:
+        # bluetoothd not running yet - the NameOwnerChanged watch below
+        # registers once it appears.
+        print(f"df-agent-bt: not registered: {e.get_dbus_message()}", file=sys.stderr, flush=True)
+
+
+def main():
+    # The interpreter would otherwise be the process name ("python3"), and
+    # run_once in the autostart checks it with "pgrep -x df-agent-bt".
+    try:
+        with open("/proc/self/comm", "w") as f:
+            f.write("df-agent-bt")
+    except OSError:
+        pass
+
+    dbus.mainloop.glib.DBusGMainLoop(set_as_default=True)
+    bus = dbus.SystemBus()
+    Agent(bus)
+
+    def wlasciciel(nazwa, stary, nowy):
+        if nazwa == BUS_NAME and nowy:
+            zarejestruj(bus)
+
+    bus.add_signal_receiver(wlasciciel, signal_name="NameOwnerChanged",
+                            dbus_interface="org.freedesktop.DBus",
+                            arg0=BUS_NAME)
+    zarejestruj(bus)
+    GLib.MainLoop().run()
+
+
+if __name__ == "__main__":
+    main()

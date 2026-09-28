@@ -82,7 +82,7 @@ Klawisze wewnątrz kafli są w [keybindings.md](keybindings.md#w-menu).
 
 ### Ikony kafli
 
-- Oryginały to sześć plików PNG ok. 1250 × 1250 px w `assets/ikony-menu/`: `uzbrojenie.png`, `sakwa.png`, `status.png`, `wiesci.png`, `zebatka.png`, `ognisko.png`. Każdy ma własną ramkę i relief, więc powłoka nie rysuje wokół kafla drugiej ramki.
+- Oryginały to sześć plików PNG 512 × 512 px w `assets/ikony-menu/`: `uzbrojenie.png`, `sakwa.png`, `status.png`, `wiesci.png`, `zebatka.png`, `ognisko.png`. Każdy ma własną ramkę i relief, więc powłoka nie rysuje wokół kafla drugiej ramki.
 - `tools/skaluj-ikony-menu.py` robi z nich kopie 256 × 256 (filtr Lanczos) w `assets/ikony-menu/256/`. Ten katalog to wynik, nie źródło, i jest w `.gitignore`.
 - `install.sh --apply` uruchamia skrypt i kopiuje `256/` do `~/.local/share/dark-fantasy/ikony-menu`, stałej ścieżki, z której czyta powłoka.
 - Ikony są autorstwa właściciela repozytorium. Nie pochodzą z gry.
@@ -134,7 +134,7 @@ Otwiera go `SUPER + O` albo kliknięcie w tytuł lub okładkę w ramce „teraz�
 
 - **Demon powiadomień.** Nazwę `org.freedesktop.Notifications` trzyma powłoka. Plik `local/share/dbus-1/services/org.freedesktop.Notifications.service` sprawia, że aktywacja D-Bus uruchamia powłokę, a nie mako, swaync czy Plasmę. SwayNC zostaje zainstalowany i skonfigurowany jako droga odwrotu; patrz [troubleshooting.md](troubleshooting.md#powiadomienia-cztery-pakiety-chcą-tej-samej-nazwy-d-bus).
 - **Dymki** pojawiają się w prawym górnym rogu pod paskiem, na warstwie overlay, więc są widoczne także nad oknem pełnoekranowym.
-- **Wieści** trzymają historię z przyciskiem „Wyczyść” i trybem „nie przeszkadzać”. Otwarcie Wieści chowa dymki, które akurat są na ekranie.
+- **Wieści** trzymają historię z przyciskiem „Wyczyść” i trybem „nie przeszkadzać”. Tryb „nie przeszkadzać” jest zapamiętywany po restarcie powłoki, wylogowaniu i ponownym uruchomieniu. Otwarcie Wieści chowa dymki, które akurat są na ekranie.
 - **OSD.** Krótki podgląd na dole ekranu przy zmianie głośności, jasności, wyciszenia albo profilu zasilania. Milczy przy starcie powłoki i przy otwartej Zębatce, bo Zębatka pokazuje te same wartości.
 
 ## Blokada i bezczynność

@@ -6,7 +6,7 @@
 
 - Gentoo, profil `default/linux/amd64/23.0/desktop/plasma`, **OpenRC + elogind**
 - Hyprland 0.56.2 (`LUA_SINGLE_TARGET=lua5-4`), uruchamiany z TTY, bez uwsm
-- Quickshell 0.3.1, Waybar 0.14.0, hyprlock 0.9.6
+- Quickshell 0.3.1, Waybar 0.15.0, hyprlock 0.9.6, hyprpaper 0.8.4, libwayland 1.26.0
 - Lenovo ThinkPad E16 Gen 3 (AMD), wbudowany ekran `eDP-1` 1920×1200@60, skala 1
 - Układ klawiatury `pl`
 

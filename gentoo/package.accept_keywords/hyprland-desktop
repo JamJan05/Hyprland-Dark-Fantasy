@@ -1,4 +1,27 @@
 # Hyprland dark-fantasy desktop
+
+# The Hyprland stack from hyproverlay. Every package here has only
+# KEYWORDS="~amd64", Hyprland 0.56 included, so without these lines Portage
+# masks them as "missing keyword" and bootstrap.sh stops at gui-wm/hyprland.
+# Unversioned on purpose: the overlay moves them together, and a pinned
+# version would mask the next one.
+gui-wm/hyprland ~amd64
+gui-libs/aquamarine ~amd64
+gui-libs/hyprutils ~amd64
+dev-libs/hyprlang ~amd64
+dev-libs/hyprgraphics ~amd64
+gui-libs/hyprcursor ~amd64
+gui-libs/hyprwire ~amd64
+dev-libs/hyprland-protocols ~amd64
+dev-util/hyprwayland-scanner ~amd64
+dev-cpp/glaze ~amd64
+gui-libs/hyprtoolkit ~amd64
+gui-libs/hyprland-guiutils ~amd64
+gui-apps/hyprpaper ~amd64
+
+# Pulled in by Quickshell's default USE (crash handler). Main Gentoo tree,
+# ~amd64 only.
+dev-cpp/cpptrace ~amd64
 gui-apps/hyprlock ~amd64
 gui-apps/hypridle ~amd64
 sys-auth/hyprpolkitagent ~amd64
@@ -12,6 +35,14 @@ gui-apps/rofi-wayland ~amd64
 media-fonts/nerdfonts ~amd64
 dev-cpp/sdbus-c++ ~amd64
 gui-libs/gtk4-layer-shell ~amd64
+
+# libwayland 1.26. Hyprland 0.56 does not work with the stable
+# dev-libs/wayland 1.25.0, although its ebuild only asks for >=1.22.91.
+# In the Gentoo tree 1.26.0 is still ~amd64, while dev-util/wayland-scanner
+# 1.26.0 and dev-libs/wayland-protocols 1.49 are already stable. bootstrap.sh
+# upgrades it (--oneshot) before installing Hyprland; by hand:
+#   sudo emerge --ask --oneshot --update ">=dev-libs/wayland-1.26.0"
+>=dev-libs/wayland-1.26.0 ~amd64
 
 # Quickshell - the desktop's widget and panel layer, written in QtQuick/QML.
 # The package lives in the "guru" overlay, which is already enabled in repos.conf.

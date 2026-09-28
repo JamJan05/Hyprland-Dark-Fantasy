@@ -2,10 +2,10 @@
 #
 # From-scratch installer for the Hyprland dark fantasy configuration on Gentoo.
 #
-#   curl -fsSL https://raw.githubusercontent.com/JamJan05/hyprland-dark-fantasy/main/bootstrap.sh | bash
+#   curl -fsSL https://raw.githubusercontent.com/JamJan05/Hyprland-Dark-Fantasy/main/bootstrap.sh | bash
 #       -> SHOWS the plan, changes NOTHING
 #
-#   curl -fsSL https://raw.githubusercontent.com/JamJan05/hyprland-dark-fantasy/main/bootstrap.sh | bash -s -- --apply
+#   curl -fsSL https://raw.githubusercontent.com/JamJan05/Hyprland-Dark-Fantasy/main/bootstrap.sh | bash -s -- --apply
 #       -> does it
 #
 # The dry run is the default on purpose. A script fetched with curl and
@@ -18,9 +18,10 @@
 #   2. enables the GURU and hyproverlay overlays with eselect repository,
 #   3. syncs them,
 #   4. installs the package.accept_keywords and package.use files,
-#   5. installs the packages,
+#   5. upgrades dev-libs/wayland to 1.26 and installs the packages,
 #   6. clones the repository,
-#   7. runs install.sh --apply, which copies the configuration.
+#   7. runs install.sh --apply, which copies the configuration,
+#   8. installs the battery udev rule and (OpenRC) the dark-fantasy-stan service.
 #
 # Operations that need root go through sudo and are printed before they run.
 # The script is idempotent - it is safe to run it again.
@@ -181,6 +182,20 @@ step "Keywords and USE flags"
 fetch_portage package.accept_keywords
 fetch_portage package.use
 
+# libwayland 1.26 - reason in gentoo/package.accept_keywords/hyprland-desktop.
+# fetch_portage skips a file that already exists, so a copy from before this
+# entry was added gets the line appended. portageq asks Portage itself, so
+# a keyword set in any other file counts as well.
+WAYLAND_ATOM=">=dev-libs/wayland-1.26.0"
+KEYWORDS_FILE=/etc/portage/package.accept_keywords/hyprland-desktop
+if [[ -n "$(portageq best_visible / "$WAYLAND_ATOM" 2>/dev/null)" ]]; then
+    ok "dev-libs/wayland 1.26 is visible to Portage"
+elif [[ -f "$KEYWORDS_FILE" ]]; then
+    run sudo sh -c "printf '%s\n' '$WAYLAND_ATOM ~amd64' >> '$KEYWORDS_FILE'"
+else
+    plan "the copied package.accept_keywords/hyprland-desktop will unmask $WAYLAND_ATOM"
+fi
+
 # --------------------------------------------------------------- packages
 
 step "Packages"
@@ -207,12 +222,13 @@ PAKIETY=(
     app-misc/jq
     x11-terms/kitty
     app-misc/brightnessctl
-    media-sound/cava
 
     # Required by the shell and the bar. Without them the desktop still comes up,
     # but the corresponding elements will be empty or show an "unavailable" state.
     sys-power/power-profiles-daemon   # power profile in the Cogwheel
     net-wireless/bluez                # Bluetooth: bar and Cogwheel
+    dev-python/dbus-python            # Bluetooth pairing agent (local/bin/df-agent-bt)
+    dev-python/pygobject              # its main loop
 
     # File manager behind SUPER+W (fileManager variable in hyprland.lua).
     # Yazi is a terminal program, so it is launched by the
@@ -251,11 +267,19 @@ printf '  %s%d packages:%s %s\n' "$c_dim" "${#PAKIETY[@]}" "$c_off" "${PAKIETY[*
 
 # --changed-use rebuilds whatever had its flags changed - in practice
 # Waybar, which without USE="wifi" does not show the network signal strength.
+#
+# libwayland first, as a separate --oneshot: it is only a dependency, so it
+# should not land in the world file, and plain "emerge hyprland" would not
+# upgrade an already installed 1.25 (no --deep). Nothing happens if 1.26 or
+# newer is already installed.
 if [[ "$APPLY" == 1 ]]; then
+    sudo emerge --ask --verbose --oneshot --update "$WAYLAND_ATOM" \
+        || die "emerge of $WAYLAND_ATOM failed. Fix the problem and run the script again."
     warn "This will take a while. Hyprland and the Qt dependencies take long to compile."
     sudo emerge --ask --verbose --changed-use "${PAKIETY[@]}" \
         || die "emerge failed. Fix the problem and run the script again."
 else
+    plan "sudo emerge --ask --verbose --oneshot --update \"$WAYLAND_ATOM\""
     plan "sudo emerge --ask --verbose --changed-use <the packages above>"
 fi
 
@@ -285,6 +309,28 @@ if ls /sys/class/power_supply/BAT*/charge_control_end_threshold >/dev/null 2>&1;
     fi
 else
     ok "battery has no charge thresholds - skipping the udev rule"
+fi
+
+# Backlight and SDDM Num Lock from the last session already before login -
+# pamiec-ustawien alone restores them only after it. Rationale in the
+# script's header. OpenRC only; on systemd, systemd-backlight covers the
+# screen backlight.
+USLUGA=/etc/init.d/dark-fantasy-stan
+if [[ "$INIT" != "openrc" ]]; then
+    ok "not OpenRC - skipping $USLUGA"
+else
+    if [[ -f "$USLUGA" ]] && cmp -s "$REPO_DIR/openrc/dark-fantasy-stan" "$USLUGA"; then
+        ok "$USLUGA already installed"
+    else
+        run sudo install -o root -g root -m 0755 "$REPO_DIR/openrc/dark-fantasy-stan" "$USLUGA"
+    fi
+    # Checked separately from the file: an up-to-date script that is not in
+    # the runlevel would never run.
+    if rc-update show default 2>/dev/null | grep -qw dark-fantasy-stan; then
+        ok "dark-fantasy-stan already in the default runlevel"
+    else
+        run sudo rc-update add dark-fantasy-stan default
+    fi
 fi
 
 # ------------------------------------------------------------------ finish

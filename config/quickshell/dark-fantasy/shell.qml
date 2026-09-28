@@ -127,6 +127,8 @@ ShellRoot {
         Ladowanie.odswiez();
         // Also wakes the singleton, which then follows profile changes itself.
         LimitMocy.zastosuj();
+        // Bluetooth on/off from before the shutdown (services/PamiecBluetooth.qml).
+        PamiecBluetooth.start();
     }
 
     // Player. A separate panel, slides out from the MIDDLE of the bar - from

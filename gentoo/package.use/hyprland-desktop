@@ -1,5 +1,7 @@
 # Hyprland dark-fantasy desktop
 gui-apps/waybar backlight network wifi mpris tray pipewire pulseaudio upower
+# Waybar with USE="tray" depends on dev-libs/libdbusmenu[gtk3].
+dev-libs/libdbusmenu gtk3
 media-fonts/nerdfonts jetbrainsmono -nerdfontssymbolsonly
 gui-libs/gtk4-layer-shell introspection vala
 media-libs/libshumate vala

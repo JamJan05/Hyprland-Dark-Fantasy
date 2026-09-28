@@ -6,6 +6,13 @@
 //  connecting without that anyway, and a separate "pair" button next to
 //  "connect" would be a meaningless distinction for the user.
 //
+//  TRUSTED BEFORE PAIRING AND CONNECTING. After pairing, headphones open the
+//  audio profiles (A2DP, HFP) THEMSELVES, and the pairing agent
+//  (local/bin/df-agent-bt) lets through only trusted devices. So a device
+//  chosen here by hand is marked trusted (Device1.Trusted) first, which also
+//  lets it reconnect by itself later. Pairing goes through
+//  PamiecBluetooth.paruj(), which takes that trust back if the pairing fails.
+//
 //  Battery level is shown only when the device reports it
 //  (batteryAvailable). Headphones usually do, mice less often.
 // -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- --
@@ -114,12 +121,17 @@ Card {
             if (root.device === null) return;
             if (root.device.connected) {
                 root.device.disconnect();
-            } else if (root.device.paired || root.device.bonded) {
+                return;
+            }
+            // See "TRUSTED BEFORE PAIRING" in the header.
+            if (root.device.paired || root.device.bonded) {
+                if (!root.device.trusted) root.device.trusted = true;
                 root.device.connect();
             } else {
                 // BlueZ will not connect an unpaired device anyway,
                 // so we pair - the connection usually follows on its own.
-                root.device.pair();
+                // Trusted for the pairing, taken back if it fails.
+                PamiecBluetooth.paruj(root.device);
             }
         }
     }

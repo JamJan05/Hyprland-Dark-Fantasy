@@ -82,7 +82,7 @@ Keys inside each tile are listed in [keybindings.md](keybindings.md#inside-the-m
 
 ### Tile icons
 
-- The originals are six PNG files of about 1250 × 1250 px in `assets/ikony-menu/`: `uzbrojenie.png`, `sakwa.png`, `status.png`, `wiesci.png`, `zebatka.png`, `ognisko.png`. Each has its own frame and relief, so the shell draws no second frame around the tile.
+- The originals are six PNG files of 512 × 512 px in `assets/ikony-menu/`: `uzbrojenie.png`, `sakwa.png`, `status.png`, `wiesci.png`, `zebatka.png`, `ognisko.png`. Each has its own frame and relief, so the shell draws no second frame around the tile.
 - `tools/skaluj-ikony-menu.py` makes 256 × 256 copies (Lanczos) in `assets/ikony-menu/256/`. That directory is build output and is listed in `.gitignore`.
 - `install.sh --apply` runs the script and copies `256/` to `~/.local/share/dark-fantasy/ikony-menu`, the fixed path the shell reads from.
 - The icons are the repository owner's own work. They are not taken from the game.
@@ -134,7 +134,7 @@ Open it with `SUPER + O`, or by clicking the title or cover in the "now" frame. 
 
 - **Notification daemon.** The shell owns `org.freedesktop.Notifications`. The file `local/share/dbus-1/services/org.freedesktop.Notifications.service` makes D-Bus activation start the shell instead of mako, swaync or Plasma. SwayNC stays installed and configured as a fallback; see [troubleshooting.md](troubleshooting.md#notifications-four-packages-want-the-same-d-bus-name).
 - **Popups** appear in the top-right corner below the bar, on the overlay layer, so they stay visible over fullscreen windows.
-- **Tidings** keeps the history with "Clear" and "do not disturb". Opening Tidings hides the popups on screen.
+- **Tidings** keeps the history with "Clear" and "do not disturb". "Do not disturb" is remembered across a shell restart, a logout and a reboot. Opening Tidings hides the popups on screen.
 - **OSD.** A short preview at the bottom of the screen when volume, brightness, mute or the power profile changes. It stays quiet at shell startup and while the Cogwheel is open, because the Cogwheel shows the same values.
 
 ## Lock screen and idle

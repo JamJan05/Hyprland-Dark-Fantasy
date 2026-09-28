@@ -1,6 +1,6 @@
 # Hyprland Dark Fantasy
 
-Kompletny pulpit Hyprlanda dla Gentoo Linux, który przypomina menu Dark Souls 3 wyłącznie kształtami, paletą i typografią.
+Kompletny pulpit Hyprlanda dla Gentoo Linux, który przypomina menu Dark Souls 3 wyłącznie kształtami, paletą i typografią. Jest zrobiony pod **laptopy ThinkPad**.
 
 [English](README.md) · **Polski**
 
@@ -24,7 +24,7 @@ Kompletny pulpit Hyprlanda dla Gentoo Linux, który przypomina menu Dark Souls 3
 - **Piętra**: do dziesięciu pięter pulpitów, każde z własnymi pulpitami 1-0, do tego gesty trzema palcami.
 - **Ustawienia na żywo** w Zębatce: dźwięk, jasność, profil zasilania, limit ładowania baterii, sieć, Bluetooth, odstępy, rozmycie, tempo animacji, tapeta, układ klawiatury, skala monitora, piętra.
 - **Ramka „teraz” na Waybarze** z zegarem, datą i bieżącym utworem. Strefa odtwarzacza pojawia się tylko wtedy, gdy jakiś program coś odtwarza.
-- **Powiadomienia, OSD i panel odtwarzacza obsługuje Quickshell**, bez osobnego demona.
+- **Powiadomienia, OSD i panel odtwarzacza obsługuje Quickshell**, bez osobnego demona. swaync jest instalowany tylko jako zapasowy demon powiadomień.
 - **Jeden wygląd wszędzie**: hyprlock, motyw logowania SDDM, GTK 3/4, kitty, yazi, btop i picker schowka w rofi.
 - **Angielski albo polski**, przełączany natychmiast.
 - **Instalatory, które najpierw pokazują plan**: instalator kopiujący, który zachowuje Twoje lokalne zmiany, a resztę odkłada do kopii zapasowych, i instalacja Gentoo od zera.
@@ -52,11 +52,12 @@ Po `--apply` pliki w `~/.config` są kopiami, więc katalog z repozytorium możn
 
 ## Wymagania
 
+- **ThinkPad.** Konfiguracja powstała i była testowana na Lenovo ThinkPad E16 Gen 3 (AMD). Limit ładowania baterii (`thinkpad_acpi`) i limit mocy procesora (AMD Ryzen, ryzenadj) zakładają sprzęt ThinkPada. Na innych laptopach pulpit działa, ale te wiersze Zębatki są ukryte. Szczegóły w [docs/pl/hardware.md](docs/pl/hardware.md).
 - **Gentoo Linux** z overlayami **GURU** i **hyproverlay**. Pliki pakietów leżą w `gentoo/`. Konfiguracja powstała na OpenRC + elogind; elementy specyficzne dla Gentoo opisuje [docs/pl/hardware.md](docs/pl/hardware.md).
 - **Hyprland 0.56+** z konfiguracją w Lua, **Quickshell** (sprawdzony w wersji 0.3.1), **Waybar** z USE `backlight network wifi mpris tray pipewire pulseaudio upower`.
 - hyprlock, hypridle, hyprpaper (składnia 0.8), hyprshot, wl-clipboard + cliphist, rofi-wayland, hyprpolkitagent, xdg-desktop-portal-hyprland.
 - PipeWire + WirePlumber, playerctl, brightnessctl, power-profiles-daemon i BlueZ. Sekcja sieci korzysta z NetworkManagera, a odczyt baterii z UPower.
-- kitty, yazi, btop, tty-clock, jq, Pillow (`dev-python/pillow`).
+- kitty, yazi, btop, tty-clock, jq, Pillow (`dev-python/pillow`) oraz dbus-python i PyGObject dla agenta parowania Bluetooth.
 - Kroje: **EB Garamond** i **JetBrainsMono Nerd Font** (`media-fonts/nerdfonts` z USE `jetbrainsmono`).
 - Wygląd: **adw-gtk3**, ikony **Papirus-Dark**, kursor **Bibata-Original-Classic**.
 
@@ -70,13 +71,14 @@ sudo emerge --ask --verbose --changed-use \
   app-misc/cliphist gui-apps/rofi-wayland sys-auth/hyprpolkitagent \
   gui-libs/xdg-desktop-portal-hyprland media-fonts/nerdfonts media-sound/playerctl \
   media-video/pipewire media-video/wireplumber gui-apps/grim gui-apps/slurp \
-  app-misc/jq x11-terms/kitty app-misc/brightnessctl media-sound/cava \
-  sys-power/power-profiles-daemon net-wireless/bluez app-misc/yazi app-misc/tty-clock \
+  app-misc/jq x11-terms/kitty app-misc/brightnessctl \
+  sys-power/power-profiles-daemon net-wireless/bluez dev-python/dbus-python dev-python/pygobject \
+  app-misc/yazi app-misc/tty-clock \
   media-fonts/eb-garamond x11-themes/adw-gtk3 x11-themes/papirus-icon-theme \
   x11-themes/bibata-xcursors sys-process/btop dev-python/pillow gui-apps/quickshell
 ```
 
-Najpierw skopiuj `gentoo/package.accept_keywords/hyprland-desktop` i `gentoo/package.use/hyprland-desktop` do `/etc/portage/`. SDDM nie ma na liście; zainstaluj go sam, jeśli chcesz motyw logowania.
+Najpierw skopiuj `gentoo/package.accept_keywords/hyprland-desktop` i `gentoo/package.use/hyprland-desktop` do `/etc/portage/`, a potem podnieś libwayland: `sudo emerge --ask --oneshot --update ">=dev-libs/wayland-1.26.0"` (Hyprland 0.56 nie działa ze stabilnym 1.25). SDDM nie ma na liście; zainstaluj go sam, jeśli chcesz motyw logowania.
 
 </details>
 

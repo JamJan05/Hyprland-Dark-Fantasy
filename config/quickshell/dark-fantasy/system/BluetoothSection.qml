@@ -171,7 +171,8 @@ Column {
                 checked: root.wlaczony
                 busy: root.wPolowieDrogi
                 enabled: root.maAdapter && !root.zablokowany
-                onToggled: root.adapter.enabled = !root.adapter.enabled
+                // Through PamiecBluetooth, so the change is saved at once.
+                onToggled: PamiecBluetooth.ustaw(!root.adapter.enabled)
             }
         }
     }

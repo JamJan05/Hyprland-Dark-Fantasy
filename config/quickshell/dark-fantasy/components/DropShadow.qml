@@ -64,12 +64,16 @@ Item {
             // builds up towards the shaded element's outline.
             readonly property real oddalenie: 1.0 - (index + 1) / root.warstwy
 
-            anchors.horizontalCenter: parent.horizontalCenter
-            anchors.verticalCenter: parent.verticalCenter
+            // root, not parent: a Repeater creates the delegate without a
+            // parent and only then moves it under root (and takes it away
+            // again when it is destroyed), so "parent" is null for a moment
+            // and every binding on it logged a TypeError. root is always there.
+            anchors.horizontalCenter: root.horizontalCenter
+            anchors.verticalCenter: root.verticalCenter
             anchors.verticalCenterOffset: root.offsetY * (oddalenie + 0.2)
 
-            width: parent.width + 2 * root.spread * oddalenie
-            height: parent.height + 2 * root.spread * oddalenie
+            width: root.width + 2 * root.spread * oddalenie
+            height: root.height + 2 * root.spread * oddalenie
             radius: root.radius + root.spread * oddalenie
 
             // Alpha divided by the number of layers - only their sum

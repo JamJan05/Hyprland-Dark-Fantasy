@@ -14,12 +14,10 @@
 #
 # A REGULAR TILED WINDOW, NOT A PANEL WINDOW
 #
-# For a while yazi opened like btop from the Status tile: a floating window
-# 70 x 70 % in the middle of the screen (class "df-panel"). Janek preferred it
-# to be a regular layout window, like the terminal - a file manager is a tool
-# for working alongside other windows, not a preview that closes after a moment.
-# Hence no --class and no panel.conf: yazi gets the look and placement of
-# a regular kitty.
+# Unlike btop from the Status tile, yazi does not get the floating "df-panel"
+# window: a file manager is a tool for working alongside other windows, not
+# a preview that closes after a moment. Hence no --class and no panel.conf:
+# yazi gets the look and placement of a regular kitty.
 #
 # A path given as an argument opens as the starting directory.
 

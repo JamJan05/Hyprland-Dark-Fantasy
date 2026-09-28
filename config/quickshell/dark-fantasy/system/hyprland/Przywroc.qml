@@ -5,7 +5,10 @@
 //  returns to the values from hyprland.lua. The wallpaper is not affected:
 //  changing it rewrites hyprpaper.conf, not the settings file.
 //
-//  The first Enter asks, the second executes - just like the dangerous Bonfire entries.
+//  Confirmation as in the game's menus: the button turns into the question
+//  "Restore defaults?" with two rows, Yes and No. The cursor lands on No, so
+//  a double Enter does not wipe the settings by accident. Leaving the column
+//  (Esc, mouse on the section list) or the section cancels the question.
 // -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- --
 
 import QtQuick
@@ -19,7 +22,26 @@ SekcjaOpcji {
 
     property bool pyta: false
 
-    onVisibleChanged: pyta = false
+    function zapytaj(): void {
+        pyta = true;
+        wybrany = 1;    // "No"
+    }
+
+    function anuluj(): void {
+        pyta = false;
+        wybrany = 0;
+    }
+
+    onVisibleChanged: if (!visible) anuluj()
+
+    // A separate Connections, not onAktywnaChanged: SekcjaOpcji already
+    // handles that signal itself.
+    Connections {
+        target: root
+        function onAktywnaChanged(): void {
+            if (!root.aktywna && root.pyta) root.anuluj();
+        }
+    }
 
     Label {
         width: root.width
@@ -35,14 +57,40 @@ SekcjaOpcji {
 
     WierszOpcji {
         width: root.width
-        etykieta: root.pyta ? Tr.t("Are you sure? Enter - yes", "Na pewno? Enter - tak")
-                             : Tr.t("All Hyprland settings", "Wszystkie ustawienia Hyprlanda")
+        visible: !root.pyta
+        etykieta: Tr.t("All Hyprland settings", "Wszystkie ustawienia Hyprlanda")
         typ: "przycisk"
-        tekst: root.pyta ? Tr.t("Restore", "Przywróć") : Tr.t("Restore defaults", "Przywróć domyślne")
+        tekst: Tr.t("Restore defaults", "Przywróć domyślne")
+        onUzyto: root.zapytaj()
+    }
+
+    Tytul {
+        width: root.width
+        visible: root.pyta
+        horizontalAlignment: Text.AlignHCenter
+        topPadding: Theme.spacingSm
+        bottomPadding: Theme.spacingMd
+        text: Tr.t("Restore defaults?", "Przywrócić domyślne?")
+    }
+
+    WierszOpcji {
+        width: root.width
+        visible: root.pyta
+        etykieta: Tr.t("Yes", "Tak")
+        typ: "przycisk"
+        tekst: Tr.t("restore", "przywróć")
         onUzyto: {
-            if (!root.pyta) { root.pyta = true; return; }
-            root.pyta = false;
+            root.anuluj();
             UstawieniaHyprlanda.przywrocDomyslne();
         }
+    }
+
+    WierszOpcji {
+        width: root.width
+        visible: root.pyta
+        etykieta: Tr.t("No", "Nie")
+        typ: "przycisk"
+        tekst: Tr.t("back", "wróć")
+        onUzyto: root.anuluj()
     }
 }

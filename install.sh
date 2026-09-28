@@ -205,7 +205,7 @@ info "Quickshell (HUD, tile row, panels, OSD, notifications)"
 kopiuj config/quickshell/dark-fantasy "$HOME/.config/quickshell/dark-fantasy"
 
 info "Helper scripts (called by Waybar and keybindings)"
-for f in df-jezyk limit-ladowania menedzer-plikow monitor-systemu pamiec-ustawien uklad-startowy waybar-data waybar-okladka waybar-odtwarzacz waybar-temperatura zrzut-ekranu; do
+for f in df-agent-bt df-jezyk limit-ladowania menedzer-plikow monitor-systemu pamiec-ustawien uklad-startowy waybar-data waybar-okladka waybar-odtwarzacz waybar-temperatura zrzut-ekranu; do
     kopiuj "local/bin/$f" "$HOME/.local/bin/$f"
 done
 
@@ -215,7 +215,7 @@ kopiuj local/share/dbus-1/services/org.freedesktop.Notifications.service \
 
 # Icons for the menu tiles at the bottom of the screen (kafle/Kafel.qml).
 #
-# The originals (~1250 px, assets/ikony-menu/) never go into the shell.
+# The originals (512 px, assets/ikony-menu/) never go into the shell.
 # The script makes 256 px versions of them in assets/ikony-menu/256/, and the shell
 # reads them from the FIXED path ~/.local/share/dark-fantasy/ikony-menu,
 # where they are copied. A fixed path, because the repository may not exist
@@ -283,6 +283,10 @@ else
        sudo visudo -cf sudoers/dark-fantasy-moc && \
          sudo install -o root -g root -m 0440 sudoers/dark-fantasy-moc /etc/sudoers.d/
      Details: docs/installation.md, "CPU power limit (ryzenadj)".
-  5. Reload: hyprctl reload
+  5. Backlight and SDDM Num Lock from the last session already before login
+     (OpenRC):
+       sudo install -o root -g root -m 0755 openrc/dark-fantasy-stan /etc/init.d/
+       sudo rc-update add dark-fantasy-stan default
+  6. Reload: hyprctl reload
 NOTE
 fi
