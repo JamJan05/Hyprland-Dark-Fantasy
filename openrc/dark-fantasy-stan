@@ -22,8 +22,10 @@
 # LEDs to the text console's state, so Num Lock would always read "off".
 # The file written during the session is the reliable source.
 #
-# The file belongs to a user, and this runs as root: every value is checked
-# (device names from a fixed character set and present in sysfs, numbers only,
+# The file belongs to a user, and this runs as root: only a regular file (not
+# a symlink or a FIFO, which would block the boot before the login screen) is
+# read, at most 4 KiB and under a timeout, and every value is checked (device
+# names from a fixed character set and present in sysfs, numbers only,
 # Num Lock 0/1) before anything is written.
 #
 # Install (OpenRC):
@@ -42,19 +44,31 @@ depend() {
 	before display-manager xdm
 }
 
-# Prints the state file to use, or nothing.
-plik_stanu() {
-	if [ -n "${DF_STAN_PLIK:-}" ]; then
-		[ -r "$DF_STAN_PLIK" ] && echo "$DF_STAN_PLIK"
-		return
-	fi
-	# shellcheck disable=SC2012 # plain paths from a fixed pattern
-	ls -t /home/*/.local/state/dark-fantasy/ustawienia-sprzetu 2>/dev/null | head -n 1
+# A regular file, not a symlink - a FIFO or a device would block the read.
+zwykly_plik() {
+	[ -f "$1" ] && [ ! -L "$1" ] && [ -r "$1" ]
 }
 
-# $1 = key; prints its value from $PLIK.
+# Prints the state file to use, or nothing.
+plik_stanu() {
+	local p
+	if [ -n "${DF_STAN_PLIK:-}" ]; then
+		zwykly_plik "$DF_STAN_PLIK" && echo "$DF_STAN_PLIK"
+		return
+	fi
+	# Newest first; the first REGULAR file wins.
+	# shellcheck disable=SC2012 # plain paths from a fixed pattern
+	ls -t /home/*/.local/state/dark-fantasy/ustawienia-sprzetu 2>/dev/null | while read -r p; do
+		if zwykly_plik "$p"; then
+			echo "$p"
+			break
+		fi
+	done
+}
+
+# $1 = key; prints its value from the text read once into $STAN.
 wartosc() {
-	sed -n "s/^$1=//p" "$PLIK" | head -n 1
+	printf '%s\n' "$STAN" | sed -n "s/^$1=//p" | head -n 1
 }
 
 # A sysfs device name: no slash, not starting with a dot.
@@ -79,7 +93,14 @@ ustaw_jasnosc() {
 	read -r max < "$1/max_brightness" || return 1
 	poprawna_liczba "$max" || return 1
 	[ "$v" -gt "$max" ] && v=$max
-	[ "$v" -lt $((max * $3 / 100)) ] && v=$((max * $3 / 100))
+	# The minimum rounded up and at least 1: with 16 levels, 5 % of 15 would
+	# otherwise be 0 and a dark screen would stay dark.
+	local min=0
+	if [ "$3" -gt 0 ] && [ "$max" -gt 0 ]; then
+		min=$(((max * $3 + 99) / 100))
+		[ "$min" -lt 1 ] && min=1
+	fi
+	[ "$v" -lt "$min" ] && v=$min
 	echo "$v" > "$1/brightness"
 }
 
@@ -91,6 +112,9 @@ start() {
 		eend 0 "no saved state yet"
 		return 0
 	fi
+	# Read ONCE, bounded: the file could be swapped between the check above
+	# and this read, and the timeout keeps even that from stalling the boot.
+	STAN=$(timeout 2 head -c 4096 -- "$PLIK" 2>/dev/null)
 
 	local urz v i
 	urz=$(wartosc jasnosc_urzadzenie)
