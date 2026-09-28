@@ -29,7 +29,40 @@
 set -uo pipefail
 
 REPO_URL="https://github.com/JamJan05/Hyprland-Dark-Fantasy.git"
-REPO_DIR="${HYPR_REPO_DIR:-$HOME/hyprland-dark-fantasy}"
+# Git without the repository-location variables inherited from the caller's
+# shell - they would point every command below at another repository's
+# metadata, index or objects.
+git_czysty() {
+    env -u GIT_DIR -u GIT_WORK_TREE -u GIT_COMMON_DIR -u GIT_INDEX_FILE \
+        -u GIT_OBJECT_DIRECTORY -u GIT_ALTERNATE_OBJECT_DIRECTORIES \
+        git "$@"
+}
+
+# The ROOT of a working git clone - git itself says so. A bare ".git"
+# directory test is not enough: an interrupted clone leaves a .git that git
+# does not accept, and "git pull" in it fails. And "inside a work tree" is
+# not enough either: an empty directory under another repository (a home
+# directory kept in git) would pass, and "git pull" would hit that one.
+#
+# And it must be THIS project - an unrelated repository with its own
+# install.sh must not be pulled and run. Checked by files only this project
+# has, not by the remote URL, so a fork under another name still works.
+jest_klonem() {
+    local korzen katalog
+    korzen="$(git_czysty -C "$1" rev-parse --show-toplevel 2>/dev/null)" || return 1
+    katalog="$(cd "$1" 2>/dev/null && pwd -P)" || return 1
+    korzen="$(cd "$korzen" 2>/dev/null && pwd -P)" || return 1
+    [[ "$katalog" == "$korzen" ]] || return 1
+    [[ -f "$katalog/install.sh" && -f "$katalog/config/hypr/floors.lua" \
+        && -f "$katalog/config/quickshell/dark-fantasy/shell.qml" ]]
+}
+
+# The clone is named like the repository. A clone made under the older,
+# lowercase default is kept and used, instead of cloning a second copy.
+REPO_DIR="${HYPR_REPO_DIR:-$HOME/Hyprland-Dark-Fantasy}"
+if [[ -z "${HYPR_REPO_DIR:-}" ]] && ! jest_klonem "$REPO_DIR" && jest_klonem "$HOME/hyprland-dark-fantasy"; then
+    REPO_DIR="$HOME/hyprland-dark-fantasy"
+fi
 STAMP="$(date +%Y%m%d-%H%M%S)"
 
 APPLY=0
@@ -167,15 +200,23 @@ fetch_portage() {  # $1 = subdirectory, $2 = target directory
 
 step "Configuration repository"
 
-if [[ -d "$REPO_DIR/.git" ]]; then
+if jest_klonem "$REPO_DIR"; then
     ok "$REPO_DIR already exists"
-    run git -C "$REPO_DIR" pull --ff-only
-elif [[ -f "$(dirname "${BASH_SOURCE[0]}")/install.sh" ]]; then
+    run git_czysty -C "$REPO_DIR" pull --ff-only
+# Run from inside a clone: use it - unless HYPR_REPO_DIR names another path,
+# which is then honored (cloned to if it has no clone yet).
+elif [[ -z "${HYPR_REPO_DIR:-}" && -f "$(dirname "${BASH_SOURCE[0]}")/install.sh" ]]; then
     REPO_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
     ok "running from inside the repository: $REPO_DIR"
 else
+    # Something that is not a clone already sits there (leftovers of an
+    # interrupted clone, other files): git clone would refuse it. It is the
+    # user's directory, so nothing is moved or deleted - stop with a clear way out.
+    if [[ -e "$REPO_DIR" ]] && [[ -n "$(ls -A "$REPO_DIR" 2>/dev/null)" ]]; then
+        die "$REPO_DIR exists and is not a git clone of this repository. Move or remove it, or set HYPR_REPO_DIR to another path."
+    fi
     run mkdir -p "$(dirname "$REPO_DIR")"
-    run git clone "$REPO_URL" "$REPO_DIR"
+    run git_czysty clone "$REPO_URL" "$REPO_DIR"
 fi
 
 step "Keywords and USE flags"

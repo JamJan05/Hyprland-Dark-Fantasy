@@ -36,8 +36,8 @@ Design jest autorski. Repozytorium nie zawiera żadnych assetów, grafik, krojó
 Te polecenia instalują konfigurację. Pakiety muszą być już zainstalowane (patrz [Wymagania](#wymagania)).
 
 ```sh
-git clone https://github.com/JamJan05/Hyprland-Dark-Fantasy.git ~/hyprland-dark-fantasy
-cd ~/hyprland-dark-fantasy
+git clone https://github.com/JamJan05/Hyprland-Dark-Fantasy.git ~/Hyprland-Dark-Fantasy
+cd ~/Hyprland-Dark-Fantasy
 ./install.sh            # próba na sucho: wypisuje, co skopiuje, niczego nie zmienia
 ./install.sh --apply    # kopiuje config/ do ~/.config, zmienione pliki odkłada do kopii
 hyprctl reload          # albo wyloguj się i uruchom sesję Hyprlanda
