@@ -1,4 +1,27 @@
 # Hyprland dark-fantasy desktop
+
+# The Hyprland stack from hyproverlay. Every package here has only
+# KEYWORDS="~amd64", Hyprland 0.56 included, so without these lines Portage
+# masks them as "missing keyword" and bootstrap.sh stops at gui-wm/hyprland.
+# Unversioned on purpose: the overlay moves them together, and a pinned
+# version would mask the next one.
+gui-wm/hyprland ~amd64
+gui-libs/aquamarine ~amd64
+gui-libs/hyprutils ~amd64
+dev-libs/hyprlang ~amd64
+dev-libs/hyprgraphics ~amd64
+gui-libs/hyprcursor ~amd64
+gui-libs/hyprwire ~amd64
+dev-libs/hyprland-protocols ~amd64
+dev-util/hyprwayland-scanner ~amd64
+dev-cpp/glaze ~amd64
+gui-libs/hyprtoolkit ~amd64
+gui-libs/hyprland-guiutils ~amd64
+gui-apps/hyprpaper ~amd64
+
+# Pulled in by Quickshell's default USE (crash handler). Main Gentoo tree,
+# ~amd64 only.
+dev-cpp/cpptrace ~amd64
 gui-apps/hyprlock ~amd64
 gui-apps/hypridle ~amd64
 sys-auth/hyprpolkitagent ~amd64

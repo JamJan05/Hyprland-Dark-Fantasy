@@ -6,7 +6,7 @@
 
 - Gentoo, profile `default/linux/amd64/23.0/desktop/plasma`, **OpenRC + elogind**
 - Hyprland 0.56.2 (`LUA_SINGLE_TARGET=lua5-4`), started from a TTY, without uwsm
-- Quickshell 0.3.1, Waybar 0.14.0, hyprlock 0.9.6
+- Quickshell 0.3.1, Waybar 0.15.0, hyprlock 0.9.6, hyprpaper 0.8.4, libwayland 1.26.0
 - Lenovo ThinkPad E16 Gen 3 (AMD), built-in display `eDP-1` at 1920×1200@60, scale 1
 - Keyboard layout `pl`
 
