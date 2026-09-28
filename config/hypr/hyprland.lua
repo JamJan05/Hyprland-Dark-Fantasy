@@ -555,15 +555,6 @@ hl.config({
     },
 })
 
--- Settings of the "master" layout: one main window plus a stack of the others.
--- They matter only when you set general.layout to "master".
--- See https://wiki.hypr.land/Configuring/Layouts/Master-Layout/
-hl.config({
-    master = {
-        new_status = "master", -- a newly opened window becomes the main (master) window
-    },
-})
-
 
 ----------------
 ----  MISC  ----
