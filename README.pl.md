@@ -1,6 +1,6 @@
 # Hyprland Dark Fantasy
 
-Kompletny pulpit Hyprlanda dla Gentoo Linux, który przypomina menu Dark Souls 3 wyłącznie kształtami, paletą i typografią.
+Kompletny pulpit Hyprlanda dla Gentoo Linux, który przypomina menu Dark Souls 3 wyłącznie kształtami, paletą i typografią. Jest zrobiony pod **laptopy ThinkPad**.
 
 [English](README.md) · **Polski**
 
@@ -52,6 +52,7 @@ Po `--apply` pliki w `~/.config` są kopiami, więc katalog z repozytorium możn
 
 ## Wymagania
 
+- **ThinkPad.** Konfiguracja powstała i była testowana na Lenovo ThinkPad E16 Gen 3 (AMD). Limit ładowania baterii (`thinkpad_acpi`) i limit mocy procesora (AMD Ryzen, ryzenadj) zakładają sprzęt ThinkPada. Na innych laptopach pulpit działa, ale te wiersze Zębatki są ukryte. Szczegóły w [docs/pl/hardware.md](docs/pl/hardware.md).
 - **Gentoo Linux** z overlayami **GURU** i **hyproverlay**. Pliki pakietów leżą w `gentoo/`. Konfiguracja powstała na OpenRC + elogind; elementy specyficzne dla Gentoo opisuje [docs/pl/hardware.md](docs/pl/hardware.md).
 - **Hyprland 0.56+** z konfiguracją w Lua, **Quickshell** (sprawdzony w wersji 0.3.1), **Waybar** z USE `backlight network wifi mpris tray pipewire pulseaudio upower`.
 - hyprlock, hypridle, hyprpaper (składnia 0.8), hyprshot, wl-clipboard + cliphist, rofi-wayland, hyprpolkitagent, xdg-desktop-portal-hyprland.

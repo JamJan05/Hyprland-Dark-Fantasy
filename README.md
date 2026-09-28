@@ -1,6 +1,6 @@
 # Hyprland Dark Fantasy
 
-A complete Hyprland desktop for Gentoo Linux that borrows the feel of the Dark Souls 3 menus through shapes, palette and typography alone.
+A complete Hyprland desktop for Gentoo Linux that borrows the feel of the Dark Souls 3 menus through shapes, palette and typography alone. It is made for **ThinkPad laptops**.
 
 **English** · [Polski](README.pl.md)
 
@@ -52,6 +52,7 @@ After `--apply` the files in `~/.config` are copies, so the repository folder ca
 
 ## Requirements
 
+- **A ThinkPad.** The setup was built and tested on a Lenovo ThinkPad E16 Gen 3 (AMD). The battery charge limit (`thinkpad_acpi`) and the CPU power limit (AMD Ryzen, ryzenadj) assume ThinkPad hardware. On other laptops the desktop still works, but those Cogwheel rows are hidden. Details in [docs/hardware.md](docs/hardware.md).
 - **Gentoo Linux** with the **GURU** and **hyproverlay** overlays. The package files are in `gentoo/`. The configuration was built on OpenRC + elogind; the Gentoo-specific parts are listed in [docs/hardware.md](docs/hardware.md).
 - **Hyprland 0.56+** with the Lua config, **Quickshell** (tested with 0.3.1), **Waybar** with USE `backlight network wifi mpris tray pipewire pulseaudio upower`.
 - hyprlock, hypridle, hyprpaper (0.8 syntax), hyprshot, wl-clipboard + cliphist, rofi-wayland, hyprpolkitagent, xdg-desktop-portal-hyprland.
