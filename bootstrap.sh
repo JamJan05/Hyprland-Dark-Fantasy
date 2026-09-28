@@ -175,7 +175,9 @@ step "Configuration repository"
 if [[ -d "$REPO_DIR/.git" ]]; then
     ok "$REPO_DIR already exists"
     run git -C "$REPO_DIR" pull --ff-only
-elif [[ -f "$(dirname "${BASH_SOURCE[0]}")/install.sh" ]]; then
+# Run from inside a clone: use it - unless HYPR_REPO_DIR names another path,
+# which is then honored (cloned to if it has no clone yet).
+elif [[ -z "${HYPR_REPO_DIR:-}" && -f "$(dirname "${BASH_SOURCE[0]}")/install.sh" ]]; then
     REPO_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
     ok "running from inside the repository: $REPO_DIR"
 else
