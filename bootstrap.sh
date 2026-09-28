@@ -207,7 +207,6 @@ PAKIETY=(
     app-misc/jq
     x11-terms/kitty
     app-misc/brightnessctl
-    media-sound/cava
 
     # Required by the shell and the bar. Without them the desktop still comes up,
     # but the corresponding elements will be empty or show an "unavailable" state.
