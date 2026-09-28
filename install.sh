@@ -283,6 +283,10 @@ else
        sudo visudo -cf sudoers/dark-fantasy-moc && \
          sudo install -o root -g root -m 0440 sudoers/dark-fantasy-moc /etc/sudoers.d/
      Details: docs/installation.md, "CPU power limit (ryzenadj)".
-  5. Reload: hyprctl reload
+  5. Backlight and SDDM Num Lock from the last session already before login
+     (OpenRC):
+       sudo install -o root -g root -m 0755 openrc/dark-fantasy-stan /etc/init.d/
+       sudo rc-update add dark-fantasy-stan default
+  6. Reload: hyprctl reload
 NOTE
 fi

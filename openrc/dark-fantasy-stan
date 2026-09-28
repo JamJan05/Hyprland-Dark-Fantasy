@@ -1,0 +1,132 @@
+#!/sbin/openrc-run
+#
+# dark-fantasy-stan - the hardware state from the last session, BEFORE login.
+#
+# local/bin/pamiec-ustawien restores the backlight, volume and Num Lock, but
+# only once you are logged in - it runs from the Hyprland autostart. Until
+# then amdgpu comes up at 100 % and the SDDM greeter starts with Num Lock off.
+# This service closes that gap at boot, before the display manager:
+#
+#   - screen backlight     written straight to /sys/class/backlight/<dev>
+#   - keyboard backlight   written straight to /sys/class/leds/<dev>
+#   - Num Lock in SDDM     /etc/sddm.conf.d/zz-dark-fantasy-numlock.conf,
+#                          [General] Numlock=on|off (read at SDDM start)
+#
+# SOURCE: the same file pamiec-ustawien keeps up to date every few seconds,
+# ~/.local/state/dark-fantasy/ustawienia-sprzetu - the most recently modified
+# one under /home, i.e. whoever used the laptop last. A different path can be
+# set in /etc/conf.d/dark-fantasy-stan: DF_STAN_PLIK=/path.
+#
+# WHY NOT SAVE AT SHUTDOWN. By the time a stop() would run, the session is
+# gone and the console has taken the keyboard back - the kernel resets the
+# LEDs to the text console's state, so Num Lock would always read "off".
+# The file written during the session is the reliable source.
+#
+# The file belongs to a user, and this runs as root: every value is checked
+# (device names from a fixed character set and present in sysfs, numbers only,
+# Num Lock 0/1) before anything is written.
+#
+# Install (OpenRC):
+#   sudo install -o root -g root -m 0755 openrc/dark-fantasy-stan /etc/init.d/
+#   sudo rc-update add dark-fantasy-stan default
+
+description="Restore the backlight and SDDM Num Lock from the last session"
+
+# Never restore the screen below this percentage - a screen saved at 0 would
+# come up black. The same value as MIN_JASNOSC_PROC in pamiec-ustawien.
+MIN_JASNOSC_PROC=5
+
+depend() {
+	need localmount
+	after udev udev-settle modules
+	before display-manager xdm
+}
+
+# Prints the state file to use, or nothing.
+plik_stanu() {
+	if [ -n "${DF_STAN_PLIK:-}" ]; then
+		[ -r "$DF_STAN_PLIK" ] && echo "$DF_STAN_PLIK"
+		return
+	fi
+	# shellcheck disable=SC2012 # plain paths from a fixed pattern
+	ls -t /home/*/.local/state/dark-fantasy/ustawienia-sprzetu 2>/dev/null | head -n 1
+}
+
+# $1 = key; prints its value from $PLIK.
+wartosc() {
+	sed -n "s/^$1=//p" "$PLIK" | head -n 1
+}
+
+# A sysfs device name: no slash, not starting with a dot.
+poprawna_nazwa() {
+	case "$1" in
+		""|.*|*[!A-Za-z0-9_.:-]*) return 1 ;;
+	esac
+	return 0
+}
+
+poprawna_liczba() {
+	case "$1" in
+		""|*[!0-9]*) return 1 ;;
+	esac
+	return 0
+}
+
+# $1 = device directory, $2 = raw value, $3 = minimum percent
+ustaw_jasnosc() {
+	local max v="$2"
+	[ -w "$1/brightness" ] && [ -r "$1/max_brightness" ] || return 1
+	read -r max < "$1/max_brightness" || return 1
+	poprawna_liczba "$max" || return 1
+	[ "$v" -gt "$max" ] && v=$max
+	[ "$v" -lt $((max * $3 / 100)) ] && v=$((max * $3 / 100))
+	echo "$v" > "$1/brightness"
+}
+
+start() {
+	ebegin "Restoring the backlight and Num Lock from the last session"
+
+	PLIK=$(plik_stanu)
+	if [ -z "$PLIK" ]; then
+		eend 0 "no saved state yet"
+		return 0
+	fi
+
+	local urz v i
+	urz=$(wartosc jasnosc_urzadzenie)
+	v=$(wartosc jasnosc)
+	if poprawna_nazwa "$urz" && poprawna_liczba "$v"; then
+		# amdgpu registers its backlight a moment after the module loads.
+		i=0
+		while [ ! -e "/sys/class/backlight/$urz/brightness" ] && [ $i -lt 10 ]; do
+			sleep 0.5
+			i=$((i + 1))
+		done
+		ustaw_jasnosc "/sys/class/backlight/$urz" "$v" "$MIN_JASNOSC_PROC" \
+			|| ewarn "could not set the screen backlight ($urz)"
+	fi
+
+	urz=$(wartosc klawiatura_urzadzenie)
+	v=$(wartosc klawiatura)
+	if poprawna_nazwa "$urz" && poprawna_liczba "$v" && [ -d "/sys/class/leds/$urz" ]; then
+		ustaw_jasnosc "/sys/class/leds/$urz" "$v" 0 \
+			|| ewarn "could not set the keyboard backlight ($urz)"
+	fi
+
+	# SDDM reads its config when it starts, and this service runs before it.
+	# Written only when SDDM is installed and the content actually changes.
+	v=$(wartosc numlock)
+	if [ -d /etc/sddm.conf.d ] && { [ "$v" = 0 ] || [ "$v" = 1 ]; }; then
+		local conf=/etc/sddm.conf.d/zz-dark-fantasy-numlock.conf tresc
+		[ "$v" = 1 ] && v=on || v=off
+		tresc=$(printf '%s\n' \
+			"# Written at boot by /etc/init.d/dark-fantasy-stan from the last session." \
+			"[General]" \
+			"Numlock=$v")
+		if [ "$(cat "$conf" 2>/dev/null)" != "$tresc" ]; then
+			printf '%s\n' "$tresc" > "$conf" || ewarn "could not write $conf"
+		fi
+	fi
+
+	eend 0
+}

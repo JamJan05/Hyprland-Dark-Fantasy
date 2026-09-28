@@ -20,7 +20,8 @@
 #   4. installs the package.accept_keywords and package.use files,
 #   5. upgrades dev-libs/wayland to 1.26 and installs the packages,
 #   6. clones the repository,
-#   7. runs install.sh --apply, which copies the configuration.
+#   7. runs install.sh --apply, which copies the configuration,
+#   8. installs the battery udev rule and (OpenRC) the dark-fantasy-stan service.
 #
 # Operations that need root go through sudo and are printed before they run.
 # The script is idempotent - it is safe to run it again.
@@ -306,6 +307,20 @@ if ls /sys/class/power_supply/BAT*/charge_control_end_threshold >/dev/null 2>&1;
     fi
 else
     ok "battery has no charge thresholds - skipping the udev rule"
+fi
+
+# Backlight and SDDM Num Lock from the last session already before login -
+# pamiec-ustawien alone restores them only after it. Rationale in the
+# script's header. OpenRC only; on systemd, systemd-backlight covers the
+# screen backlight.
+USLUGA=/etc/init.d/dark-fantasy-stan
+if [[ "$INIT" != "openrc" ]]; then
+    ok "not OpenRC - skipping $USLUGA"
+elif [[ -f "$USLUGA" ]] && cmp -s "$REPO_DIR/openrc/dark-fantasy-stan" "$USLUGA"; then
+    ok "$USLUGA already installed"
+else
+    run sudo install -o root -g root -m 0755 "$REPO_DIR/openrc/dark-fantasy-stan" "$USLUGA"
+    run sudo rc-update add dark-fantasy-stan default
 fi
 
 # ------------------------------------------------------------------ finish

@@ -19,6 +19,10 @@
 # but it writes them with a delay and dies together with the session at
 # shutdown, so the last change can get lost. Num Lock has no memory at all.
 #
+# This script runs from the Hyprland autostart, so it restores the state only
+# after login. The OpenRC service openrc/dark-fantasy-stan reads this same
+# file at boot and applies the backlight and SDDM's Num Lock before login.
+#
 # WHY POLLING, NOT A SAVE AT SHUTDOWN. At poweroff the session is killed
 # (killprocs, then SIGKILL) and PipeWire may be gone before a TERM handler
 # gets to run. So the state is read every INTERWAL seconds and the file is

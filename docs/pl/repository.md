@@ -18,6 +18,7 @@ local/
   share/dbus-1/      wskazanie powłoki jako demona powiadomień
 gentoo/              keywordy i flagi USE dla Portage
 udev/                reguła: progi ładowania baterii zapisywalne dla wheel
+openrc/              dark-fantasy-stan: jasność i Num Lock w SDDM przed zalogowaniem
 sbin/                df-limit-mocy: limit mocy procesora przez ryzenadj (root, /usr/local/sbin)
 sudoers/             reguła: df-limit-mocy bez hasła dla wheel
 sddm/                motyw logowania (QML) i jego instalator

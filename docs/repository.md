@@ -18,6 +18,7 @@ local/
   share/dbus-1/      makes the shell the notification daemon
 gentoo/              keywords and USE flags for Portage
 udev/                rule: battery charge thresholds writable by wheel
+openrc/              dark-fantasy-stan: backlight and SDDM Num Lock before login
 sbin/                df-limit-mocy: CPU power limit via ryzenadj (root, /usr/local/sbin)
 sudoers/             rule: df-limit-mocy without a password for wheel
 sddm/                login theme (QML) and its installer
