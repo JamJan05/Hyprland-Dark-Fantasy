@@ -29,10 +29,17 @@
 set -uo pipefail
 
 REPO_URL="https://github.com/JamJan05/Hyprland-Dark-Fantasy.git"
+# A working git clone - git itself says so. A bare ".git" directory test is
+# not enough: an interrupted clone leaves a .git that git does not accept,
+# and "git pull" in it fails.
+jest_klonem() {
+    git -C "$1" rev-parse --is-inside-work-tree >/dev/null 2>&1
+}
+
 # The clone is named like the repository. A clone made under the older,
 # lowercase default is kept and used, instead of cloning a second copy.
 REPO_DIR="${HYPR_REPO_DIR:-$HOME/Hyprland-Dark-Fantasy}"
-if [[ -z "${HYPR_REPO_DIR:-}" && ! -d "$REPO_DIR/.git" && -d "$HOME/hyprland-dark-fantasy/.git" ]]; then
+if [[ -z "${HYPR_REPO_DIR:-}" ]] && ! jest_klonem "$REPO_DIR" && jest_klonem "$HOME/hyprland-dark-fantasy"; then
     REPO_DIR="$HOME/hyprland-dark-fantasy"
 fi
 STAMP="$(date +%Y%m%d-%H%M%S)"
@@ -172,7 +179,7 @@ fetch_portage() {  # $1 = subdirectory, $2 = target directory
 
 step "Configuration repository"
 
-if [[ -d "$REPO_DIR/.git" ]]; then
+if jest_klonem "$REPO_DIR"; then
     ok "$REPO_DIR already exists"
     run git -C "$REPO_DIR" pull --ff-only
 # Run from inside a clone: use it - unless HYPR_REPO_DIR names another path,
