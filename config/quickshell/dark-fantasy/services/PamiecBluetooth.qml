@@ -125,6 +125,27 @@ Singleton {
 
     Component.onDestruction: zakonczParowanie()
 
+    // For Sesja.qml, before logout / reboot / power off. Settles the pairing
+    // like zakonczParowanie(), and when a temporary trust has to be taken
+    // back, returns a shell command prefix that does it and WAITS for BlueZ
+    // to confirm: "u.trusted = false" only queues an asynchronous D-Bus
+    // write, which the teardown could cut short. Non-interactive
+    // "bluetoothctl untrust" quits only in the reply callback (bluez 5.87
+    // client/main.c, cmd_untrust -> generic_callback). "" = nothing to do.
+    function przedWyjsciem(): string {
+        const u = parowane;
+        const tymczasowe = zaufanieTymczasowe;
+        let doCofniecia = false;
+        let adres = "";
+        try {
+            doCofniecia = !!u && tymczasowe && !u.paired && !u.bonded;
+            if (doCofniecia) adres = String(u.address);
+        } catch (e) {}
+        zakonczParowanie();
+        if (!doCofniecia || !/^([0-9A-F]{2}:){5}[0-9A-F]{2}$/i.test(adres)) return "";
+        return "timeout 3 bluetoothctl untrust " + adres + " >/dev/null 2>&1; ";
+    }
+
     readonly property bool paruje: parowane ? parowane.pairing : false
 
     // The pairing ended; "paired" may arrive a moment after "pairing" drops,

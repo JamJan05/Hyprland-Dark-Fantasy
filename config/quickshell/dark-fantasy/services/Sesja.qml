@@ -46,20 +46,18 @@ Singleton {
     }
 
     function wyloguj(): void {
-        // A temporary pairing trust must not outlive the session (PamiecBluetooth).
-        PamiecBluetooth.zakonczParowanie();
-        sh("command -v hyprshutdown >/dev/null 2>&1 && hyprshutdown || hyprctl dispatch 'hl.dsp.exit()'");
+        // A temporary pairing trust must not outlive the session - taken back,
+        // and confirmed by BlueZ, before the teardown (PamiecBluetooth.przedWyjsciem).
+        sh(PamiecBluetooth.przedWyjsciem() + "command -v hyprshutdown >/dev/null 2>&1 && hyprshutdown || hyprctl dispatch 'hl.dsp.exit()'");
     }
 
     function uruchomPonownie(): void {
-        // A temporary pairing trust must not outlive the session (PamiecBluetooth).
-        PamiecBluetooth.zakonczParowanie();
-        sh("loginctl reboot");
+        // See wyloguj().
+        sh(PamiecBluetooth.przedWyjsciem() + "loginctl reboot");
     }
 
     function wylacz(): void {
-        // A temporary pairing trust must not outlive the session (PamiecBluetooth).
-        PamiecBluetooth.zakonczParowanie();
-        sh("loginctl poweroff");
+        // See wyloguj().
+        sh(PamiecBluetooth.przedWyjsciem() + "loginctl poweroff");
     }
 }
