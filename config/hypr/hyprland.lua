@@ -8,17 +8,24 @@
 -- Option reference: https://wiki.hypr.land/Configuring/Start/
 
 
+-- $XDG_STATE_HOME/dark-fantasy, with the XDG fallback to ~/.local/state.
+-- Shared by readLanguage() and readNumlock().
+local function stateDir()
+    local state = os.getenv("XDG_STATE_HOME")
+    if not state or state == "" then
+        state = (os.getenv("HOME") or "") .. "/.local/state"
+    end
+    return state .. "/dark-fantasy"
+end
+
 -- Interface language (Cogwheel -> Language): "en" (default) or "pl". The
 -- Quickshell shell keeps it in $XDG_STATE_HOME/dark-fantasy/powloka.json
 -- and runs "hyprctl reload" after a change, so reading it once per config
 -- load is enough. Missing or unreadable file = English. T(en, pl) is global,
 -- so floors.lua and the generated ustawienia.lua can use it as well.
+
 local function readLanguage()
-    local state = os.getenv("XDG_STATE_HOME")
-    if not state or state == "" then
-        state = (os.getenv("HOME") or "") .. "/.local/state"
-    end
-    local f = io.open(state .. "/dark-fantasy/powloka.json", "r")
+    local f = io.open(stateDir() .. "/powloka.json", "r")
     if not f then return "en" end
     local text = f:read("a") or ""
     f:close()
@@ -594,11 +601,7 @@ hl.config({
 -- state goes into numlock_by_default, which applies when a keyboard is
 -- created - at login. No file (first boot) = off, Hyprland's default.
 local function readNumlock()
-    local state = os.getenv("XDG_STATE_HOME")
-    if not state or state == "" then
-        state = (os.getenv("HOME") or "") .. "/.local/state"
-    end
-    local f = io.open(state .. "/dark-fantasy/ustawienia-sprzetu", "r")
+    local f = io.open(stateDir() .. "/ustawienia-sprzetu", "r")
     if not f then return false end
     local text = f:read("a") or ""
     f:close()
