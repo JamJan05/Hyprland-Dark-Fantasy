@@ -54,8 +54,8 @@
         "group/media"             // title + sliding skip buttons
     ],
 
-    // The clock moved to the center. The power profile, idle inhibitor,
-    // notification bell, cogwheel and session menu left the bar - their
+    // The clock is in the center. No power profile, idle inhibitor,
+    // notification bell, cogwheel or session menu on the bar - their
     // functions have tiles at the bottom of the screen: Cogwheel (power profile,
     // idle inhibitor, settings), Tidings (notification history with a counter
     // in the corner of the tile) and Bonfire (lock, suspend, log out, restart,
@@ -134,8 +134,8 @@
     //
     // The values are computed by the shell (services/Cpu.qml, Memory.qml,
     // Battery.qml) - the same ones it draws the bars from - so the number on the
-    // bar and the bar in the corner cannot differ. The built-in cpu, memory and
-    // battery modules used to be here.
+    // bar and the bar in the corner cannot differ - which is why the built-in
+    // cpu, memory and battery modules are not used.
     //
     // NO "interval", only "signal". Man waybar-custom: "If a signal is
     // defined then the script will run once on startup and will only update
@@ -186,8 +186,8 @@
     // Clock: HH:MM in the mono typeface, without seconds.
     //
     // Mouse hover shows a calendar; the wheel over it scrolls the months,
-    // RMB toggles month <-> year. The old "format-alt" (date on click)
-    // is gone - the module next to it shows the date all the time.
+    // RMB toggles month <-> year. No "format-alt" (date on click) - the
+    // module next to it shows the date all the time.
     //
     // Today in the calendar is gold, not ember-colored: in this theme ember
     // means only an alarm, and today's date is not one.
@@ -266,9 +266,9 @@
     // "align": 0 pushes a short title against the cover art instead of centering
     // it in the empty zone.
     //
-    // The colored player icons (the Spotify note, the browser's little screen)
-    // went away together with "mpris" - in the small-caps label they would be the
-    // only colored glyphs in the middle of the bar. The player panel tells who
+    // No colored player icons (the Spotify note, the browser's little screen):
+    // in the small-caps label they would be the only colored glyphs in the
+    // middle of the bar. The player panel tells who
     // is playing.
     //
     //   left click   = player panel (Quickshell)
@@ -304,22 +304,16 @@
         "on-click": "playerctl next"
     },
 
-    // VOLUME AND BRIGHTNESS - NO LONGER HERE.
+    // NO VOLUME OR BRIGHTNESS MODULES.
     //
-    // The "backlight" and "pulseaudio" modules and both their sliders moved
-    // to the Quickshell shell - today they are in Cogwheel (Sound, Display). The
-    // bar showed them as percentages with a slide-out slider; the panel shows
-    // the same plus the microphone and device selection, so keeping both
-    // would mean two ways of changing the same thing.
+    // They live in the Quickshell shell, in Cogwheel (Sound, Display), which
+    // also has the microphone, device selection and a volume slider for each
+    // application straight from PipeWire. Modules here would be a second way
+    // of changing the same thing.
     //
     // The XF86Audio* and XF86MonBrightness* keys are handled by hyprland.lua,
-    // not by the bar, so they work exactly as before. The change is
-    // confirmed by the OSD at the bottom of the screen.
-    //
-    // The old sound panel went away together with the modules
-    // (waybar-panel-audio, panel-audio.css, menu-audio.xml): the separate
-    // slider for each application is now a list of programs
-    // in Cogwheel (Sound) and takes its data straight from PipeWire.
+    // not by the bar. The change is confirmed by the OSD at the bottom of
+    // the screen.
     //
     // Cogwheel is opened by a tile in the tile menu or by the SUPER+U shortcut.
 
@@ -363,7 +357,7 @@
         "tooltip": true
     },
 
-    // The CLOCK moved to the "now" frame in the middle of the bar - see
+    // The CLOCK is in the "now" frame in the middle of the bar - see
     // "clock#czas" above.
 
     // System tray - icons of applications running in the background

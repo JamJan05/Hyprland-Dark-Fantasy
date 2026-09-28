@@ -32,8 +32,7 @@ pragma Singleton
 //  Enterprise networks (Wpa2Eap, WpaEap, Leap, DynamicWep...) require
 //  certificates, an identity and a choice of EAP method - i.e. the full
 //  NetworkManager form. The panel does not try to configure such networks;
-//  it points to nmtui, exactly where a click on the "network" module
-//  on the bar used to point.
+//  it points to nmtui.
 // -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- --
 
 import QtQml

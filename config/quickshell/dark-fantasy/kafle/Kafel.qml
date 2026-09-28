@@ -45,7 +45,7 @@ Item {
     property bool wybrany: false
 
     // Number in the tile corner - today only Tidings (pending notifications).
-    // Zero hides the badge. Replaces the bell counter that disappeared from the bar.
+    // Zero hides the badge.
     property int licznik: 0
 
     // The cursor moved over the tile / the tile was clicked. The decision on

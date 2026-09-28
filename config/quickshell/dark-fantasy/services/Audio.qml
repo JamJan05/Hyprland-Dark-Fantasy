@@ -85,16 +85,12 @@ Singleton {
     // ================================================================
     //  APPLICATION STREAMS (per-application audio)
     //
-    //  What the local/bin/waybar-panel-audio script used to do,
-    //  calling "pactl -f json list sink-inputs". PipeWire exposes the
-    //  same thing natively: a playback stream is a node that is
-    //  Audio, Sink and Stream at the same time - in Quickshell it is described by
-    //  the PwNodeType.AudioOutStream flag.
-    //
-    //  The comment in that script explained that wpctl is not enough here,
-    //  because it cannot set the volume of individual streams. That was
-    //  true of wpctl, not of PipeWire - here every stream has its own
-    //  audio.volume and audio.muted, exactly like a device.
+    //  No "pactl -f json list sink-inputs" needed: PipeWire exposes the
+    //  streams natively. A playback stream is a node that is Audio, Sink and
+    //  Stream at the same time - in Quickshell the PwNodeType.AudioOutStream
+    //  flag. wpctl cannot set the volume of individual streams, but PipeWire
+    //  can: every stream has its own audio.volume and audio.muted, exactly
+    //  like a device.
     // ================================================================
     readonly property var streams: {
         const lista = [];
@@ -114,8 +110,8 @@ Singleton {
     readonly property bool anyStream: streams.length > 0
 
     // Application name to display. PipeWire provides it in the
-    // node properties; the order of attempts is the same as the one
-    // the old script used, because not every program fills in all fields.
+    // node properties; several are tried in order, because not every
+    // program fills in all fields.
     function streamName(node): string {
         if (node === null) return "";
         const w = node.properties;

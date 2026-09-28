@@ -6,9 +6,7 @@ pragma ComponentBehavior: Bound
 //  NOTIFICATION HISTORY - header with "Clear", "do not disturb"
 //  and the card list.
 //
-//  Extracted from the old notification center window (NotificationCenter.qml),
-//  when the history moved from the top right corner to above the tile row
-//  (kafle/Wiesci.qml). That window disappeared in the last stage of the rebuild.
+//  Shown above the tile row, in the Tidings tile (kafle/Wiesci.qml).
 //
 //  THERE IS NO GROUPING AND THAT IS A DECISION
 //

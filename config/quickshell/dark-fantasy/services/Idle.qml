@@ -27,10 +27,6 @@ pragma Singleton
 //  That is why only Quickshell holds the inhibitor. The toggle is
 //  in the Cogwheel (System -> Behavior), and scripts are left with
 //  "qs ipc call idle toggle".
-//
-//  Until the Dark Souls-style rebuild, the bar had a "custom/idle" module -
-//  a view of this inhibitor, woken by the SIGRTMIN+8 signal on every change.
-//  The module left the bar, and the signal went with it.
 // -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- --
 
 import QtQml

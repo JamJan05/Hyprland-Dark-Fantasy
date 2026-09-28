@@ -1,8 +1,8 @@
 // -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- --
 //  POPUPS - notifications popping up in the corner.
 //
-//  Top right corner, below the bar - where the SwayNC popups
-//  used to appear (positionX right, positionY top in its config.json).
+//  Top right corner, below the bar - the same place SwayNC uses
+//  (positionX right, positionY top in config/swaync/config.json).
 //
 //  ---------------------------------------------------------------
 //  OVERLAY LAYER, NOT TOP
@@ -86,9 +86,8 @@ PanelWindow {
                 height: karta.implicitHeight
 
                 // The popup emerges with a crossfade and drifts 8 px
-                // upward (Theme.driftDistance). It used to slide in from the right
-                // by 40 px - in Dark Souls style nothing slides in, it just
-                // appears. Timings and curve are the same as for the panels
+                // upward (Theme.driftDistance). No slide-in from the side - in
+                // Dark Souls style nothing slides in, it just appears. Timings and curve are the same as for the panels
                 // (leaf "layers" in hyprland.lua), so that everything on this
                 // desktop has one tempo.
                 Component.onCompleted: wjazd.start()

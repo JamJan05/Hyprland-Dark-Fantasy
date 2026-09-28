@@ -98,6 +98,12 @@ prompt-dark-souls-hyprland.md
 # outside the repository; the pattern is here in case someone copies it in.
 config/hypr/ustawienia.lua
 
+# ----- LOCAL ADDITIONS -----
+# ~/.config/hypr/lokalne.lua holds hand-written additions for one computer
+# (loaded by hyprland.lua, never touched by install.sh). Private by design -
+# the pattern is here in case someone copies it into the repository.
+config/hypr/lokalne.lua
+
 # ----- ASSETS -----
 # The 256 px tile icons are the OUTPUT of tools/skaluj-ikony-menu.py, not a source -
 # install.sh regenerates them from the originals in assets/ikony-menu/. Versioning
@@ -118,9 +124,9 @@ sddm/dark-fantasy/backgrounds/*
 # Plasma theme change. Versioning them would mean constant, useless changes
 # in the repo.
 #
-# gtk.css used to be listed here along with them - and it is NOT anymore. Since the
-# Dark Souls-style rebuild it is a hand-written palette for adw-gtk3 and libadwaita
-# (config/gtk-3.0/gtk.css, config/gtk-4.0/gtk.css), so it belongs in the repo.
+# gtk.css is NOT listed here although kde-gtk-config can write it too: it is a
+# hand-written palette for adw-gtk3 and libadwaita (config/gtk-3.0/gtk.css,
+# config/gtk-4.0/gtk.css), so it belongs in the repo.
 config/gtk-3.0/colors.css
 config/gtk-3.0/window_decorations.css
 config/gtk-4.0/colors.css

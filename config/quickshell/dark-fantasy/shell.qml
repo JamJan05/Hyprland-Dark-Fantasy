@@ -7,8 +7,7 @@
 // Papirus-Dark icon theme - the same as gtk-icon-theme-name
 // in config/gtk-3.0/settings.ini, so a program has the same icon in the
 // Arsenal grid as in GTK windows. Without this line Qt looked for icons
-// only in hicolor and lost everything that is not there. Before the
-// Dark Souls-style rebuild this was breeze.
+// only in hicolor and lost everything that is not there.
 
 // -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- --
 //  HYPRLAND DARK FANTASY - QUICKSHELL SHELL.
@@ -166,9 +165,9 @@ ShellRoot {
         if (ktory !== "pauza") pauzaOpen = false;
     }
 
-    // Tile row at the bottom edge - replaced the dock. Hides the same way
-    // the dock did (empty desktop = visible), and in pause dims the screen and takes
-    // the keyboard. Description in kafle/RzadKafli.qml.
+    // Tile row at the bottom edge - the dock and the app menu. Visible on an
+    // empty desktop, and in pause dims the screen and takes the keyboard.
+    // Description in kafle/RzadKafli.qml.
     //
     // What using a tile does is decided HERE, not by the row: tiles open
     // panels whose state the shell holds anyway. Satchel and Status launch
@@ -287,8 +286,7 @@ ShellRoot {
     }
 
     // Notification history (Tidings tile) and "do not disturb" mode - for
-    // scripts and shortcuts. "status" for the bell on the bar went away together
-    // with the bell.
+    // scripts and shortcuts.
     IpcHandler {
         target: "notifications"
 
@@ -401,8 +399,7 @@ ShellRoot {
     }
 
     // Idle inhibit - for scripts and shortcuts. The switch is
-    // in Cogwheel (System -> Behavior); "status" for the custom/idle module
-    // went away together with the module.
+    // in Cogwheel (System -> Behavior).
     IpcHandler {
         target: "idle"
 

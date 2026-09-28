@@ -5,9 +5,9 @@
 //  set as the section label (SectionLabel.qml), only larger - a panel
 //  and a section differ in size, not in typeface or color.
 //
-//  Previously the title was bold 15 px mono text. The packaged Garamond
-//  has only the regular weight, so bold would be synthetic
-//  (smeared) - size and letter-spacing stand in for weight here.
+//  Not bold: the packaged Garamond has only the regular weight, so bold
+//  would be synthetic (smeared) - size and letter-spacing stand in for
+//  weight here.
 // -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- --
 
 import QtQuick

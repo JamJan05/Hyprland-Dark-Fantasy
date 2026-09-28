@@ -14,8 +14,7 @@ pragma ComponentBehavior: Bound
 //      │                                   │              kitty     │
 //      └───────────────────────────────────┴───────────────────────┘
 //
-//  Content of the Arsenal tile, opened above the tile row. Replaced the app
-//  menu, which was a separate window in the middle of the screen.
+//  Content of the Arsenal tile, opened above the tile row - the app menu.
 //
 //  LEFT COLUMN - grid of 48 px slots (kafle/SlotAplikacji.qml).
 //  RIGHT COLUMN - "item description": the name in small caps, below it the generic
@@ -28,11 +27,11 @@ pragma ComponentBehavior: Bound
 //  Backspace deletes, Esc first clears the search, and only the next
 //  Esc returns to the tile row. Enter launches the selected program.
 //
-//  No favourites row and no pinning - the favourites from the old menu
-//  disappeared together with the dock, which was their other half.
+//  No favourites row and no pinning: the grid with search is enough to reach
+//  any program in a few keys.
 //
 //  THE KEYBOARD IS NOT OWNED HERE. Focus is held by the tile row (one focus
-//  owner - the pitfall with opening the old menu) and it passes keys to
+//  owner - a second element with "focus" steals it on opening) and it passes keys to
 //  klawisz() below when it is on the content level. Thanks to that there is
 //  no text field here that could steal or lose focus.
 // -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- --
@@ -78,7 +77,7 @@ Item {
         }
     }
 
-    // Every opening starts with a clean grid - like the old menu.
+    // Every opening starts with a clean grid.
     onWidocznyChanged: {
         if (widoczny) {
             fraza = "";
@@ -140,8 +139,8 @@ Item {
         siatka.positionViewAtIndex(wybrany, GridView.Contain);
     }
 
-    // MOUSE AND SELECTION - the same guard as in the old menu: the selection
-    // follows the mouse only on REAL cursor movement. Slots slide by
+    // MOUSE AND SELECTION - the selection follows the mouse only on REAL
+    // cursor movement. Slots slide by
     // themselves under a stationary cursor on opening and with every typed letter,
     // and then Enter would launch a different program from the one you searched for.
     property point kursor: Qt.point(-1, -1)

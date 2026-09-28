@@ -285,11 +285,20 @@ Te pliki leżą w katalogach systemowych i wymagają roota. Jeśli je zmienisz, 
 Część stanu celowo zostaje **poza** repozytorium, bo dotyczy jednego komputera, a nie konfiguracji pulpitu:
 
 - `~/.config/hypr/ustawienia.lua`: ustawienia Hyprlanda z Zębatki (wpisane też do `.gitignore`),
+- `~/.config/hypr/lokalne.lua`: Twoje własne, pisane ręcznie dodatki do Hyprlanda dla tego komputera (patrz niżej),
 - `~/.local/state/dark-fantasy/powloka.json`: ustawienia powłoki (język, paski HUD-u, limit ładowania, limity mocy procesora).
 
 **Tapeta też jest lokalna.** Wybór tapety w Zębatce przepisuje `path` w `~/.config/hypr/hyprpaper.conf` i `$tapeta` w `~/.config/hypr/hyprlock.conf`. To kopie, więc zmiana jest lokalna: nie pojawia się w `git status`, a `install.sh --apply` ją zachowuje, chyba że od ostatniej instalacji zmieniła się wersja któregoś z tych plików w repo (wtedy Twoja wersja trafia do kopii `.bak-*` i tapetę wybierasz ponownie). Przenoś te pliki do repo tylko wtedy, gdy ścieżka obrazu istnieje też na Twoich innych komputerach.
 
 > [!NOTE]
+**Własne dodatki do Hyprlanda wpisuj do `~/.config/hypr/lokalne.lua`**, a nie do `hyprland.lua`. Chodzi np. o zmienną środowiskową dla jednego programu, regułę okna albo dodatkowy skrót. `hyprland.lua` wczytuje ten plik po swoich ustawieniach domyślnych, więc może je nadpisać, a przed `ustawienia.lua` z Zębatki, więc ustawienie z Zębatki nadal wygrywa. `install.sh` nigdy go nie rusza, więc przetrwa każdą ponowną instalację, a linia dopisana do samego `hyprland.lua` trafiłaby do kopii `.bak-*`. To zwykły Lua z tym samym API `hl.*`. Po edycji uruchom `hyprctl reload`. Przy ustawionej (i niepustej) zmiennej `XDG_CONFIG_HOME` plik leży w `$XDG_CONFIG_HOME/hypr/lokalne.lua`, obok `ustawienia.lua`. Jeśli plik ma błąd, Hyprland pokaże powiadomienie z jego nazwą, a reszta konfiguracji i tak się wczyta.
+
+```lua
+-- ~/.config/hypr/lokalne.lua
+hl.env("JAKAS_ZMIENNA", "wartosc")
+hl.window_rule({ name = "moja-regula", match = { class = "^foo$" }, float = true })
+```
+
 > Plik `<plik>.bak-RRRRMMDD-GGMMSS` obok pliku konfiguracji to wersja, którą `install.sh` odłożył na bok, bo zmieniła się i ona, i plik w repo (albo była to pierwsza instalacja). Porównaj go z nowym plikiem, przenieś, co potrzebne, i usuń. Patrz [troubleshooting.md](troubleshooting.md#pliki-bak-obok-konfiguracji).
 
 ### Przywracanie po reinstalacji systemu

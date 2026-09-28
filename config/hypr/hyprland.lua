@@ -1078,6 +1078,74 @@ hl.window_rule({
 })
 
 
+-- Loads an optional Lua file from ~/.config/hypr (the path follows
+-- XDG_CONFIG_HOME, like in the shell - so the test stand can have its own
+-- files and leave the session's ones untouched). A missing file is normal.
+--
+-- WHY dofile, NOT require. Hyprland reports a module missing from require
+-- as a config error with a red bar (config/lua/ConfigManager.cpp), and a
+-- missing file is the normal state here - a fresh install. Besides, files
+-- loaded through require are tracked by Hyprland and reloaded on every save
+-- (that is how floors.lua works) - and the Cogwheel saves on every slider
+-- change. The price: after editing such a file by hand, run "hyprctl reload".
+--
+-- A broken file must not bring down the whole config - the rest has already
+-- loaded. The notification says which file and how to get out. Only a
+-- MISSING file is silent (io.open's errno 2, ENOENT); a file that exists but
+-- cannot be read (permissions, a directory in its place) is reported too.
+local function wczytajOpcjonalny(nazwa, podpowiedz)
+    -- An empty XDG_CONFIG_HOME counts as unset (XDG spec; in Lua "" is true),
+    -- the same as stateDir() at the top and the shell.
+    local konfig = os.getenv("XDG_CONFIG_HOME")
+    if not konfig or konfig == "" then
+        konfig = (os.getenv("HOME") or "") .. "/.config"
+    end
+    local sciezka = konfig .. "/hypr/" .. nazwa
+    local function zglos(blad)
+        pcall(hl.notification.create, {
+            text    = nazwa .. ": " .. tostring(blad) .. podpowiedz,
+            timeout = 15000,
+        })
+    end
+
+    local plik, bladOtwarcia, kod = io.open(sciezka, "r")
+    if not plik then
+        if kod ~= 2 then zglos(bladOtwarcia) end
+        return
+    end
+    plik:close()
+    local ok, blad = pcall(dofile, sciezka)
+    if not ok then zglos(blad) end
+end
+
+
+------------------------------------------
+---- LOCAL ADDITIONS (lokalne.lua) -------
+------------------------------------------
+
+-- ~/.config/hypr/lokalne.lua: your own additions for THIS computer - an
+-- environment variable for one program, a window rule, an extra bind.
+-- Plain Lua with the same hl.* API, e.g.:
+--
+--     hl.env("SOME_VARIABLE", "value")
+--     hl.window_rule({ name = "my-rule", match = { class = "^foo$" }, float = true })
+--
+-- Locals of this file (mainMod, terminal...) are not visible there - write
+-- "SUPER" and the program names directly. Globals are: T(), przypiszSkrot(),
+-- wlasnySkrot(), floors.
+--
+-- WHY A SEPARATE FILE. install.sh replaces hyprland.lua with the repository's
+-- version, and a line added to it by hand ends up in a .bak copy at the next
+-- install. lokalne.lua is never touched by install.sh (it copies config/hypr
+-- file by file) and is not in the repository (.gitignore) - a private detail
+-- of one machine does not belong in the published desktop.
+--
+-- ORDER: after everything above, so it can override the defaults; BEFORE
+-- the Cogwheel's ustawienia.lua, so a slider moved in the Cogwheel still wins
+-- after a reload instead of snapping back to a value set here.
+wczytajOpcjonalny("lokalne.lua", "")
+
+
 ----------------------------------------
 ---- COGWHEEL SETTINGS (LAST) ----------
 ----------------------------------------
@@ -1095,35 +1163,12 @@ hl.window_rule({
 -- WHY AT THE VERY END. Every hl.config above sets the default
 -- values; the GUI settings must come AFTER them, otherwise they would be
 -- overwritten back. The same applies to floors.setup() and ustawAnimacje().
---
--- WHY dofile, NOT require. Hyprland reports a module missing from require
--- as a config error with a red bar (config/lua/ConfigManager.cpp),
--- and a missing file is the normal state here - a fresh install. Besides, files
--- loaded through require are tracked by Hyprland and reloaded on every save
--- (that is how floors.lua works) - and the Cogwheel saves on every slider change.
 -- Live changes go through a separate path anyway, via "hyprctl eval".
---
--- The path follows XDG_CONFIG_HOME, just like in the shell - thanks to this
--- the test stand can have its own file and leave the session's one untouched.
+-- Why dofile and how a broken file is handled: at wczytajOpcjonalny() above.
 --
 -- The file is outside the repository (.gitignore) - it is the state of this computer,
 -- not the desktop configuration.
-local USTAWIENIA = (os.getenv("XDG_CONFIG_HOME") or (os.getenv("HOME") .. "/.config"))
-    .. "/hypr/ustawienia.lua"
-
-local plikUstawien = io.open(USTAWIENIA, "r")
-if plikUstawien then
-    plikUstawien:close()
-    local ok, blad = pcall(dofile, USTAWIENIA)
-    if not ok then
-        -- A broken file must not bring down the whole config - the rest has
-        -- already loaded. The notification says where to look and how to get out.
-        pcall(hl.notification.create, {
-            text    = "ustawienia.lua: " .. tostring(blad) .. T(" (Cogwheel -> Restore defaults)", " (Zębatka -> Przywróć domyślne)"),
-            timeout = 15000,
-        })
-    end
-end
+wczytajOpcjonalny("ustawienia.lua", T(" (Cogwheel -> Restore defaults)", " (Zębatka -> Przywróć domyślne)"))
 
 -- The shortcut list for the Cogwheel - after ustawienia.lua, so it holds the
 -- keys the settings file moved the shortcuts to (see EDITABLE SHORTCUTS).
