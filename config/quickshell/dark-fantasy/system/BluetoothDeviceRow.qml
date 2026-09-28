@@ -6,6 +6,14 @@
 //  connecting without that anyway, and a separate "pair" button next to
 //  "connect" would be a meaningless distinction for the user.
 //
+//  TRUSTED BEFORE PAIRING AND CONNECTING. After pairing, headphones open the
+//  audio profiles (A2DP, HFP) THEMSELVES. BlueZ lets an untrusted device do
+//  that only after asking an agent - and this session runs none (the shell
+//  does not register one, and bluetoothctl's lives only while it runs). So
+//  the request was refused and the headphones dropped a few seconds after
+//  "Connected". A device chosen here by hand is marked trusted
+//  (Device1.Trusted) first, which also lets it reconnect by itself later.
+//
 //  Battery level is shown only when the device reports it
 //  (batteryAvailable). Headphones usually do, mice less often.
 // -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- --
@@ -114,7 +122,11 @@ Card {
             if (root.device === null) return;
             if (root.device.connected) {
                 root.device.disconnect();
-            } else if (root.device.paired || root.device.bonded) {
+                return;
+            }
+            // See "TRUSTED BEFORE PAIRING" in the header.
+            if (!root.device.trusted) root.device.trusted = true;
+            if (root.device.paired || root.device.bonded) {
                 root.device.connect();
             } else {
                 // BlueZ will not connect an unpaired device anyway,
