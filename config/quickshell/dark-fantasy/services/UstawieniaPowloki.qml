@@ -77,6 +77,10 @@ Singleton {
         }
     }
 
+    // powloka.json has been read (or does not exist yet) - FileView loads
+    // asynchronously, and until then every property holds its default.
+    property bool wczytane: false
+
     readonly property bool dnd: dane.dnd
 
     function ustawDnd(wlaczone: bool): void {
@@ -112,6 +116,8 @@ Singleton {
 
         onFileChanged: reload()
         onAdapterUpdated: writeAdapter()
+        onLoaded: root.wczytane = true
+        onLoadFailed: root.wczytane = true
 
         adapter: JsonAdapter {
             id: dane

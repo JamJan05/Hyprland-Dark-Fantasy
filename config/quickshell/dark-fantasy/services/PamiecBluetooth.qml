@@ -16,12 +16,16 @@ pragma Singleton
 //
 //  TWO PITFALLS.
 //    - At startup the adapter may still be missing (bluetoothd starts in
-//      parallel) or report the AutoEnable state for a moment. So nothing is
-//      saved until the saved state has been applied - otherwise that first
-//      "on" would overwrite a saved "off".
+//      parallel) or report the AutoEnable state for a moment, and
+//      powloka.json loads asynchronously. So nothing is saved until the
+//      saved state has been applied - after the file has loaded, and again
+//      for a replacement adapter - otherwise that first "on" would overwrite
+//      a saved "off".
 //    - At shutdown bluetoothd may stop before the session and the adapter may
-//      report "off" on its way out. So a change is saved only after it has
-//      held for ZWLOKA ms with the adapter still present.
+//      report "off" on its way out. So a change seen on the adapter is saved
+//      only after it has held for ZWLOKA ms with the adapter still present.
+//      The Cogwheel toggle goes through ustaw() and is saved at once, so
+//      logging out right after it does not lose it.
 // -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- --
 
 import QtQml
@@ -46,8 +50,16 @@ Singleton {
     // Called by shell.qml, only to create the singleton at session start.
     function start(): void {}
 
+    // The Cogwheel's power toggle: a deliberate change, saved immediately.
+    function ustaw(wl: bool): void {
+        if (!adapter) return;
+        zapis.stop();
+        adapter.enabled = wl;
+        if (gotowe) UstawieniaPowloki.ustawBluetooth(wl);
+    }
+
     function przywroc(): void {
-        if (gotowe || !czasMinal || !adapter) return;
+        if (gotowe || !czasMinal || !adapter || !UstawieniaPowloki.wczytane) return;
         const zapisany = UstawieniaPowloki.bluetooth;
         if (zapisany !== -1 && adapter.enabled !== (zapisany === 1))
             adapter.enabled = zapisany === 1;
@@ -65,8 +77,17 @@ Singleton {
         }
     }
 
-    // bluetoothd started later than the shell.
-    onAdapterChanged: przywroc()
+    // bluetoothd started later than the shell, or the adapter was replaced
+    // (bluetoothd restarted, a USB dongle): the new one gets the saved state
+    // too, and a pending save belonging to the old one is dropped.
+    onAdapterChanged: {
+        zapis.stop();
+        gotowe = false;
+        przywroc();
+    }
+
+    readonly property bool ustawieniaWczytane: UstawieniaPowloki.wczytane
+    onUstawieniaWczytaneChanged: przywroc()
 
     onWlaczonyChanged: if (gotowe) zapis.restart()
 
