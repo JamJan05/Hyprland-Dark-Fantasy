@@ -272,6 +272,8 @@ trap 'zapisz; exit 0' TERM HUP INT
 while :; do
     zapisz
     # sleep in the background + wait, so TERM is handled at once instead of
-    # after the sleep ends.
-    sleep "$INTERWAL" & wait $!
+    # after the sleep ends. 9>&- - the sleep must not inherit the lock: left
+    # orphaned after TERM, it would hold it for up to INTERWAL seconds and a
+    # restart in that time would take "flock -n" as a running copy and quit.
+    sleep "$INTERWAL" 9>&- & wait $!
 done
