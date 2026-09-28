@@ -40,7 +40,7 @@ W nawiasach nazwy z angielskiego interfejsu.
 | **Ekran** (Monitor) | Skala (tylko „czyste” skale dla bieżącej rozdzielczości), odświeżanie, położenie drugiego monitora |
 | **Piętra** (Floors) | Liczba pięter (1-10) i nazwa każdego piętra |
 | **Skróty** (Shortcuts) | Podgląd wszystkich skrótów z opisami, prosto z `hyprctl binds` |
-| **Przywróć domyślne** (Restore defaults) | Usuwa plik ustawień i przeładowuje Hyprlanda. Pierwszy Enter pyta, drugi wykonuje. |
+| **Przywróć domyślne** (Restore defaults) | Usuwa plik ustawień i przeładowuje Hyprlanda. Najpierw pyta „Przywrócić domyślne?” z wyborem Tak / Nie; kursor stoi na Nie. |
 
 Dostępne układy klawiatury: `pl`, `us`, `gb`, `de`, `fr`, `es`, `it`, `cz`, `sk`, `ua`.
 

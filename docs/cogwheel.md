@@ -38,7 +38,7 @@ Network and Bluetooth need device lists, passwords and pairing, which do not fit
 | **Monitor** | Scale (only "clean" scales for the current resolution), refresh rate, position of a second monitor |
 | **Floors** | Number of floors (1-10) and a name for each floor |
 | **Shortcuts** | Read-only list of all keybindings with descriptions, taken from `hyprctl binds` |
-| **Restore defaults** | Deletes the settings file and reloads Hyprland. The first Enter asks, the second one runs it. |
+| **Restore defaults** | Deletes the settings file and reloads Hyprland. It first asks "Restore defaults?" with Yes / No; the cursor starts on No. |
 
 Keyboard layouts offered: `pl`, `us`, `gb`, `de`, `fr`, `es`, `it`, `cz`, `sk`, `ua`.
 
