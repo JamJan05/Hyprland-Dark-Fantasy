@@ -12,19 +12,31 @@
 # nothing.
 #
 # WHAT IT ACCEPTS. Capability NoInputNoOutput: no PIN typing, no passkey on
-# screen. Pairing confirmations and service authorizations are accepted only
-# for devices marked Trusted - the Cogwheel marks a device trusted right before
-# pairing it (system/BluetoothDeviceRow.qml). Anything else asking to pair on
-# its own is refused, so being pairable does not let a stranger in.
+# screen. Trusted alone is NOT enough - the shell marks a device trusted for
+# the time of a pairing, and a trust left behind (a failed pairing, a session
+# torn down mid-pairing) must not open the door later:
 #
-# Legacy (pre-2.1) devices ask for a PIN; a trusted one gets "0000", the PIN
-# of practically every old headset.
+#   pairing requests      (RequestConfirmation, RequestAuthorization,
+#                          RequestPinCode) - only for the device the shell is
+#                          pairing right now: its address is in
+#                          $XDG_RUNTIME_DIR/dark-fantasy/parowanie, written by
+#                          services/PamiecBluetooth.qml for the time of the
+#                          pairing. The runtime directory goes away with the
+#                          session, so the file cannot outlive it either.
+#   service authorization (AuthorizeService) - only for a device that is
+#                          trusted AND already paired or bonded.
+#
+# Anything else is refused, so being pairable does not let a stranger in.
+#
+# Legacy (pre-2.1) devices ask for a PIN; the device being paired gets "0000",
+# the PIN of practically every old headset.
 #
 # Registers again when bluetoothd restarts. Started from the Hyprland
 # autostart (run_once - the process name is "df-agent-bt").
 #
 # Requires dev-python/dbus-python and dev-python/pygobject.
 
+import os
 import sys
 
 import dbus
@@ -42,13 +54,25 @@ class Rejected(dbus.DBusException):
     _dbus_error_name = "org.bluez.Error.Rejected"
 
 
-def zaufane(bus, sciezka):
+def wlasciwosci(bus, sciezka):
     try:
         props = dbus.Interface(bus.get_object(BUS_NAME, sciezka),
                                "org.freedesktop.DBus.Properties")
-        return bool(props.Get("org.bluez.Device1", "Trusted"))
+        return props.GetAll("org.bluez.Device1")
     except dbus.DBusException:
-        return False
+        return {}
+
+
+# The address the shell is pairing right now, or "".
+def parowany_adres():
+    runtime = os.environ.get("XDG_RUNTIME_DIR")
+    if not runtime:
+        return ""
+    try:
+        with open(os.path.join(runtime, "dark-fantasy", "parowanie")) as f:
+            return f.read(64).strip().upper()
+    except OSError:
+        return ""
 
 
 class Agent(dbus.service.Object):
@@ -56,9 +80,18 @@ class Agent(dbus.service.Object):
         super().__init__(bus, AGENT_PATH)
         self.bus = bus
 
-    def sprawdz(self, device):
-        if not zaufane(self.bus, device):
-            raise Rejected("device is not trusted")
+    # A pairing request: trusted and the device the shell is pairing now.
+    def sprawdz_parowanie(self, device):
+        w = wlasciwosci(self.bus, device)
+        adres = str(w.get("Address", "")).upper()
+        if not w.get("Trusted", False) or not adres or adres != parowany_adres():
+            raise Rejected("not the device being paired")
+
+    # A service: trusted and already paired or bonded.
+    def sprawdz_usluge(self, device):
+        w = wlasciwosci(self.bus, device)
+        if not w.get("Trusted", False) or not (w.get("Paired", False) or w.get("Bonded", False)):
+            raise Rejected("device is not trusted and paired")
 
     @dbus.service.method(AGENT_IFACE, in_signature="", out_signature="")
     def Release(self):
@@ -66,11 +99,11 @@ class Agent(dbus.service.Object):
 
     @dbus.service.method(AGENT_IFACE, in_signature="os", out_signature="")
     def AuthorizeService(self, device, uuid):
-        self.sprawdz(device)
+        self.sprawdz_usluge(device)
 
     @dbus.service.method(AGENT_IFACE, in_signature="o", out_signature="s")
     def RequestPinCode(self, device):
-        self.sprawdz(device)
+        self.sprawdz_parowanie(device)
         return "0000"
 
     @dbus.service.method(AGENT_IFACE, in_signature="o", out_signature="u")
@@ -89,11 +122,11 @@ class Agent(dbus.service.Object):
 
     @dbus.service.method(AGENT_IFACE, in_signature="ou", out_signature="")
     def RequestConfirmation(self, device, passkey):
-        self.sprawdz(device)
+        self.sprawdz_parowanie(device)
 
     @dbus.service.method(AGENT_IFACE, in_signature="o", out_signature="")
     def RequestAuthorization(self, device):
-        self.sprawdz(device)
+        self.sprawdz_parowanie(device)
 
     @dbus.service.method(AGENT_IFACE, in_signature="", out_signature="")
     def Cancel(self):

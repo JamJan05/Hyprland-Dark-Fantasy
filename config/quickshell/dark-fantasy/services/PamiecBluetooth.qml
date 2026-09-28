@@ -31,6 +31,7 @@ pragma Singleton
 import QtQml
 import Quickshell
 import Quickshell.Bluetooth
+import Quickshell.Io
 
 Singleton {
     id: root
@@ -92,11 +93,32 @@ Singleton {
     property var parowane: null
     property bool zaufanieTymczasowe: false
 
+    // The address being paired, for the agent: df-agent-bt answers pairing
+    // requests only for this device, so a trust left behind by a failed or
+    // interrupted pairing opens nothing later. In the runtime directory, which
+    // goes away with the session. Written and waited for BEFORE pair(), so
+    // the agent cannot read it too early.
+    FileView {
+        id: znacznikParowania
+        path: {
+            const r = Quickshell.env("XDG_RUNTIME_DIR");
+            return r ? r + "/dark-fantasy/parowanie" : "";
+        }
+        printErrors: false
+    }
+
+    function ustawZnacznik(adres: string): void {
+        if (znacznikParowania.path === "") return;
+        znacznikParowania.setText(adres === "" ? "" : adres + "\n");
+        znacznikParowania.waitForJob();
+    }
+
     function paruj(urzadzenie: var): void {
         if (!urzadzenie) return;
         zakonczParowanie();
         parowane = urzadzenie;
         zaufanieTymczasowe = !urzadzenie.trusted;
+        ustawZnacznik(String(urzadzenie.address));
         if (zaufanieTymczasowe) urzadzenie.trusted = true;
         urzadzenie.pair();
         straznikParowania.restart();
@@ -114,6 +136,7 @@ Singleton {
         straznikParowania.stop();
         sprawdzenieParowania.stop();
         if (!u) return;
+        ustawZnacznik("");
         try {
             if (u.pairing) u.cancelPair();
             if (tymczasowe && !u.paired && !u.bonded) u.trusted = false;
@@ -132,6 +155,13 @@ Singleton {
     // write, which the teardown could cut short. Non-interactive
     // "bluetoothctl untrust" quits only in the reply callback (bluez 5.87
     // client/main.c, cmd_untrust -> generic_callback). "" = nothing to do.
+    //
+    // Up to three attempts, but the teardown goes ahead even if all fail:
+    // untrust also fails when BlueZ has already dropped the device (and its
+    // trust with it) or bluetoothd is down, and "Shut down" silently doing
+    // nothing would be worse. A trust left behind is harmless anyway - the
+    // agent wants the pairing marker for pairing requests and a finished
+    // pairing for services (see "PAIRING WITH TEMPORARY TRUST").
     function przedWyjsciem(): string {
         const u = parowane;
         const tymczasowe = zaufanieTymczasowe;
@@ -143,7 +173,8 @@ Singleton {
         } catch (e) {}
         zakonczParowanie();
         if (!doCofniecia || !/^([0-9A-F]{2}:){5}[0-9A-F]{2}$/i.test(adres)) return "";
-        return "timeout 3 bluetoothctl untrust " + adres + " >/dev/null 2>&1; ";
+        return "for i in 1 2 3; do timeout 3 bluetoothctl untrust " + adres
+             + " >/dev/null 2>&1 && break; sleep 1; done; ";
     }
 
     readonly property bool paruje: parowane ? parowane.pairing : false
