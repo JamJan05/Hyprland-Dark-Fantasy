@@ -29,10 +29,13 @@
 set -uo pipefail
 
 REPO_URL="https://github.com/JamJan05/Hyprland-Dark-Fantasy.git"
-# Git without GIT_DIR / GIT_WORK_TREE inherited from the caller's shell -
-# they would point every command below at another repository.
+# Git without the repository-location variables inherited from the caller's
+# shell - they would point every command below at another repository's
+# metadata, index or objects.
 git_czysty() {
-    env -u GIT_DIR -u GIT_WORK_TREE git "$@"
+    env -u GIT_DIR -u GIT_WORK_TREE -u GIT_COMMON_DIR -u GIT_INDEX_FILE \
+        -u GIT_OBJECT_DIRECTORY -u GIT_ALTERNATE_OBJECT_DIRECTORIES \
+        git "$@"
 }
 
 # The ROOT of a working git clone - git itself says so. A bare ".git"
@@ -40,12 +43,18 @@ git_czysty() {
 # does not accept, and "git pull" in it fails. And "inside a work tree" is
 # not enough either: an empty directory under another repository (a home
 # directory kept in git) would pass, and "git pull" would hit that one.
+#
+# And it must be THIS project - an unrelated repository with its own
+# install.sh must not be pulled and run. Checked by files only this project
+# has, not by the remote URL, so a fork under another name still works.
 jest_klonem() {
     local korzen katalog
     korzen="$(git_czysty -C "$1" rev-parse --show-toplevel 2>/dev/null)" || return 1
     katalog="$(cd "$1" 2>/dev/null && pwd -P)" || return 1
     korzen="$(cd "$korzen" 2>/dev/null && pwd -P)" || return 1
-    [[ "$katalog" == "$korzen" ]]
+    [[ "$katalog" == "$korzen" ]] || return 1
+    [[ -f "$katalog/install.sh" && -f "$katalog/config/hypr/floors.lua" \
+        && -f "$katalog/config/quickshell/dark-fantasy/shell.qml" ]]
 }
 
 # The clone is named like the repository. A clone made under the older,
