@@ -1,0 +1,40 @@
+// fastfetch - the system summary fish shows when an interactive shell starts
+// (config/fish/config.fish).
+//
+// fastfetch's own default module list, with ONE change: no "localip". The
+// terminal ends up on screenshots and in screen shares, and the local IP
+// address has no business being there. Everything else is fastfetch's
+// default, in its default order (fastfetch --gen-config, version 2.65).
+{
+  "$schema": "https://github.com/fastfetch-cli/fastfetch/raw/master/doc/json_schema.json",
+  "modules": [
+    "title",
+    "separator",
+    "os",
+    "host",
+    "kernel",
+    "uptime",
+    "packages",
+    "shell",
+    "display",
+    "de",
+    "wm",
+    "wmtheme",
+    "theme",
+    "icons",
+    "font",
+    "cursor",
+    "terminal",
+    "terminalfont",
+    "cpu",
+    "gpu",
+    "memory",
+    "swap",
+    "disk",
+    "battery",
+    "poweradapter",
+    "locale",
+    "break",
+    "colors"
+  ]
+}

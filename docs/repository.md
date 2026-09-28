@@ -12,6 +12,7 @@ config/              mirror of ~/.config; install.sh copies it one to one
   gtk-3.0/ gtk-4.0/  look of GTK apps: theme, icons, cursor, palette
   xdg-desktop-portal/ order of portal backends
   fish/              interactive fish config (fastfetch)
+  fastfetch/         fastfetch modules: the defaults without the local IP
 assets/              tile icon originals (ikony-menu/), wallpaper.png, screenshots (zrzuty/)
 local/
   bin/               scripts called by Waybar, tiles and keybindings

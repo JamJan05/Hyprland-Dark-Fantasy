@@ -11,6 +11,12 @@
 //  dimmed at the top, bold title, body, and below it
 //  the action buttons.
 //
+//  THE "default" ACTION IS NOT A BUTTON. Per the notification spec it is what
+//  a click on the notification itself does (kitty uses it to bring up the
+//  window that sent it), and it usually has no label - as a button it was an
+//  empty square. So a click on the card invokes it, and only actions with a
+//  label become buttons.
+//
 //  ---------------------------------------------------------------
 //  THE BODY CAN BE HOSTILE
 //
@@ -67,6 +73,25 @@ Card {
         interval: root.czas * 1000
         running: root.ephemeral && root.czas > 0 && !root.hovered
         onTriggered: Notifications.hidePopup(root.notification)
+    }
+
+    readonly property var akcjaDomyslna: {
+        if (notification === null) return null;
+        for (const a of notification.actions) if (a.identifier === "default") return a;
+        return null;
+    }
+
+    readonly property var przyciski: notification === null ? []
+        : notification.actions.filter(a => a.identifier !== "default" && a.text !== "")
+
+    // A click on the card = the default action. Declared before the content,
+    // so the close button and the action buttons lie above it and keep
+    // their own clicks.
+    MouseArea {
+        anchors.fill: parent
+        enabled: root.akcjaDomyslna !== null
+        cursorShape: Qt.PointingHandCursor
+        onClicked: Notifications.invoke(root.akcjaDomyslna, root.notification)
     }
 
     Column {
@@ -177,11 +202,10 @@ Card {
         Flow {
             width: parent.width
             spacing: Theme.spacingSm
-            visible: root.notification !== null
-                     && root.notification.actions.length > 0
+            visible: root.przyciski.length > 0
 
             Repeater {
-                model: root.notification === null ? [] : root.notification.actions
+                model: root.przyciski
 
                 delegate: Rectangle {
                     id: przycisk

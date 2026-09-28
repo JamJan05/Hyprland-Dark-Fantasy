@@ -4,7 +4,7 @@ Kompletny pulpit Hyprlanda dla Gentoo Linux, który przypomina menu Dark Souls 3
 
 [English](README.md) · **Polski**
 
-![Pulpit: HUD w lewym górnym rogu, ramka „teraz” na pasku, yazi i tty-clock](assets/zrzuty/desktop.jpg)
+![Pulpit po zalogowaniu: HUD w lewym górnym rogu, ramka „teraz” na pasku, terminal z fastfetch, tty-clock i yazi](assets/zrzuty/desktop.jpg)
 
 | | |
 |---|---|
