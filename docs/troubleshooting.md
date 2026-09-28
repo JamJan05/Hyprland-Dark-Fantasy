@@ -39,8 +39,8 @@ For your own additions to Hyprland, such as an environment variable, a window ru
 `install.sh` copies the configuration, so `~/.config/...` and the repository are separate files. An edit on the system works, but `git status` in a clone does not see it. To keep it, copy the file into a clone and commit:
 
 ```sh
-cp ~/.config/hypr/hyprland.lua ~/hyprland-dark-fantasy/config/hypr/
-cd ~/hyprland-dark-fantasy && git add -A && git commit -m "describe the change"
+cp ~/.config/hypr/hyprland.lua ~/Hyprland-Dark-Fantasy/config/hypr/
+cd ~/Hyprland-Dark-Fantasy && git add -A && git commit -m "describe the change"
 ```
 
 The other way round, an edit in the repo does nothing until you run `./install.sh --apply`. Local changes you do not copy back still survive a reinstall: `install.sh` keeps them, unless the same file changed in the repo too.

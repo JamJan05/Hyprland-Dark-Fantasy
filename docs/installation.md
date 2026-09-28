@@ -31,14 +31,14 @@ What `--apply` does, in order:
 1. Checks that the system is Gentoo, that `emerge`, `git` and `sudo` exist, and that the script is **not** running as root. It also detects OpenRC or systemd.
 2. Asks for the `sudo` password once, up front. With `curl | bash` it reads the password from `/dev/tty`.
 3. Enables the **GURU** and **hyproverlay** overlays with `eselect repository` and syncs them.
-4. Clones the repository into `~/hyprland-dark-fantasy`. Set `HYPR_REPO_DIR` to use a different path. If the script is run from inside a clone, it uses that clone.
+4. Clones the repository into `~/Hyprland-Dark-Fantasy`. An existing clone in `~/hyprland-dark-fantasy`, the earlier default, is used instead. Set `HYPR_REPO_DIR` to use a different path. If the script is run from inside a clone, it uses that clone.
 5. Copies `gentoo/package.accept_keywords/hyprland-desktop` and `gentoo/package.use/hyprland-desktop` into `/etc/portage/`, unless they already exist. If Portage still cannot see `dev-libs/wayland` 1.26 (an older copy of the file), it appends that one entry.
 6. Upgrades `dev-libs/wayland` to 1.26 (`emerge --oneshot --update`), then installs the packages with `emerge --ask --verbose --changed-use`. Compiling Hyprland and the Qt dependencies takes a while.
 7. Runs `install.sh --apply`.
 8. Installs the battery udev rule, but only if the battery exposes charge thresholds.
 9. On OpenRC, installs and enables the [`dark-fantasy-stan` service](#state-before-login-openrc-service).
 
-The script is idempotent: running it again skips whatever is already done. `./bootstrap.sh --help` prints the same summary. The installed desktop does not need the clone in `~/hyprland-dark-fantasy`; you can delete it afterwards.
+The script is idempotent: running it again skips whatever is already done. `./bootstrap.sh --help` prints the same summary. The installed desktop does not need the clone in `~/Hyprland-Dark-Fantasy`; you can delete it afterwards.
 
 If `sudo` cannot ask for a password because there is no terminal, download the script and run it directly:
 
@@ -99,8 +99,8 @@ Notes on the list:
 Then install the configuration:
 
 ```sh
-git clone https://github.com/JamJan05/Hyprland-Dark-Fantasy.git ~/hyprland-dark-fantasy
-cd ~/hyprland-dark-fantasy
+git clone https://github.com/JamJan05/Hyprland-Dark-Fantasy.git ~/Hyprland-Dark-Fantasy
+cd ~/Hyprland-Dark-Fantasy
 ./install.sh
 ./install.sh --apply
 ```
@@ -262,9 +262,9 @@ After a reboot, `sudo df-limit-mocy` should print six numbers: the current limit
 After `install.sh --apply` the files in `~/.config` are copies, not links. Editing them does not show up in `git status`, and editing the repo does not change the desktop until you run `./install.sh --apply`. The repository is still the backup, but a change made on the system has to be carried back into it by hand:
 
 ```sh
-git clone https://github.com/JamJan05/Hyprland-Dark-Fantasy.git ~/hyprland-dark-fantasy
-cp ~/.config/hypr/hyprland.lua ~/hyprland-dark-fantasy/config/hypr/hyprland.lua
-cd ~/hyprland-dark-fantasy
+git clone https://github.com/JamJan05/Hyprland-Dark-Fantasy.git ~/Hyprland-Dark-Fantasy
+cp ~/.config/hypr/hyprland.lua ~/Hyprland-Dark-Fantasy/config/hypr/hyprland.lua
+cd ~/Hyprland-Dark-Fantasy
 git add -A && git commit -m "describe the change" && git push
 ```
 
@@ -306,8 +306,8 @@ hl.window_rule({ name = "my-rule", match = { class = "^foo$" }, float = true })
 On a fresh Gentoo with network access and `git`:
 
 ```sh
-git clone https://github.com/JamJan05/Hyprland-Dark-Fantasy.git ~/hyprland-dark-fantasy
-cd ~/hyprland-dark-fantasy
+git clone https://github.com/JamJan05/Hyprland-Dark-Fantasy.git ~/Hyprland-Dark-Fantasy
+cd ~/Hyprland-Dark-Fantasy
 ./bootstrap.sh              # plan
 ./bootstrap.sh --apply      # overlays, packages, configuration, udev rule
 cd sddm && ./install-theme.sh --apply && cd ..            # optional

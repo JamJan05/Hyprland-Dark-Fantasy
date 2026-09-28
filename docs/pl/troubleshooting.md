@@ -39,8 +39,8 @@ Własne dodatki do Hyprlanda, np. zmienną środowiskową, regułę okna albo sk
 `install.sh` kopiuje konfigurację, więc `~/.config/...` i repozytorium to osobne pliki. Zmiana w systemie działa, ale `git status` w klonie jej nie widzi. Żeby ją zachować, skopiuj plik do klonu i zrób commit:
 
 ```sh
-cp ~/.config/hypr/hyprland.lua ~/hyprland-dark-fantasy/config/hypr/
-cd ~/hyprland-dark-fantasy && git add -A && git commit -m "opis zmiany"
+cp ~/.config/hypr/hyprland.lua ~/Hyprland-Dark-Fantasy/config/hypr/
+cd ~/Hyprland-Dark-Fantasy && git add -A && git commit -m "opis zmiany"
 ```
 
 W drugą stronę: zmiana w repo nic nie robi, dopóki nie uruchomisz `./install.sh --apply`. Lokalne zmiany, których nie przeniesiesz do repo, i tak przetrwają ponowną instalację: `install.sh` je zachowuje, chyba że ten sam plik zmienił się też w repo.

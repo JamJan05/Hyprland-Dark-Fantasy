@@ -31,14 +31,14 @@ Co robi `--apply`, po kolei:
 1. Sprawdza, czy to Gentoo, czy są `emerge`, `git` i `sudo` i czy skrypt **nie** działa jako root. Rozpoznaje też OpenRC albo systemd.
 2. Od razu na początku raz prosi o hasło `sudo`. Przy `curl | bash` czyta je z `/dev/tty`.
 3. Włącza overlaye **GURU** i **hyproverlay** przez `eselect repository` i je synchronizuje.
-4. Klonuje repozytorium do `~/hyprland-dark-fantasy`. Inną ścieżkę podasz w `HYPR_REPO_DIR`. Uruchomiony z wnętrza klonu używa tego klonu.
+4. Klonuje repozytorium do `~/Hyprland-Dark-Fantasy`. Jeśli istnieje już klon w `~/hyprland-dark-fantasy` (wcześniejsza domyślna ścieżka), używa go. Inną ścieżkę podasz w `HYPR_REPO_DIR`. Uruchomiony z wnętrza klonu używa tego klonu.
 5. Kopiuje `gentoo/package.accept_keywords/hyprland-desktop` i `gentoo/package.use/hyprland-desktop` do `/etc/portage/`, jeśli ich tam jeszcze nie ma. Jeśli Portage nadal nie widzi `dev-libs/wayland` 1.26 (starsza kopia pliku), dopisuje ten jeden wpis.
 6. Podnosi `dev-libs/wayland` do 1.26 (`emerge --oneshot --update`), a potem instaluje pakiety przez `emerge --ask --verbose --changed-use`. Kompilacja Hyprlanda i zależności Qt trochę trwa.
 7. Uruchamia `install.sh --apply`.
 8. Wgrywa regułę udev dla baterii, ale tylko wtedy, gdy bateria ma progi ładowania.
 9. Na OpenRC instaluje i włącza [usługę `dark-fantasy-stan`](#stan-przed-zalogowaniem-usługa-openrc).
 
-Skrypt jest idempotentny: przy ponownym uruchomieniu pomija to, co już zrobione. `./bootstrap.sh --help` wypisuje to samo streszczenie. Zainstalowany pulpit nie potrzebuje klonu w `~/hyprland-dark-fantasy`; możesz go potem usunąć.
+Skrypt jest idempotentny: przy ponownym uruchomieniu pomija to, co już zrobione. `./bootstrap.sh --help` wypisuje to samo streszczenie. Zainstalowany pulpit nie potrzebuje klonu w `~/Hyprland-Dark-Fantasy`; możesz go potem usunąć.
 
 Jeśli `sudo` nie może zapytać o hasło, bo nie ma terminala, pobierz skrypt na dysk i uruchom go bezpośrednio:
 
@@ -99,8 +99,8 @@ Uwagi do listy:
 Potem zainstaluj konfigurację:
 
 ```sh
-git clone https://github.com/JamJan05/Hyprland-Dark-Fantasy.git ~/hyprland-dark-fantasy
-cd ~/hyprland-dark-fantasy
+git clone https://github.com/JamJan05/Hyprland-Dark-Fantasy.git ~/Hyprland-Dark-Fantasy
+cd ~/Hyprland-Dark-Fantasy
 ./install.sh
 ./install.sh --apply
 ```
@@ -262,9 +262,9 @@ Po restarcie `sudo df-limit-mocy` powinno wypisać sześć liczb: obecne limity 
 Po `install.sh --apply` pliki w `~/.config` są kopiami, nie dowiązaniami. Ich edycja nie pojawia się w `git status`, a edycja w repo nie zmienia pulpitu, dopóki nie uruchomisz `./install.sh --apply`. Repozytorium nadal jest kopią zapasową, ale zmianę zrobioną w systemie trzeba do niego przenieść ręcznie:
 
 ```sh
-git clone https://github.com/JamJan05/Hyprland-Dark-Fantasy.git ~/hyprland-dark-fantasy
-cp ~/.config/hypr/hyprland.lua ~/hyprland-dark-fantasy/config/hypr/hyprland.lua
-cd ~/hyprland-dark-fantasy
+git clone https://github.com/JamJan05/Hyprland-Dark-Fantasy.git ~/Hyprland-Dark-Fantasy
+cp ~/.config/hypr/hyprland.lua ~/Hyprland-Dark-Fantasy/config/hypr/hyprland.lua
+cd ~/Hyprland-Dark-Fantasy
 git add -A && git commit -m "opis zmiany" && git push
 ```
 
@@ -306,8 +306,8 @@ hl.window_rule({ name = "moja-regula", match = { class = "^foo$" }, float = true
 Na świeżym Gentoo z siecią i `git`:
 
 ```sh
-git clone https://github.com/JamJan05/Hyprland-Dark-Fantasy.git ~/hyprland-dark-fantasy
-cd ~/hyprland-dark-fantasy
+git clone https://github.com/JamJan05/Hyprland-Dark-Fantasy.git ~/Hyprland-Dark-Fantasy
+cd ~/Hyprland-Dark-Fantasy
 ./bootstrap.sh              # plan
 ./bootstrap.sh --apply      # overlaye, pakiety, konfiguracja, reguła udev
 cd sddm && ./install-theme.sh --apply && cd ..            # opcjonalnie

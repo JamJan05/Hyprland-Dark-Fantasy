@@ -29,7 +29,12 @@
 set -uo pipefail
 
 REPO_URL="https://github.com/JamJan05/Hyprland-Dark-Fantasy.git"
-REPO_DIR="${HYPR_REPO_DIR:-$HOME/hyprland-dark-fantasy}"
+# The clone is named like the repository. A clone made under the older,
+# lowercase default is kept and used, instead of cloning a second copy.
+REPO_DIR="${HYPR_REPO_DIR:-$HOME/Hyprland-Dark-Fantasy}"
+if [[ -z "${HYPR_REPO_DIR:-}" && ! -d "$REPO_DIR/.git" && -d "$HOME/hyprland-dark-fantasy/.git" ]]; then
+    REPO_DIR="$HOME/hyprland-dark-fantasy"
+fi
 STAMP="$(date +%Y%m%d-%H%M%S)"
 
 APPLY=0

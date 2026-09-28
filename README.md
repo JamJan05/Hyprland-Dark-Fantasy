@@ -36,8 +36,8 @@ The design is original. The repository contains no assets, images, fonts or text
 These commands install the configuration. The packages have to be installed already (see [Requirements](#requirements)).
 
 ```sh
-git clone https://github.com/JamJan05/Hyprland-Dark-Fantasy.git ~/hyprland-dark-fantasy
-cd ~/hyprland-dark-fantasy
+git clone https://github.com/JamJan05/Hyprland-Dark-Fantasy.git ~/Hyprland-Dark-Fantasy
+cd ~/Hyprland-Dark-Fantasy
 ./install.sh            # dry run: prints what would be copied, changes nothing
 ./install.sh --apply    # copies config/ into ~/.config, backs up files you changed
 hyprctl reload          # or log out and start a Hyprland session
