@@ -4,9 +4,10 @@
    Part of a set with waybar/style.css -
    the same dark-fantasy palette and the same rounding.
 
-   Background blur is done by the layer rules in ~/.config/hypr/hyprland.lua
-   for the "swaync-control-center" and
-   "swaync-notification-window" namespaces - not by this file.
+   Background blur is done by Hyprland layer rules, not by this file.
+   SwayNC is only a fallback, so ~/.config/hypr/hyprland.lua does not
+   blur it by default: add "swaync-control-center" and
+   "swaync-notification-window" to the "blur-*" rules when switching back.
 
    Node names are taken from /etc/xdg/swaync/style.css. SwayNC has
    long, nested selectors (.notification-row >

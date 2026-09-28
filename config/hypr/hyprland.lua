@@ -159,15 +159,15 @@ local function autostart()
 
    run_once("hyprpaper")   -- wallpaper; reads ~/.config/hypr/hyprpaper.conf
 
-   -- Notifications are now handled by the QUICKSHELL SHELL, not SwayNC.
+   -- Notifications are handled by the QUICKSHELL SHELL, not SwayNC.
    -- The D-Bus name org.freedesktop.Notifications is held by exactly one
    -- process, so swaync MUST NOT start here - if it got there first,
    -- our server would not receive a single notification.
    --
    -- The swaync package stays installed as a fallback. To go back:
-   -- restore this line and point to swaync in the file
+   -- add run_once("swaync") here and point to swaync in the file
    -- ~/.local/share/dbus-1/services/org.freedesktop.Notifications.service
-   -- (or simply switch to the main branch).
+   -- (for blur, also add its namespaces to the LAYER RULES below).
 
 
    run_once("waybar")
@@ -856,7 +856,7 @@ hl.window_rule({
 
 -- LAYER RULES
 --
--- Waybar, the shell panels and swaync are layer-shell surfaces, not windows,
+-- Waybar and the shell panels are layer-shell surfaces, not windows,
 -- so decoration.blur does not apply to them - they have to be named separately.
 -- You can check the namespace names with the command: hyprctl layers
 --
@@ -867,7 +867,7 @@ hl.window_rule({
 -- Each panel sets its namespace name itself, through WlrLayershell.namespace.
 -- Until the panel is running, the rule is idle - Hyprland simply does not
 -- find a layer with that name and nothing happens.
-for _, ns in ipairs({ "waybar", "swaync-notification-window", "swaync-control-center",
+for _, ns in ipairs({ "waybar",
                       "quickshell-media", "quickshell-osd",
                       "quickshell-quick", "quickshell-popups",
                       -- HUD in the left corner: it should look like the bar frame, so
