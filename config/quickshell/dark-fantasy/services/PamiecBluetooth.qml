@@ -105,20 +105,36 @@ Singleton {
             return r ? r + "/dark-fantasy/parowanie" : "";
         }
         printErrors: false
+        onSaved: root.wynikZnacznika = 1
+        onSaveFailed: root.wynikZnacznika = -1
     }
 
-    function ustawZnacznik(adres: string): void {
-        if (znacznikParowania.path === "") return;
+    // 1 saved, -1 failed, 0 not known.
+    property int wynikZnacznika: 0
+
+    // Returns whether the marker was really written. waitForJob() returns
+    // true for a finished job whether it succeeded or not, but saved() /
+    // saveFailed() arrive before it returns (checked on Quickshell 0.3.1
+    // with a writable and an unwritable path), so the result is known here.
+    function ustawZnacznik(adres: string): bool {
+        if (znacznikParowania.path === "") return false;
+        wynikZnacznika = 0;
         znacznikParowania.setText(adres === "" ? "" : adres + "\n");
         znacznikParowania.waitForJob();
+        return wynikZnacznika === 1;
     }
 
     function paruj(urzadzenie: var): void {
         if (!urzadzenie) return;
         zakonczParowanie();
+        // Without the marker the agent would refuse the pairing anyway -
+        // so do not start it, and do not hand out any trust either.
+        if (!ustawZnacznik(String(urzadzenie.address))) {
+            console.warn("PamiecBluetooth: pairing marker not written, pairing not started");
+            return;
+        }
         parowane = urzadzenie;
         zaufanieTymczasowe = !urzadzenie.trusted;
-        ustawZnacznik(String(urzadzenie.address));
         if (zaufanieTymczasowe) urzadzenie.trusted = true;
         urzadzenie.pair();
         straznikParowania.restart();
