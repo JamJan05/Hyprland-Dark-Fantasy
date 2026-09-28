@@ -4,7 +4,7 @@ A complete Hyprland desktop for Gentoo Linux that borrows the feel of the Dark S
 
 **English** · [Polski](README.pl.md)
 
-![Desktop: the HUD in the top-left corner, the "now" frame on the bar and the tile row on an empty desktop](assets/zrzuty/desktop.jpg)
+![Desktop after login: the HUD in the top-left corner, the "now" frame on the bar, a terminal with fastfetch, tty-clock and yazi](assets/zrzuty/desktop.jpg)
 
 | | |
 |---|---|
