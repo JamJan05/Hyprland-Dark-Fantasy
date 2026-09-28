@@ -102,6 +102,10 @@ Singleton {
         straznikParowania.restart();
     }
 
+    // Also called when another device is picked mid-pairing, and on the way
+    // out of the session (Sesja.qml, and the destruction below for a shell
+    // restart). A pairing still running is cancelled first, so it cannot
+    // finish on its own after its trust is gone.
     function zakonczParowanie(): void {
         const u = parowane;
         const tymczasowe = zaufanieTymczasowe;
@@ -109,14 +113,17 @@ Singleton {
         zaufanieTymczasowe = false;
         straznikParowania.stop();
         sprawdzenieParowania.stop();
-        if (!u || !tymczasowe) return;
+        if (!u) return;
         try {
-            if (!u.paired && !u.bonded) u.trusted = false;
+            if (u.pairing) u.cancelPair();
+            if (tymczasowe && !u.paired && !u.bonded) u.trusted = false;
         } catch (e) {
             // The device object is gone (BlueZ dropped a temporary device) -
             // and its trust went with it.
         }
     }
+
+    Component.onDestruction: zakonczParowanie()
 
     readonly property bool paruje: parowane ? parowane.pairing : false
 
