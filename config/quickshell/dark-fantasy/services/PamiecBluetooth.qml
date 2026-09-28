@@ -50,20 +50,91 @@ Singleton {
     // Called by shell.qml, only to create the singleton at session start.
     function start(): void {}
 
-    // The Cogwheel's power toggle: a deliberate change, saved immediately.
+    // A Cogwheel toggle made before the saved state was applied (1 / 0),
+    // -1 = none. It wins over the saved state instead of being undone by it.
+    property int wyborUzytkownika: -1
+
+    // The Cogwheel's power toggle: a deliberate change, saved immediately -
+    // or, before the saved state has been applied, remembered and saved then.
     function ustaw(wl: bool): void {
         if (!adapter) return;
         zapis.stop();
         adapter.enabled = wl;
         if (gotowe) UstawieniaPowloki.ustawBluetooth(wl);
+        else wyborUzytkownika = wl ? 1 : 0;
     }
 
     function przywroc(): void {
         if (gotowe || !czasMinal || !adapter || !UstawieniaPowloki.wczytane) return;
-        const zapisany = UstawieniaPowloki.bluetooth;
-        if (zapisany !== -1 && adapter.enabled !== (zapisany === 1))
-            adapter.enabled = zapisany === 1;
+        if (wyborUzytkownika !== -1) {
+            adapter.enabled = wyborUzytkownika === 1;
+            UstawieniaPowloki.ustawBluetooth(wyborUzytkownika === 1);
+            wyborUzytkownika = -1;
+        } else {
+            const zapisany = UstawieniaPowloki.bluetooth;
+            if (zapisany !== -1 && adapter.enabled !== (zapisany === 1))
+                adapter.enabled = zapisany === 1;
+        }
         gotowe = true;
+    }
+
+    // ---------------------------------------------------------------
+    //  PAIRING WITH TEMPORARY TRUST
+    //
+    //  The pairing agent (local/bin/df-agent-bt) accepts only devices marked
+    //  Trusted, so a device is marked trusted right before pair(). BlueZ does
+    //  not clear Trusted when pairing fails, and a trusted device would then
+    //  get past the agent later without anyone clicking anything. So trust
+    //  set HERE is taken back when the pairing ends without a pairing; trust
+    //  the device already had stays. Kept in this singleton, not in the list
+    //  row, because the row goes away when the Cogwheel closes mid-pairing.
+    // ---------------------------------------------------------------
+    property var parowane: null
+    property bool zaufanieTymczasowe: false
+
+    function paruj(urzadzenie: var): void {
+        if (!urzadzenie) return;
+        zakonczParowanie();
+        parowane = urzadzenie;
+        zaufanieTymczasowe = !urzadzenie.trusted;
+        if (zaufanieTymczasowe) urzadzenie.trusted = true;
+        urzadzenie.pair();
+        straznikParowania.restart();
+    }
+
+    function zakonczParowanie(): void {
+        const u = parowane;
+        const tymczasowe = zaufanieTymczasowe;
+        parowane = null;
+        zaufanieTymczasowe = false;
+        straznikParowania.stop();
+        sprawdzenieParowania.stop();
+        if (!u || !tymczasowe) return;
+        try {
+            if (!u.paired && !u.bonded) u.trusted = false;
+        } catch (e) {
+            // The device object is gone (BlueZ dropped a temporary device) -
+            // and its trust went with it.
+        }
+    }
+
+    readonly property bool paruje: parowane ? parowane.pairing : false
+
+    // The pairing ended; "paired" may arrive a moment after "pairing" drops,
+    // so the result is checked 2 s later.
+    onParujeChanged: if (!paruje && parowane) sprawdzenieParowania.restart()
+
+    Timer {
+        id: sprawdzenieParowania
+        interval: 2000
+        onTriggered: root.zakonczParowanie()
+    }
+
+    // A pairing that never started or never ended.
+    Timer {
+        id: straznikParowania
+        interval: 60000
+        onTriggered: root.zakonczParowanie()
     }
 
     // After 3 s, like the charge limit (services/Ladowanie.qml): powloka.json
