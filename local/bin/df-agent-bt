@@ -22,7 +22,9 @@
 #                          $XDG_RUNTIME_DIR/dark-fantasy/parowanie, written by
 #                          services/PamiecBluetooth.qml for the time of the
 #                          pairing. The runtime directory goes away with the
-#                          session, so the file cannot outlive it either.
+#                          session, so the file cannot outlive it either, and a
+#                          marker older than 2 minutes (left by a shell that
+#                          crashed mid-pairing) is ignored.
 #   service authorization (AuthorizeService) - only for a device that is
 #                          trusted AND already paired or bonded.
 #
@@ -38,6 +40,7 @@
 
 import os
 import sys
+import time
 
 import dbus
 import dbus.mainloop.glib
@@ -63,13 +66,23 @@ def wlasciwosci(bus, sciezka):
         return {}
 
 
-# The address the shell is pairing right now, or "".
+# How long a pairing marker counts. The shell gives a pairing 60 s (its
+# watchdog) and clears the marker when it ends; a marker older than this was
+# left behind - the shell crashed mid-pairing and never cleaned up - and must
+# not keep that device's pairing requests accepted until logout.
+ZNACZNIK_WAZNY_S = 120
+
+
+# The address the shell is pairing right now, or "" - also for a stale marker.
 def parowany_adres():
     runtime = os.environ.get("XDG_RUNTIME_DIR")
     if not runtime:
         return ""
+    sciezka = os.path.join(runtime, "dark-fantasy", "parowanie")
     try:
-        with open(os.path.join(runtime, "dark-fantasy", "parowanie")) as f:
+        if time.time() - os.stat(sciezka).st_mtime > ZNACZNIK_WAZNY_S:
+            return ""
+        with open(sciezka) as f:
             return f.read(64).strip().upper()
     except OSError:
         return ""

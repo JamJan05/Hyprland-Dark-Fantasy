@@ -152,13 +152,20 @@ Singleton {
         straznikParowania.stop();
         sprawdzenieParowania.stop();
         if (!u) return;
-        ustawZnacznik("");
+        // The security steps first, the marker last: a failure clearing the
+        // marker (e.g. at shell exit) must not skip them - and a marker left
+        // behind goes stale for the agent after 2 minutes anyway.
         try {
             if (u.pairing) u.cancelPair();
             if (tymczasowe && !u.paired && !u.bonded) u.trusted = false;
         } catch (e) {
             // The device object is gone (BlueZ dropped a temporary device) -
             // and its trust went with it.
+        }
+        try {
+            ustawZnacznik("");
+        } catch (e) {
+            console.warn("PamiecBluetooth: pairing marker not cleared: " + e);
         }
     }
 
