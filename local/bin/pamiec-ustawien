@@ -183,18 +183,39 @@ przywroc() {
         ustaw_jasnosc "/sys/class/leds/$KLAWIATURA" "${stan[klawiatura]:-}" 0
 
     # Audio: the autostart starts PipeWire (gentoo-pipewire-launcher) at the
-    # same moment, so wait (up to 30 s) until WirePlumber has a default output.
+    # same moment. Wait for the SAVED device to become the default, not just
+    # any: WirePlumber may first pick another node (a dummy output, HDMI) and
+    # switch to the real one a moment later - restoring right after the first
+    # default showed up skipped the volume altogether.
     command -v wpctl >/dev/null || return 0
-    local i
-    for (( i = 0; i < 60; i++ )); do
-        [[ -n $(wezel_audio @DEFAULT_AUDIO_SINK@) ]] && break
-        sleep 0.5
-    done
+    czekaj_na_wezel @DEFAULT_AUDIO_SINK@   "${stan[glosnik_wezel]:-}"  60
+    czekaj_na_wezel @DEFAULT_AUDIO_SOURCE@ "${stan[mikrofon_wezel]:-}" 10
+
     # WirePlumber applies its own saved route volume when the device appears.
     # Going after it means the more recent value from this file wins.
     sleep 2
     przywroc_audio @DEFAULT_AUDIO_SINK@   glosnik
     przywroc_audio @DEFAULT_AUDIO_SOURCE@ mikrofon
+
+    # Its route volume can still land AFTER ours (WirePlumber writes and
+    # applies it with a delay), and the save loop below would then record the
+    # older value as the new state. So once more, a few seconds later - the
+    # loop does not start until this returns.
+    sleep 5
+    przywroc_audio @DEFAULT_AUDIO_SINK@   glosnik
+    przywroc_audio @DEFAULT_AUDIO_SOURCE@ mikrofon
+}
+
+# $1 = wpctl target, $2 = saved node name (empty = any node will do),
+# $3 = how many half-second tries. Returns when the default matches or on timeout.
+czekaj_na_wezel() {
+    local i obecny
+    for (( i = 0; i < $3; i++ )); do
+        obecny=$(wezel_audio "$1")
+        if [[ -n $obecny && ( -z $2 || $obecny == "$2" ) ]]; then return 0; fi
+        sleep 0.5
+    done
+    return 1
 }
 
 case ${1:-} in
