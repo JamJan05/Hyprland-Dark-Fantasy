@@ -57,6 +57,10 @@ SekcjaOpcji {
     }
 
     function zakonczDodawanie(): void {
+        // Cancel pressed while the Keys row still waits for keys: hiding the
+        // row alone would leave Hyprland in the capture submap until the
+        // row's 10 s timeout.
+        przerwijPrzechwytywanie();
         dodawanie = false;
         wybrany = 0;
     }
