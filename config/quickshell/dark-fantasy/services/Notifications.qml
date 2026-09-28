@@ -68,8 +68,9 @@ Singleton {
     property var popups: []
 
     // ---------------- DO NOT DISTURB ----------------
-    // From now on a plain property, without calling swaync-client.
-    property bool dnd: false
+    // Kept in UstawieniaPowloki (powloka.json), so it survives a shell
+    // restart, a logout and a reboot.
+    readonly property bool dnd: UstawieniaPowloki.dnd
 
     // How many seconds a popup stays up. The same values that
     // config/swaync/config.json had - so that switching the daemon does not
@@ -190,10 +191,11 @@ Singleton {
     }
 
     function toggleDnd() {
-        dnd = !dnd;
+        const wlacz = !dnd;
+        UstawieniaPowloki.ustawDnd(wlacz);
         // Enabling DND clears whatever is currently up - otherwise you would have
         // to wait for them to disappear on their own.
-        if (dnd) root.popups = [];
+        if (wlacz) root.popups = [];
     }
 
     // Cleans the list of notifications closed by the application itself.

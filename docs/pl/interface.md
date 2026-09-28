@@ -134,7 +134,7 @@ Otwiera go `SUPER + O` albo kliknięcie w tytuł lub okładkę w ramce „teraz�
 
 - **Demon powiadomień.** Nazwę `org.freedesktop.Notifications` trzyma powłoka. Plik `local/share/dbus-1/services/org.freedesktop.Notifications.service` sprawia, że aktywacja D-Bus uruchamia powłokę, a nie mako, swaync czy Plasmę. SwayNC zostaje zainstalowany i skonfigurowany jako droga odwrotu; patrz [troubleshooting.md](troubleshooting.md#powiadomienia-cztery-pakiety-chcą-tej-samej-nazwy-d-bus).
 - **Dymki** pojawiają się w prawym górnym rogu pod paskiem, na warstwie overlay, więc są widoczne także nad oknem pełnoekranowym.
-- **Wieści** trzymają historię z przyciskiem „Wyczyść” i trybem „nie przeszkadzać”. Otwarcie Wieści chowa dymki, które akurat są na ekranie.
+- **Wieści** trzymają historię z przyciskiem „Wyczyść” i trybem „nie przeszkadzać”. Tryb „nie przeszkadzać” jest zapamiętywany po restarcie powłoki, wylogowaniu i ponownym uruchomieniu. Otwarcie Wieści chowa dymki, które akurat są na ekranie.
 - **OSD.** Krótki podgląd na dole ekranu przy zmianie głośności, jasności, wyciszenia albo profilu zasilania. Milczy przy starcie powłoki i przy otwartej Zębatce, bo Zębatka pokazuje te same wartości.
 
 ## Blokada i bezczynność

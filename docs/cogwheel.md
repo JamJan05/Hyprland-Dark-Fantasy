@@ -24,7 +24,7 @@ Network and Bluetooth need device lists, passwords and pairing, which do not fit
 | **Power** | Power profile, CPU power limit per profile, charge limit, resume charging threshold, battery state |
 | **Behavior** | Keep screen on (blocks screen off, lock and suspend), HUD bars |
 | **Network** | Wi-Fi toggle, network list, connecting with a password (NetworkManager) |
-| **Bluetooth** | Power, device list, connecting |
+| **Bluetooth** | Power (remembered across reboots), device list, connecting |
 | **Language** | English or Polish (see [Language](#language)) |
 
 ### Hyprland

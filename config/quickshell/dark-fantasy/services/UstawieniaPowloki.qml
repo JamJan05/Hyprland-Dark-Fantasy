@@ -15,6 +15,9 @@ pragma Singleton
 //                      0 = never set, nothing is restored.
 //    moc*            - CPU power limit in W for each power profile
 //                      (services/LimitMocy.qml). 0 = factory limit.
+//    dnd             - "do not disturb" in Tidings (services/Notifications.qml).
+//    bluetooth       - whether Bluetooth was on (services/PamiecBluetooth.qml).
+//                      -1 = never saved, nothing is restored.
 //
 //  ---------------------------------------------------------------
 //  WHY ~/.local/state AND NOT THE REPOSITORY
@@ -74,6 +77,18 @@ Singleton {
         }
     }
 
+    readonly property bool dnd: dane.dnd
+
+    function ustawDnd(wlaczone: bool): void {
+        dane.dnd = wlaczone;
+    }
+
+    readonly property int bluetooth: dane.bluetooth
+
+    function ustawBluetooth(wlaczony: bool): void {
+        dane.bluetooth = wlaczony ? 1 : 0;
+    }
+
     // Interface language: "en" (default) or "pl". Read through Tr.
     readonly property string jezyk: dane.jezyk
 
@@ -106,6 +121,8 @@ Singleton {
             property int mocZrownowazony: 0
             property int mocWydajny: 0
             property string jezyk: "en"
+            property bool dnd: false
+            property int bluetooth: -1
         }
     }
 }

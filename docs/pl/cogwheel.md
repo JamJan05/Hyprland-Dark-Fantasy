@@ -26,7 +26,7 @@ W nawiasach nazwy z angielskiego interfejsu.
 | **Zasilanie** (Power) | Profil zasilania, limit mocy procesora dla każdego profilu, limit ładowania, próg wznowienia ładowania, stan baterii |
 | **Zachowanie** (Behavior) | Nie wygaszaj ekranu (wstrzymuje wygaszanie, blokadę i uśpienie), paski HUD-u |
 | **Sieć** (Network) | Przełącznik Wi-Fi, lista sieci, łączenie z hasłem (NetworkManager) |
-| **Bluetooth** | Zasilanie, lista urządzeń, łączenie |
+| **Bluetooth** | Zasilanie (zapamiętywane po ponownym uruchomieniu), lista urządzeń, łączenie |
 | **Język** (Language) | Angielski albo polski (patrz [Język](#język)) |
 
 ### Hyprland

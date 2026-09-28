@@ -134,7 +134,7 @@ Open it with `SUPER + O`, or by clicking the title or cover in the "now" frame. 
 
 - **Notification daemon.** The shell owns `org.freedesktop.Notifications`. The file `local/share/dbus-1/services/org.freedesktop.Notifications.service` makes D-Bus activation start the shell instead of mako, swaync or Plasma. SwayNC stays installed and configured as a fallback; see [troubleshooting.md](troubleshooting.md#notifications-four-packages-want-the-same-d-bus-name).
 - **Popups** appear in the top-right corner below the bar, on the overlay layer, so they stay visible over fullscreen windows.
-- **Tidings** keeps the history with "Clear" and "do not disturb". Opening Tidings hides the popups on screen.
+- **Tidings** keeps the history with "Clear" and "do not disturb". "Do not disturb" is remembered across a shell restart, a logout and a reboot. Opening Tidings hides the popups on screen.
 - **OSD.** A short preview at the bottom of the screen when volume, brightness, mute or the power profile changes. It stays quiet at shell startup and while the Cogwheel is open, because the Cogwheel shows the same values.
 
 ## Lock screen and idle
