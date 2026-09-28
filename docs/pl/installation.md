@@ -31,7 +31,7 @@ Co robi `--apply`, po kolei:
 1. Sprawdza, czy to Gentoo, czy są `emerge`, `git` i `sudo` i czy skrypt **nie** działa jako root. Rozpoznaje też OpenRC albo systemd.
 2. Od razu na początku raz prosi o hasło `sudo`. Przy `curl | bash` czyta je z `/dev/tty`.
 3. Włącza overlaye **GURU** i **hyproverlay** przez `eselect repository` i je synchronizuje.
-4. Klonuje repozytorium do `~/Hyprland-Dark-Fantasy`. Jeśli tam jeszcze nie ma klonu, a jest w `~/hyprland-dark-fantasy` (wcześniejsza domyślna ścieżka), i nie ustawiono `HYPR_REPO_DIR`, używa tamtego. Inną ścieżkę podasz w `HYPR_REPO_DIR`. Uruchomiony z wnętrza klonu używa tego klonu.
+4. Klonuje repozytorium do `~/Hyprland-Dark-Fantasy`. Jeśli tam jeszcze nie ma klonu, a jest w `~/hyprland-dark-fantasy` (wcześniejsza domyślna ścieżka), i nie ustawiono `HYPR_REPO_DIR`, używa tamtego. Inną ścieżkę podasz w `HYPR_REPO_DIR`. Uruchomiony z wnętrza klonu, bez ustawionego `HYPR_REPO_DIR`, używa tego klonu. Jeśli docelową ścieżkę zajmuje coś, co nie jest klonem, skrypt zatrzymuje się z komunikatem i niczego tam nie rusza.
 5. Kopiuje `gentoo/package.accept_keywords/hyprland-desktop` i `gentoo/package.use/hyprland-desktop` do `/etc/portage/`, jeśli ich tam jeszcze nie ma. Jeśli Portage nadal nie widzi `dev-libs/wayland` 1.26 (starsza kopia pliku), dopisuje ten jeden wpis.
 6. Podnosi `dev-libs/wayland` do 1.26 (`emerge --oneshot --update`), a potem instaluje pakiety przez `emerge --ask --verbose --changed-use`. Kompilacja Hyprlanda i zależności Qt trochę trwa.
 7. Uruchamia `install.sh --apply`.

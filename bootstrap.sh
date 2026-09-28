@@ -29,11 +29,23 @@
 set -uo pipefail
 
 REPO_URL="https://github.com/JamJan05/Hyprland-Dark-Fantasy.git"
-# A working git clone - git itself says so. A bare ".git" directory test is
-# not enough: an interrupted clone leaves a .git that git does not accept,
-# and "git pull" in it fails.
+# Git without GIT_DIR / GIT_WORK_TREE inherited from the caller's shell -
+# they would point every command below at another repository.
+git_czysty() {
+    env -u GIT_DIR -u GIT_WORK_TREE git "$@"
+}
+
+# The ROOT of a working git clone - git itself says so. A bare ".git"
+# directory test is not enough: an interrupted clone leaves a .git that git
+# does not accept, and "git pull" in it fails. And "inside a work tree" is
+# not enough either: an empty directory under another repository (a home
+# directory kept in git) would pass, and "git pull" would hit that one.
 jest_klonem() {
-    git -C "$1" rev-parse --is-inside-work-tree >/dev/null 2>&1
+    local korzen katalog
+    korzen="$(git_czysty -C "$1" rev-parse --show-toplevel 2>/dev/null)" || return 1
+    katalog="$(cd "$1" 2>/dev/null && pwd -P)" || return 1
+    korzen="$(cd "$korzen" 2>/dev/null && pwd -P)" || return 1
+    [[ "$katalog" == "$korzen" ]]
 }
 
 # The clone is named like the repository. A clone made under the older,
@@ -181,15 +193,21 @@ step "Configuration repository"
 
 if jest_klonem "$REPO_DIR"; then
     ok "$REPO_DIR already exists"
-    run git -C "$REPO_DIR" pull --ff-only
+    run git_czysty -C "$REPO_DIR" pull --ff-only
 # Run from inside a clone: use it - unless HYPR_REPO_DIR names another path,
 # which is then honored (cloned to if it has no clone yet).
 elif [[ -z "${HYPR_REPO_DIR:-}" && -f "$(dirname "${BASH_SOURCE[0]}")/install.sh" ]]; then
     REPO_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
     ok "running from inside the repository: $REPO_DIR"
 else
+    # Something that is not a clone already sits there (leftovers of an
+    # interrupted clone, other files): git clone would refuse it. It is the
+    # user's directory, so nothing is moved or deleted - stop with a clear way out.
+    if [[ -e "$REPO_DIR" ]] && [[ -n "$(ls -A "$REPO_DIR" 2>/dev/null)" ]]; then
+        die "$REPO_DIR exists and is not a git clone of this repository. Move or remove it, or set HYPR_REPO_DIR to another path."
+    fi
     run mkdir -p "$(dirname "$REPO_DIR")"
-    run git clone "$REPO_URL" "$REPO_DIR"
+    run git_czysty clone "$REPO_URL" "$REPO_DIR"
 fi
 
 step "Keywords and USE flags"
