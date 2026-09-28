@@ -18,12 +18,11 @@ pragma Singleton
 //  ---------------------------------------------------------------
 //  READING IS REACTIVE, WITHOUT A SINGLE POLL
 //
-//  The first version of this file polled brightnessctl every second,
-//  because "sysfs does not emit events that QFileSystemWatcher would catch".
-//  That turned out to be false and was verified experimentally:
-//  FileView with watchChanges on /sys/class/backlight/<dev>/brightness
-//  detects EVERY change - including one made with the hardware key
-//  through brightnessctl called from hyprland.lua.
+//  A common belief is that "sysfs does not emit events that
+//  QFileSystemWatcher would catch". For the backlight it is false, verified
+//  experimentally: FileView with watchChanges on
+//  /sys/class/backlight/<dev>/brightness detects EVERY change - including one
+//  made with the hardware key through brightnessctl called from hyprland.lua.
 //
 //  Test: three brightnessctl changes, three FileView events
 //  (64764 -> 58288 -> 45335 -> 64764). Thanks to this:
@@ -47,9 +46,9 @@ pragma Singleton
 //  ---------------------------------------------------------------
 //  THE DEVICE IS NOT HARDCODED
 //
-//  The Waybar config deliberately did NOT have a "device" key - the comment on
-//  the "backlight" module explained that the previously set "amdgpu_bl0"
-//  tied the configuration to a single laptop. We stick to the same rule.
+//  No device name in the configuration: a fixed "amdgpu_bl0" would tie it to
+//  a single laptop. Waybar's "backlight" module has no "device" key for the
+//  same reason.
 //
 //  The class filter matters. "brightnessctl -lm" on this machine
 //  prints fourteen devices, thirteen of which are LEDs:
@@ -97,8 +96,8 @@ Singleton {
             if (p.length < 5) continue;
             if (p[1] !== "backlight") continue;
 
-            // The first backlight-class device wins - exactly
-            // the same rule Waybar used to pick it.
+            // The first backlight-class device wins - the same rule
+            // Waybar's backlight module and pamiec-ustawien follow.
             root.urzadzenie = p[0];
             return;
         }

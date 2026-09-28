@@ -66,12 +66,11 @@ window#waybar {
    Whole module groups get the background and border, so the left, center and
    right sides read as three frames, not as loose icons.
 
-   NO vertical margin. There used to be "margin: 3px 0" here, which made the frame
-   32 px tall on a 38 px layer. The left corner with the Quickshell HUD is EXACTLY
-   as tall as the bar frames, and three stat bars with a row of desktops do not
-   fit in 32 px - so the frames now fill the whole layer, and the shell's panels
-   compute their position from the same edge
-   (Theme.panelMarginTop = 44). */
+   NO vertical margin: a "margin: 3px 0" would make the frame 32 px tall on a
+   38 px layer. The left corner with the Quickshell HUD is EXACTLY as tall as
+   the bar frames, and three stat bars with a row of desktops do not fit in
+   32 px - so the frames fill the whole layer, and the shell's panels compute
+   their position from the same edge (Theme.panelMarginTop = 44). */
 .modules-center,
 .modules-right {
     background-color: @bg;
@@ -133,9 +132,8 @@ window#waybar.empty #window {
     transition: background-color 200ms ease, color 200ms ease;
 }
 
-/* A little slack at the right edge of the frame. The last module used to be the
-   session, then the cogwheel; since stage 7 of the rebuild (settings moved under
-   the Cogwheel tile) it is the tray. */
+/* A little slack at the right edge of the frame, after the last module
+   (the tray). */
 #tray {
     padding-right: 12px;
 }
@@ -304,8 +302,8 @@ window#waybar.empty #window {
     color: @red;
 }
 
-/* Critical battery as numbers instead of bars - the same rule as
-   the old #battery.critical. The class is set by hud/Hud.qml. */
+/* Critical battery as numbers instead of bars. The class is set by
+   hud/Hud.qml. */
 #custom-zasoby.krytyczna {
     color: @red;
     animation: mruganie 1.5s ease-in-out infinite alternate;
@@ -330,7 +328,7 @@ tooltip label {
 /* ----- CONTEXT MENUS -----
    Applies to the icon menus in the tray (right click on a tray icon). GTK draws
    them as separate windows, so the module rules do not reach them - the styles
-   have to be given here. Formerly also the session menu (menu-sesja.xml, now deleted). */
+   have to be given here. */
 menu {
     background-color: rgba(11, 11, 12, 0.98);
     border: 1px solid @obwodka;

@@ -76,9 +76,8 @@ PanelWindow {
     // IDLE INHIBIT.
     //
     // The inhibitor binds to a Wayland surface, so it needs a window -
-    // the singleton services/Idle.qml has none. It used to live in the System Control
-    // Center window; since stage 7 that window is no longer created, while the HUD exists for the whole
-    // session and never disappears, so it serves just as well. The state is held by Idle.qml.
+    // the singleton services/Idle.qml has none. The HUD exists for the whole
+    // session and never disappears, so it hosts it. The state is held by Idle.qml.
     IdleInhibitor {
         window: root
         enabled: Idle.inhibited
@@ -219,7 +218,7 @@ PanelWindow {
 
         let krytyczna = false;
         if (Battery.obecna) {
-            // Threshold from the old "battery" module: critical 12 %.
+            // Critical at 12 %.
             krytyczna = !Battery.laduje && !Battery.naKablu && Battery.poziom <= 0.12;
             czesci.push(ikona(Icons.battery(Battery.poziom, Battery.laduje, Battery.naKablu),
                               krytyczna ? zar : zloto) + " " + proc(Battery.poziom));

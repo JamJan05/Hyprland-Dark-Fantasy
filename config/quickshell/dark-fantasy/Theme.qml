@@ -177,11 +177,10 @@ Singleton {
     //
     //  SHARP RECTANGLES. All three radii are zero.
     //
-    //  This used to be a 6 / 10 / 12 px scale taken from the CSS of the bar, dock
-    //  and SwayNC. A Dark Souls-style interface has not a single
-    //  rounded corner - frames are forged, not molded - and likewise zero
-    //  is what Hyprland (decoration.rounding), Waybar (border-radius),
-    //  hyprlock (rounding) and the SDDM theme have today.
+    //  A Dark Souls-style interface has not a single rounded corner - frames
+    //  are forged, not molded - and likewise zero is what Hyprland
+    //  (decoration.rounding), Waybar (border-radius), hyprlock (rounding) and
+    //  the SDDM theme use.
     //
     //  The property names STAY, even though they all mean the same. A dozen or so
     //  components read them, and a possible return to rounded corners should be
@@ -303,12 +302,8 @@ Singleton {
     readonly property int fontWeightMedium: 600
     readonly property int fontWeightBold: 700
 
-    // The section header has its own recognizable set in panel-audio.css:
-    // 11 px, weight 700, letter spacing 1 px, gold color. That is exactly
-    // the label that stands above the sliders in the mockup as "SYSTEM".
-    //
-    //  Since the rebuild the section header is in EB Garamond small caps,
-    //  so the letter spacing follows the display typeface, not the CSS.
+    // The section header is in EB Garamond small caps, so its letter spacing
+    // follows the display typeface.
     readonly property real sectionLetterSpacing: displayLetterSpacing
 
     // ================================================================
@@ -335,8 +330,7 @@ Singleton {
     //  Entry stays ~2.5x slower than exit: emerging should be
     //  slow, and closing must not keep you waiting.
     //
-    //  "popinScale" (0.87, inherited from the windows' "popin 87%") went away together
-    //  with popin itself - Hyprland windows now only crossfade too.
+    //  No scale for panels: Hyprland windows only crossfade too ("popin 100%").
     // ================================================================
     readonly property int animFast: 150
     readonly property int animNormal: 200
@@ -399,20 +393,18 @@ Singleton {
     // ================================================================
     //  PANEL PLACEMENT
     //
-    //  Panels slide out from under the bar - just like SwayNC
-    //  and the audio panel used to, so everything opens in the same place.
+    //  Panels open right under the bar, so everything opens in the same place.
     //
     //  44 px is the bottom edge of the bar pill:
     //      6 px  bar margin-top    (config.jsonc)
     //    + 38 px bar height        (config.jsonc)
     //    = 44
     //
-    //  Before the rebuild this was 41, because the pill had
-    //  "margin: 3px 0" in style.css and was 6 px shorter than the bar layer - and at 44
-    //  the panel attached to the LAYER and left a strip of wallpaper. The left corner
-    //  with the HUD (three stat bars and a row of desktops) does not fit
-    //  in 32 px, so the pills got the full 38 px and the margin went away.
-    //  The bar, HUD and panels are now computed from one pair of numbers.
+    //  The pills have no vertical margin (style.css) and take the full 38 px:
+    //  the left corner with the HUD (three stat bars and a row of desktops)
+    //  does not fit in less. A margin there would make the pill shorter than
+    //  the bar layer, and a panel at 44 px would leave a strip of wallpaper.
+    //  The bar, HUD and panels are computed from one pair of numbers.
     //
     //  Deliberately WITHOUT a gap. SwayNC and the audio panel add another
     //  6 px of slack (hence their 50) and so look like separate windows

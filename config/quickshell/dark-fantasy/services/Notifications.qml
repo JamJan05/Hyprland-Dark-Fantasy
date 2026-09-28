@@ -6,9 +6,8 @@ pragma Singleton
 // in services/Brightness.qml.
 
 // -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- --
-//  NOTIFICATIONS - NOW OUR OWN DAEMON.
+//  NOTIFICATIONS - THE SHELL IS THE DAEMON.
 //
-//  This is the change after which SwayNC is no longer needed.
 //  Quickshell registers on D-Bus under the name
 //  org.freedesktop.Notifications, and from then on all
 //  notifications in the system go through here.
@@ -141,10 +140,8 @@ Singleton {
         }
     }
 
-    // The bar no longer gets a signal when the counter changes (formerly
-    // SIGRTMIN+9 for the "custom/powiadomienia" bell). The bell left
-    // Waybar, and the pending count is shown by the corner of the Tidings tile, which
-    // binds to "count" directly.
+    // No signal to the bar when the counter changes: the pending count is
+    // shown by the corner of the Tidings tile, which binds to "count" directly.
 
     // ---------------------------------------------------------------
     //  ACTIONS

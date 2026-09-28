@@ -7,8 +7,8 @@ pragma ComponentBehavior: Bound
 //
 //      [Arsenal] [Satchel] [Status] [Tidings] [Cogwheel] [Bonfire]
 //
-//  Replaced the dock and the app menu window. One element instead of two:
-//  six tiles, and the content of each opens ABOVE the row.
+//  The dock and the app menu in one element: six tiles, and the content of
+//  each opens ABOVE the row.
 //
 //  ---------------------------------------------------------------
 //  TWO STATES
@@ -32,28 +32,25 @@ pragma ComponentBehavior: Bound
 //  program grid in the Arsenal). On level 1 keys go to the content,
 //  and whatever it does not handle (Esc on an empty search) goes back to the row.
 //  Starting to type on the row at a tile with content moves straight
-//  into it - SUPER+R and typing a program name works like in the old menu.
+//  into it - SUPER+R and typing a program name is enough to find it.
 //
 //  MOUSE: ONE CLICK USES THE TILE.
 //
-//  The first version worked like a menu tab in the game: the first click
-//  opened the pause with the tile description, only the second one used it. In the game this
-//  makes sense, because the tab's content is visible above it right away. Here most tiles
-//  open a window or launch a program, so the result was dimming the
-//  screen before every launch - Janek found it odd and was
-//  right. Now a click uses the tile right away: a tile with an action performs it,
-//  a tile with its own content (Arsenal, Tidings, Cogwheel, Bonfire)
-//  opens it in the pause above the row.
+//  Not like a menu tab in the game (first click shows the description, the
+//  second uses it). In the game that makes sense, because the tab's content is
+//  visible above it right away. Here most tiles open a window or launch a
+//  program, so it would mean dimming the screen before every launch. A click
+//  uses the tile right away: a tile with an action performs it, a tile with
+//  its own content (Arsenal, Tidings, Cogwheel, Bonfire) opens it in the
+//  pause above the row.
 //
 //  The pause state is held by shell.qml, like the state of every panel - the row asks
 //  for a change with a signal. What using a tile does is also decided by shell.qml:
 //  it opens existing panels and launches programs.
 //
 //  ---------------------------------------------------------------
-//  HIDING - CARRIED OVER 1:1 FROM THE OLD DOCK
+//  HIDING
 //
-//  The same rule and the same implementation as in the dock the row replaced
-//  (and before that in config/hypr/dock.lua with nwg-dock):
 //      empty desktop                 -> row visible
 //      a window appears              -> row hides
 //      last window closed            -> comes back
@@ -61,19 +58,18 @@ pragma ComponentBehavior: Bound
 //      cursor on the row             -> stays
 //      cursor moved away             -> hides again after 0.45 s
 //  Cursor detection is an input mask (a 3 px strip at the edge plus the row
-//  outline) and a HoverHandler - no polling and no background timers. dock.lua
-//  had to poll the cursor position every 120 ms, because the hidden GTK dock did not
-//  know the mouse was over it. Here the layer window never disappears -
-//  only its mask changes, so moving into the strip at the edge is
-//  an ordinary hover event.
+//  outline) and a HoverHandler - no polling and no background timers. The
+//  layer window never disappears - only its mask changes, so moving into the
+//  strip at the edge is an ordinary hover event. (A dock that really hides
+//  does not know the mouse is over it and has to poll the cursor position.)
 //
 //  The strip is narrow on purpose: everything that passes through it is
 //  taken away from the window underneath, and within 3 px of the screen edge you
 //  cannot meaningfully aim anyway. The pitfalls (Hyprland's lazy models, Region.item)
 //  are described next to the code below.
 //
-//  Hiding is the same crossfade - the dock also slid down, but the theme
-//  no longer allows any motion other than crossfading.
+//  Hiding is a crossfade, not a slide - the theme allows no motion other
+//  than crossfading.
 //
 //  THE WELCOME LAYOUT (local/bin/uklad-startowy) opens three windows after login,
 //  so the row starts hidden - an intended consequence of the rule
@@ -230,7 +226,7 @@ PanelWindow {
     }
 
     // ---------------------------------------------------------------
-    //  WHAT IS ON THE DESKTOP - 1:1 from the old dock.
+    //  WHAT IS ON THE DESKTOP
     // ---------------------------------------------------------------
     readonly property var pulpit: Hyprland.focusedWorkspace
 
@@ -246,7 +242,7 @@ PanelWindow {
     // only once the data arrives. We do NOT call refreshWorkspaces() here "just
     // to be safe": called too early, before the IPC socket is up, it leaves
     // desktops without identifiers (id = -1) in the model and focusedWorkspace
-    // empty forever. Verified with the dock - the binding alone is enough.
+    // empty forever. Verified - the binding alone is enough.
     readonly property var okna: pulpit ? pulpit.toplevels.values : []
 
     // The scratchpad counts as "desktop occupied", but only when it is
@@ -274,8 +270,8 @@ PanelWindow {
 
     // Delay before hiding. Without it, sliding two pixels off a tile -
     // or moving the mouse diagonally - would hide the row exactly when
-    // you are aiming at something. 450 ms is the value from the old dock.lua (4 ticks
-    // of 120 ms), carried through the dock unchanged.
+    // you are aiming at something. 450 ms is long enough for that and still
+    // feels immediate.
     Timer {
         id: chowanie
         interval: 450
@@ -301,8 +297,8 @@ PanelWindow {
     //  INPUT MASK - see "ONE FULLSCREEN WINDOW" in the header.
     //
     //  Numbers, not Region.item. Region has an "item" property, which
-    //  was the obvious choice - and in the dock it did not work: it lost the cursor
-    //  the moment it moved from the trigger strip onto the icons, because the outline
+    //  was the obvious choice - and it did not work: the mask lost the cursor
+    //  the moment it moved from the trigger strip onto the tiles, because the outline
     //  never made it into the mask at all. The same region given as a rectangle works.
     // ---------------------------------------------------------------
     mask: Region {

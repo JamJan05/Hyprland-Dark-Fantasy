@@ -21,10 +21,10 @@ pragma Singleton
 //    3. Generic program icon. Only when that one is missing too do we return an empty
 //       string, and the tile shows its own glyph.
 //
-//  Previously the menu and dock called Quickshell.iconPath() directly, and the shell
-//  had no icon theme set - Qt then searched only
-//  in hicolor and lost everything that exists only in breeze: the Konsole terminal,
-//  system settings, system monitor, printers.
+//  Why not Quickshell.iconPath() directly: without an icon theme set, Qt
+//  searches only in hicolor and loses everything that exists only in a full
+//  theme such as breeze - the Konsole terminal, system settings, system
+//  monitor, printers.
 // -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- --
 
 import Quickshell

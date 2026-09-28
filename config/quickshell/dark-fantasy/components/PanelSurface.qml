@@ -32,11 +32,11 @@
 //
 //  FADE ONLY.
 //
-//  There used to be a grow-in from 87% scale (mirroring the windows' "popin 87%")
-//  and a 12 px slide from under the bar. Both went away together with Hyprland's
-//  window popin: in Dark Souls style a panel emerges from darkness rather than popping out.
-//  The offset remained as an option (slideDistance) - zero by default,
-//  and the OSD uses Theme.driftDistance, same as notification popups.
+//  No scaling and no slide from under the bar: in Dark Souls style a panel
+//  emerges from darkness rather than popping out - the same as the windows,
+//  which only fade ("popin 100%" in hyprland.lua). An offset is still possible
+//  (slideDistance) - zero by default; the OSD uses Theme.driftDistance, same
+//  as notification popups.
 //
 //  Grain lies under the card's content (components/Szum.qml) - "ash,
 //  not smooth black".

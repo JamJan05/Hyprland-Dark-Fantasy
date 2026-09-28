@@ -124,9 +124,9 @@ sddm/dark-fantasy/backgrounds/*
 # Plasma theme change. Versioning them would mean constant, useless changes
 # in the repo.
 #
-# gtk.css used to be listed here along with them - and it is NOT anymore. Since the
-# Dark Souls-style rebuild it is a hand-written palette for adw-gtk3 and libadwaita
-# (config/gtk-3.0/gtk.css, config/gtk-4.0/gtk.css), so it belongs in the repo.
+# gtk.css is NOT listed here although kde-gtk-config can write it too: it is a
+# hand-written palette for adw-gtk3 and libadwaita (config/gtk-3.0/gtk.css,
+# config/gtk-4.0/gtk.css), so it belongs in the repo.
 config/gtk-3.0/colors.css
 config/gtk-3.0/window_decorations.css
 config/gtk-4.0/colors.css

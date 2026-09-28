@@ -1,16 +1,16 @@
 // -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- --
 //  TILE CONTENT - the panel above the row in pause mode.
 //
-//  In the game, the content of the chosen menu tab opens above it. Here each
-//  tile gets its own content in successive stages of the rebuild:
+//  In the game, the content of the chosen menu tab opens above it. Four
+//  tiles have their own content:
 //
 //      Arsenal     program grid with item description     kafle/Uzbrojenie.qml
 //      Tidings     notification history                   kafle/Wiesci.qml
+//      Cogwheel    settings                               kafle/Zebatka.qml
 //      Bonfire     session menu                           kafle/Ognisko.qml
-//      Cogwheel    settings                               (stage 7)
 //
-//  Tiles without their own content (Satchel, Status, for now Cogwheel) get
-//  this panel in pause: a description and what Enter will do - open the
+//  The tiles without it (Satchel, Status) get this panel when they are
+//  selected in pause: a description and what Enter will do - open the
 //  existing window or launch a program.
 //
 //  Frame, background and grain the same as in every shell panel.

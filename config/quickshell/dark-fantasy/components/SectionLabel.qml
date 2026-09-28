@@ -1,9 +1,8 @@
 // -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- --
 //  SECTION HEADER - the caption "Sound", "Display", "Power".
 //
-//  Before the redesign this was the ".sekcja" class from panel-audio.css: 11 px mono,
-//  bold, all caps, gold color. In Dark Souls style a section label
-//  is an inscription, not an alarm: EB Garamond in SMALL CAPS, letter-spaced
+//  In Dark Souls style a section label is an inscription, not an alarm - so
+//  not bold gold capitals, but EB Garamond in SMALL CAPS, letter-spaced
 //  by 1.75 px, in the text color #d7d0c5.
 //
 //  Gold stays reserved for the "this is active" state (selection, border of

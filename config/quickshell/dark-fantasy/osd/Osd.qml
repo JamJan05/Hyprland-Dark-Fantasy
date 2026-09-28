@@ -2,10 +2,9 @@
 //  OSD - a brief preview when volume, brightness or the
 //  power profile changes, and on mute.
 //
-//  It exists because volume and brightness disappeared from Waybar.
-//  The XF86Audio* and XF86MonBrightness* keys still work - they are handled
-//  by hyprland.lua - but without the bar they no longer gave any confirmation
-//  on screen. This is that confirmation.
+//  Waybar has no volume or brightness modules, so the XF86Audio* and
+//  XF86MonBrightness* keys (handled by hyprland.lua) would give no
+//  confirmation on screen. This is that confirmation.
 //
 //  ---------------------------------------------------------------
 //  THERE IS NO SECOND SOURCE OF VOLUME HERE
@@ -233,10 +232,9 @@ PanelWindow {
                     color: Theme.textMuted
                 }
 
-                // For the power profile there is no bar. It used to be here showing the level
-                // (power saver / balanced / performance), but the profile name next to it
-                // varies in length, so the bar changed width on every
-                // switch - and the name tells the level anyway.
+                // No bar for the power profile: the profile name next to it varies
+                // in length, so the bar would change width on every switch - and
+                // the name tells the level anyway.
                 ProgressBar {
                     width: parent.width
                     visible: root.rodzaj !== "profil"

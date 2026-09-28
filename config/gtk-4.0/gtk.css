@@ -8,9 +8,9 @@
    for every application - both old GTK 3 ones and new libadwaita ones -
    to get our palette without touching the theme itself.
 
-   Breeze with Plasma modules used to be here (gtk-modules=colorreload-gtk-module:
-   window-decorations-gtk-module). Outside a Plasma session nothing can
-   feed those modules, so they went away together with Breeze.
+   No Plasma GTK modules (gtk-modules=colorreload-gtk-module:
+   window-decorations-gtk-module): outside a Plasma session nothing can
+   feed them.
 
    KDE WARNING: kde-gtk-config writes its own gtk.css when the theme is
    changed in Plasma System Settings. install.sh treats that as a local

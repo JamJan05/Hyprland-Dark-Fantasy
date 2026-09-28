@@ -146,7 +146,7 @@ for f in config.jsonc style.css; do
     kopiuj "config/waybar/$f" "$HOME/.config/waybar/$f"
 done
 
-# SwayNC is NO LONGER the notification daemon - Quickshell took that over
+# SwayNC is NOT the notification daemon - Quickshell is
 # (config/quickshell/dark-fantasy, services/Notifications.qml), and SwayNC
 # is not started from the autostart in hyprland.lua.
 #

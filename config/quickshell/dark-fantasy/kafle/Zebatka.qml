@@ -6,8 +6,8 @@
 //  the sections it is built from live there too.
 //
 //  It is opened by the tile, SUPER+U (GlobalShortcut "systemToggle" in shell.qml)
-//  and "qs -c dark-fantasy ipc call system toggle". The Cogwheel on Waybar
-//  is gone - there is a single way into settings, in the tile menu.
+//  and "qs -c dark-fantasy ipc call system toggle". There is a single way into
+//  settings - no cogwheel on Waybar.
 //
 //  Fixed size: the frame must not jump when the section changes, because every
 //  jump moves the line above the row and looks like a glitch.

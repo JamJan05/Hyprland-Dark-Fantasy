@@ -16,8 +16,7 @@
 //  would first have to fade out and only then light up as the new one,
 //  and for a moment the emblem would be empty.
 //
-//  The mouse wheel over the emblem changes the floor (up = higher), just like
-//  the wheel over the old floor pill on Waybar.
+//  The mouse wheel over the emblem changes the floor (up = higher).
 // -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- --
 
 import QtQuick
