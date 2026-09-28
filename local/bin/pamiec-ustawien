@@ -164,7 +164,14 @@ ustaw_jasnosc() {
     [[ $v =~ ^[0-9]+$ && -r $1/max_brightness ]] || return 0
     read -r max < "$1/max_brightness" || return 0
     (( v > max )) && v=$max
-    (( v < max * $3 / 100 )) && v=$(( max * $3 / 100 ))
+    # The minimum rounded up and at least 1 - with 16 levels, 5 % of 15
+    # would otherwise be 0 (the same rule as openrc/dark-fantasy-stan).
+    local min=0
+    if (( $3 > 0 && max > 0 )); then
+        min=$(( (max * $3 + 99) / 100 ))
+        (( min < 1 )) && min=1
+    fi
+    (( v < min )) && v=$min
     brightnessctl -q -d "${1##*/}" set "$v" >/dev/null 2>&1
 }
 
@@ -198,16 +205,36 @@ przywroc() {
     # WirePlumber applies its own saved route volume when the device appears.
     # Going after it means the more recent value from this file wins.
     sleep 2
+    local przed_glosnik przed_mikrofon
+    przed_glosnik=$(wpctl get-volume @DEFAULT_AUDIO_SINK@ 2>/dev/null)
+    przed_mikrofon=$(wpctl get-volume @DEFAULT_AUDIO_SOURCE@ 2>/dev/null)
     przywroc_audio @DEFAULT_AUDIO_SINK@   glosnik
     przywroc_audio @DEFAULT_AUDIO_SOURCE@ mikrofon
 
     # Its route volume can still land AFTER ours (WirePlumber writes and
     # applies it with a delay), and the save loop below would then record the
-    # older value as the new state. So once more, a few seconds later - the
-    # loop does not start until this returns.
+    # older value as the new state. So a few seconds later, once more - but
+    # only where the volume went back to exactly what WirePlumber had before
+    # our restore. Anything else is a change made meanwhile (a volume key, the
+    # OSD) and stays. The loop does not start until this returns.
     sleep 5
-    przywroc_audio @DEFAULT_AUDIO_SINK@   glosnik
-    przywroc_audio @DEFAULT_AUDIO_SOURCE@ mikrofon
+    ponow_audio @DEFAULT_AUDIO_SINK@   glosnik  "$przed_glosnik"
+    ponow_audio @DEFAULT_AUDIO_SOURCE@ mikrofon "$przed_mikrofon"
+}
+
+# $1 = wpctl target, $2 = key prefix, $3 = "wpctl get-volume" output from
+# before the first restore. Restores again only when the current state is
+# that one again and it differs from the saved state.
+ponow_audio() {
+    local teraz
+    [[ -n $3 ]] || return 0
+    teraz=$(wpctl get-volume "$1" 2>/dev/null) || return 0
+    [[ $teraz == "$3" ]] || return 0
+    [[ $teraz =~ Volume:\ ([0-9.]+) ]] || return 0
+    local wyciszony=0
+    [[ $teraz == *MUTED* ]] && wyciszony=1
+    [[ ${BASH_REMATCH[1]} == "${stan[${2}_glosnosc]:-}" && $wyciszony == "${stan[${2}_wyciszony]:-0}" ]] && return 0
+    przywroc_audio "$1" "$2"
 }
 
 # $1 = wpctl target, $2 = saved node name (empty = any node will do),
