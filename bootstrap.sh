@@ -316,11 +316,19 @@ fi
 USLUGA=/etc/init.d/dark-fantasy-stan
 if [[ "$INIT" != "openrc" ]]; then
     ok "not OpenRC - skipping $USLUGA"
-elif [[ -f "$USLUGA" ]] && cmp -s "$REPO_DIR/openrc/dark-fantasy-stan" "$USLUGA"; then
-    ok "$USLUGA already installed"
 else
-    run sudo install -o root -g root -m 0755 "$REPO_DIR/openrc/dark-fantasy-stan" "$USLUGA"
-    run sudo rc-update add dark-fantasy-stan default
+    if [[ -f "$USLUGA" ]] && cmp -s "$REPO_DIR/openrc/dark-fantasy-stan" "$USLUGA"; then
+        ok "$USLUGA already installed"
+    else
+        run sudo install -o root -g root -m 0755 "$REPO_DIR/openrc/dark-fantasy-stan" "$USLUGA"
+    fi
+    # Checked separately from the file: an up-to-date script that is not in
+    # the runlevel would never run.
+    if rc-update show default 2>/dev/null | grep -qw dark-fantasy-stan; then
+        ok "dark-fantasy-stan already in the default runlevel"
+    else
+        run sudo rc-update add dark-fantasy-stan default
+    fi
 fi
 
 # ------------------------------------------------------------------ finish
