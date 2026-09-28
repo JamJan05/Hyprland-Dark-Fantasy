@@ -227,6 +227,8 @@ PAKIETY=(
     # but the corresponding elements will be empty or show an "unavailable" state.
     sys-power/power-profiles-daemon   # power profile in the Cogwheel
     net-wireless/bluez                # Bluetooth: bar and Cogwheel
+    dev-python/dbus-python            # Bluetooth pairing agent (local/bin/df-agent-bt)
+    dev-python/pygobject              # its main loop
 
     # File manager behind SUPER+W (fileManager variable in hyprland.lua).
     # Yazi is a terminal program, so it is launched by the

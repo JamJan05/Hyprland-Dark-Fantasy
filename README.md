@@ -57,7 +57,7 @@ After `--apply` the files in `~/.config` are copies, so the repository folder ca
 - **Hyprland 0.56+** with the Lua config, **Quickshell** (tested with 0.3.1), **Waybar** with USE `backlight network wifi mpris tray pipewire pulseaudio upower`.
 - hyprlock, hypridle, hyprpaper (0.8 syntax), hyprshot, wl-clipboard + cliphist, rofi-wayland, hyprpolkitagent, xdg-desktop-portal-hyprland.
 - PipeWire + WirePlumber, playerctl, brightnessctl, power-profiles-daemon and BlueZ. The network section relies on NetworkManager and the battery readout on UPower.
-- kitty, yazi, btop, tty-clock, jq, Pillow (`dev-python/pillow`).
+- kitty, yazi, btop, tty-clock, jq, Pillow (`dev-python/pillow`), and dbus-python + PyGObject for the Bluetooth pairing agent.
 - Fonts: **EB Garamond** and **JetBrainsMono Nerd Font** (`media-fonts/nerdfonts` with USE `jetbrainsmono`).
 - Theme: **adw-gtk3**, **Papirus-Dark** icons, **Bibata-Original-Classic** cursor.
 
@@ -72,7 +72,8 @@ sudo emerge --ask --verbose --changed-use \
   gui-libs/xdg-desktop-portal-hyprland media-fonts/nerdfonts media-sound/playerctl \
   media-video/pipewire media-video/wireplumber gui-apps/grim gui-apps/slurp \
   app-misc/jq x11-terms/kitty app-misc/brightnessctl \
-  sys-power/power-profiles-daemon net-wireless/bluez app-misc/yazi app-misc/tty-clock \
+  sys-power/power-profiles-daemon net-wireless/bluez dev-python/dbus-python dev-python/pygobject \
+  app-misc/yazi app-misc/tty-clock \
   media-fonts/eb-garamond x11-themes/adw-gtk3 x11-themes/papirus-icon-theme \
   x11-themes/bibata-xcursors sys-process/btop dev-python/pillow gui-apps/quickshell
 ```

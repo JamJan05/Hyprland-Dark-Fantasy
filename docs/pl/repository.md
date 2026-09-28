@@ -65,6 +65,7 @@ Nazwy plików i identyfikatorów w kodzie są w dużej części polskie (`kafle`
 | `monitor-systemu` | Kafel Status | btop w oknie panelu: klasa `df-panel` (reguła w `hyprland.lua`) i osobny config kitty `panel.conf` |
 | `limit-ladowania` | Zębatka → Zasilanie, terminal | Odczytuje albo ustawia progi ładowania baterii we właściwej kolejności; bez prawa zapisu woła `pkexec` |
 | `pamiec-ustawien` | Autostart | Przywraca jasność ekranu i podświetlenie klawiatury, głośność i wyciszenie sprzed wyłączenia, potem co kilka sekund zapisuje je do `~/.local/state/dark-fantasy/ustawienia-sprzetu`. Num Lock z tego samego pliku czyta `hyprland.lua`. |
+| `df-agent-bt` | Autostart | Agent parowania Bluetooth (NoInputNoOutput). Bez agenta BlueZ w ogóle nie paruje. Zgadza się na parowanie i usługi tylko dla urządzeń oznaczonych jako zaufane, co Zębatka robi przed parowaniem. |
 | `uklad-startowy` | Autostart | Buduje układ powitalny: terminal i `tty-clock` po lewej, yazi po prawej. Pomija, gdy na pulpicie jest już okno. |
 | `df-jezyk` | Skrypty Waybara, hyprlock | Wypisuje język interfejsu, `en` albo `pl` |
 | `waybar-data` | `custom/data` | Data obok zegara w języku interfejsu, bez zera wiodącego |

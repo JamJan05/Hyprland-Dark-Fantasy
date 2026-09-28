@@ -205,6 +205,11 @@ local function autostart(atLogin)
    -- so plain "hyprpolkitagent" won't launch anything.
    run_once("/usr/libexec/hyprpolkitagent", "pgrep -x hyprpolkitagent")
 
+   -- Bluetooth pairing agent. Without one, BlueZ refuses to pair at all
+   -- (headphones: "Connected", then dropped). Details in ~/.local/bin/df-agent-bt;
+   -- it renames its process to "df-agent-bt", so the default check works.
+   run_once("df-agent-bt")
+
    -- Clipboard history. wl-paste in --watch mode sits in the background and on every
    -- change of the clipboard contents appends an entry to the cliphist database.
    -- Two separate instances, because the MIME types of text and images are disjoint.

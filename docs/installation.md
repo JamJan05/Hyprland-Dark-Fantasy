@@ -82,7 +82,8 @@ sudo emerge --ask --verbose --changed-use \
   gui-libs/xdg-desktop-portal-hyprland media-fonts/nerdfonts media-sound/playerctl \
   media-video/pipewire media-video/wireplumber gui-apps/grim gui-apps/slurp \
   app-misc/jq x11-terms/kitty app-misc/brightnessctl \
-  sys-power/power-profiles-daemon net-wireless/bluez app-misc/yazi app-misc/tty-clock \
+  sys-power/power-profiles-daemon net-wireless/bluez dev-python/dbus-python dev-python/pygobject \
+  app-misc/yazi app-misc/tty-clock \
   media-fonts/eb-garamond x11-themes/adw-gtk3 x11-themes/papirus-icon-theme \
   x11-themes/bibata-xcursors sys-process/btop dev-python/pillow gui-apps/quickshell
 ```

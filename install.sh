@@ -205,7 +205,7 @@ info "Quickshell (HUD, tile row, panels, OSD, notifications)"
 kopiuj config/quickshell/dark-fantasy "$HOME/.config/quickshell/dark-fantasy"
 
 info "Helper scripts (called by Waybar and keybindings)"
-for f in df-jezyk limit-ladowania menedzer-plikow monitor-systemu pamiec-ustawien uklad-startowy waybar-data waybar-okladka waybar-odtwarzacz waybar-temperatura zrzut-ekranu; do
+for f in df-agent-bt df-jezyk limit-ladowania menedzer-plikow monitor-systemu pamiec-ustawien uklad-startowy waybar-data waybar-okladka waybar-odtwarzacz waybar-temperatura zrzut-ekranu; do
     kopiuj "local/bin/$f" "$HOME/.local/bin/$f"
 done
 
