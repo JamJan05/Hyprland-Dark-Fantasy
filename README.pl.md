@@ -76,7 +76,7 @@ sudo emerge --ask --verbose --changed-use \
   x11-themes/bibata-xcursors sys-process/btop dev-python/pillow gui-apps/quickshell
 ```
 
-Najpierw skopiuj `gentoo/package.accept_keywords/hyprland-desktop` i `gentoo/package.use/hyprland-desktop` do `/etc/portage/`. SDDM nie ma na liście; zainstaluj go sam, jeśli chcesz motyw logowania.
+Najpierw skopiuj `gentoo/package.accept_keywords/hyprland-desktop` i `gentoo/package.use/hyprland-desktop` do `/etc/portage/`, a potem podnieś libwayland: `sudo emerge --ask --oneshot --update ">=dev-libs/wayland-1.26.0"` (Hyprland 0.56 nie działa ze stabilnym 1.25). SDDM nie ma na liście; zainstaluj go sam, jeśli chcesz motyw logowania.
 
 </details>
 

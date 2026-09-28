@@ -32,8 +32,8 @@ What `--apply` does, in order:
 2. Asks for the `sudo` password once, up front. With `curl | bash` it reads the password from `/dev/tty`.
 3. Enables the **GURU** and **hyproverlay** overlays with `eselect repository` and syncs them.
 4. Clones the repository into `~/hyprland-dark-fantasy`. Set `HYPR_REPO_DIR` to use a different path. If the script is run from inside a clone, it uses that clone.
-5. Copies `gentoo/package.accept_keywords/hyprland-desktop` and `gentoo/package.use/hyprland-desktop` into `/etc/portage/`, unless they already exist.
-6. Installs the packages with `emerge --ask --verbose --changed-use`. Compiling Hyprland and the Qt dependencies takes a while.
+5. Copies `gentoo/package.accept_keywords/hyprland-desktop` and `gentoo/package.use/hyprland-desktop` into `/etc/portage/`, unless they already exist. If Portage still cannot see `dev-libs/wayland` 1.26 (an older copy of the file), it appends that one entry.
+6. Upgrades `dev-libs/wayland` to 1.26 (`emerge --oneshot --update`), then installs the packages with `emerge --ask --verbose --changed-use`. Compiling Hyprland and the Qt dependencies takes a while.
 7. Runs `install.sh --apply`.
 8. Installs the battery udev rule, but only if the battery exposes charge thresholds.
 
@@ -63,6 +63,12 @@ Copy the Portage files. They add keywords for the `~amd64` packages and the USE 
 ```sh
 sudo cp gentoo/package.accept_keywords/hyprland-desktop /etc/portage/package.accept_keywords/
 sudo cp gentoo/package.use/hyprland-desktop             /etc/portage/package.use/
+```
+
+Hyprland 0.56 does not work with the stable `dev-libs/wayland` 1.25, and 1.26 is still `~amd64`. The file above unmasks it; upgrade it first, as a dependency only:
+
+```sh
+sudo emerge --ask --oneshot --update ">=dev-libs/wayland-1.26.0"
 ```
 
 Install the same list as the `PAKIETY` array in `bootstrap.sh`:

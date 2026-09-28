@@ -18,7 +18,7 @@
 #   2. enables the GURU and hyproverlay overlays with eselect repository,
 #   3. syncs them,
 #   4. installs the package.accept_keywords and package.use files,
-#   5. installs the packages,
+#   5. upgrades dev-libs/wayland to 1.26 and installs the packages,
 #   6. clones the repository,
 #   7. runs install.sh --apply, which copies the configuration.
 #
@@ -181,6 +181,20 @@ step "Keywords and USE flags"
 fetch_portage package.accept_keywords
 fetch_portage package.use
 
+# libwayland 1.26 - reason in gentoo/package.accept_keywords/hyprland-desktop.
+# fetch_portage skips a file that already exists, so a copy from before this
+# entry was added gets the line appended. portageq asks Portage itself, so
+# a keyword set in any other file counts as well.
+WAYLAND_ATOM=">=dev-libs/wayland-1.26.0"
+KEYWORDS_FILE=/etc/portage/package.accept_keywords/hyprland-desktop
+if [[ -n "$(portageq best_visible / "$WAYLAND_ATOM" 2>/dev/null)" ]]; then
+    ok "dev-libs/wayland 1.26 is visible to Portage"
+elif [[ -f "$KEYWORDS_FILE" ]]; then
+    run sudo sh -c "printf '%s\n' '$WAYLAND_ATOM ~amd64' >> '$KEYWORDS_FILE'"
+else
+    plan "the copied package.accept_keywords/hyprland-desktop will unmask $WAYLAND_ATOM"
+fi
+
 # --------------------------------------------------------------- packages
 
 step "Packages"
@@ -250,11 +264,19 @@ printf '  %s%d packages:%s %s\n' "$c_dim" "${#PAKIETY[@]}" "$c_off" "${PAKIETY[*
 
 # --changed-use rebuilds whatever had its flags changed - in practice
 # Waybar, which without USE="wifi" does not show the network signal strength.
+#
+# libwayland first, as a separate --oneshot: it is only a dependency, so it
+# should not land in the world file, and plain "emerge hyprland" would not
+# upgrade an already installed 1.25 (no --deep). Nothing happens if 1.26 or
+# newer is already installed.
 if [[ "$APPLY" == 1 ]]; then
+    sudo emerge --ask --verbose --oneshot --update "$WAYLAND_ATOM" \
+        || die "emerge of $WAYLAND_ATOM failed. Fix the problem and run the script again."
     warn "This will take a while. Hyprland and the Qt dependencies take long to compile."
     sudo emerge --ask --verbose --changed-use "${PAKIETY[@]}" \
         || die "emerge failed. Fix the problem and run the script again."
 else
+    plan "sudo emerge --ask --verbose --oneshot --update \"$WAYLAND_ATOM\""
     plan "sudo emerge --ask --verbose --changed-use <the packages above>"
 fi
 
