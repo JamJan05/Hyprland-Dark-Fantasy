@@ -330,6 +330,21 @@ hl.env("XCURSOR_THEME", "Bibata-Original-Classic")
 -- scaling, so at a scale other than 1 such windows are blurry.
 hl.env("ELECTRON_OZONE_PLATFORM_HINT", "auto")
 
+-- ~/.local/bin in PATH. The helper scripts installed there (uklad-startowy,
+-- df-agent-bt, pamiec-ustawien, menedzer-plikow, df-jezyk in hyprlock.conf)
+-- are called by bare name. Hyprland inherits PATH from the login, and
+-- Gentoo's base PATH does not include ~/.local/bin - only config.fish adds
+-- it, and fish is optional. Without this, with a bash login shell all of
+-- them failed silently (run_once sends output to /dev/null).
+-- The check keeps a reload from adding the directory a second time.
+do
+    local bin = (os.getenv("HOME") or "") .. "/.local/bin"
+    local path = os.getenv("PATH") or ""
+    if (":" .. path .. ":"):find(":" .. bin .. ":", 1, true) == nil then
+        hl.env("PATH", path == "" and bin or (bin .. ":" .. path))
+    end
+end
+
 -- Disables Hyprland's native cursor format (hyprcursor). This way
 -- the compositor is sure to use the regular XCursor theme set above,
 -- and not its own default cursor.
