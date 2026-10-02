@@ -32,7 +32,7 @@ What `--apply` does, in order:
 2. Asks for the `sudo` password once, up front. With `curl | bash` it reads the password from `/dev/tty`.
 3. Enables the **GURU** and **hyproverlay** overlays with `eselect repository` and syncs them.
 4. Clones the repository into `~/Hyprland-Dark-Fantasy`. If there is no clone there yet but there is one in `~/hyprland-dark-fantasy` (the earlier default), and `HYPR_REPO_DIR` is not set, it uses that one. Set `HYPR_REPO_DIR` to use a different path. If the script is run from inside a clone and `HYPR_REPO_DIR` is not set, it uses that clone. If the target path is occupied by something that is not a clone, the script stops and says so instead of touching it.
-5. Copies `gentoo/package.accept_keywords/hyprland-desktop` and `gentoo/package.use/hyprland-desktop` into `/etc/portage/`, unless they already exist. If Portage still cannot see `dev-libs/wayland` 1.26 (an older copy of the file), it appends that one entry.
+5. Copies `gentoo/package.accept_keywords/hyprland-desktop` and `gentoo/package.use/hyprland-desktop` into `/etc/portage/`. An existing copy that differs from the repository is replaced, and the old one is kept as a hidden `.hyprland-desktop.bak-<date>` (Portage skips hidden files). If Portage still cannot see `dev-libs/wayland` 1.26, it appends that one entry.
 6. Upgrades `dev-libs/wayland` to 1.26 (`emerge --oneshot --update`), then installs the packages with `emerge --ask --verbose --changed-use`. Compiling Hyprland and the Qt dependencies takes a while.
 7. Runs `install.sh --apply`.
 8. Installs the battery udev rule, but only if the battery exposes charge thresholds.

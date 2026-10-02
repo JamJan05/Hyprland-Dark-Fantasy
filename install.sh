@@ -33,6 +33,13 @@ APPLY=0
 
 MANIFEST="${XDG_STATE_HOME:-$HOME/.local/state}/dark-fantasy/instalacja.sha256"
 
+# Where the programs look: Hyprland, Quickshell, Waybar and the rest read
+# $XDG_CONFIG_HOME, and D-Bus looks for .service files in $XDG_DATA_HOME.
+# With a custom XDG_CONFIG_HOME the files used to land in ~/.config, where
+# nothing read them.
+KONFIG="${XDG_CONFIG_HOME:-$HOME/.config}"
+DANE="${XDG_DATA_HOME:-$HOME/.local/share}"
+
 info()  { printf '\033[0;36m%s\033[0m\n' "$*"; }
 ok()    { printf '  \033[0;32m✔\033[0m %s\n' "$*"; }
 warn()  { printf '  \033[0;33m!\033[0m %s\n' "$*"; }
@@ -55,14 +62,24 @@ suma() { sha256sum < "$1" | cut -d' ' -f1; }
 # Copy through a temporary file and a rename: a program reading the file at
 # that moment (Hyprland watches its config) never sees half of it, and the
 # rename also replaces an old symlink instead of writing through it.
+#
+# A failure is remembered in NIEUDANE, so that kopiuj_plik does not record
+# the repo checksum for a file that never got copied (see the end of it).
 wgraj() {  # $1 = source, $2 = target
-    mkdir -p "$(dirname "$2")" &&
-    cp -p "$1" "$2.tmp-$STAMP" &&
-    mv -f "$2.tmp-$STAMP" "$2"
+    if mkdir -p "$(dirname "$2")" &&
+       cp -p "$1" "$2.tmp-$STAMP" &&
+       mv -f "$2.tmp-$STAMP" "$2"; then
+        return 0
+    fi
+    rm -f "$2.tmp-$STAMP" 2>/dev/null
+    warn "copy FAILED: $2"
+    NIEUDANE=1
+    return 1
 }
 
 kopiuj_plik() {  # $1 = absolute source, $2 = absolute target
     local src="$1" dst="$2" hs hd stara
+    NIEUDANE=0
     hs=$(suma "$src")
     stara=${POPRZEDNIE[$dst]:-}
 
@@ -87,12 +104,24 @@ kopiuj_plik() {  # $1 = absolute source, $2 = absolute target
             if [[ "$APPLY" == 0 ]]; then
                 echo "  $dst  <-  ${src#"$REPO"/}  (your version goes to .bak-$STAMP)"
             else
-                mv "$dst" "$dst.bak-$STAMP" && wgraj "$src" "$dst"
-                warn "your version backed up as: $dst.bak-$STAMP"
+                if mv "$dst" "$dst.bak-$STAMP"; then
+                    warn "your version backed up as: $dst.bak-$STAMP"
+                    wgraj "$src" "$dst"
+                else
+                    warn "backup FAILED, left untouched: $dst"
+                    NIEUDANE=1
+                fi
             fi
         fi
     fi
-    OBECNE[$dst]=$hs
+    # A failed copy keeps the previous record. Recording the repo checksum
+    # anyway made the next run see "repo unchanged, system different" and
+    # keep the stale file for good as if it were a local change.
+    if [[ $NIEUDANE == 1 ]]; then
+        [[ -n $stara ]] && OBECNE[$dst]=$stara
+    else
+        OBECNE[$dst]=$hs
+    fi
 }
 
 kopiuj() {  # $1 = source in the repo (relative), $2 = absolute target
@@ -135,15 +164,15 @@ kopiuj() {  # $1 = source in the repo (relative), $2 = absolute target
 [[ "$APPLY" == 0 ]] && info "=== DRY RUN (add --apply to make the changes) ==="
 
 info "Hyprland"
-kopiuj config/hypr/hyprland.lua   "$HOME/.config/hypr/hyprland.lua"
-kopiuj config/hypr/floors.lua     "$HOME/.config/hypr/floors.lua"
-kopiuj config/hypr/hyprlock.conf  "$HOME/.config/hypr/hyprlock.conf"
-kopiuj config/hypr/hypridle.conf  "$HOME/.config/hypr/hypridle.conf"
-kopiuj config/hypr/hyprpaper.conf "$HOME/.config/hypr/hyprpaper.conf"
+kopiuj config/hypr/hyprland.lua   "$KONFIG/hypr/hyprland.lua"
+kopiuj config/hypr/floors.lua     "$KONFIG/hypr/floors.lua"
+kopiuj config/hypr/hyprlock.conf  "$KONFIG/hypr/hyprlock.conf"
+kopiuj config/hypr/hypridle.conf  "$KONFIG/hypr/hypridle.conf"
+kopiuj config/hypr/hyprpaper.conf "$KONFIG/hypr/hyprpaper.conf"
 
 info "Waybar"
 for f in config.jsonc style.css; do
-    kopiuj "config/waybar/$f" "$HOME/.config/waybar/$f"
+    kopiuj "config/waybar/$f" "$KONFIG/waybar/$f"
 done
 
 # SwayNC is NOT the notification daemon - Quickshell is
@@ -155,29 +184,29 @@ done
 # file at swaync is enough to switch back. Without these files, going back
 # would mean configuring it from scratch.
 info "SwayNC (inactive - config kept as a fallback)"
-kopiuj config/swaync/config.json "$HOME/.config/swaync/config.json"
-kopiuj config/swaync/style.css   "$HOME/.config/swaync/style.css"
+kopiuj config/swaync/config.json "$KONFIG/swaync/config.json"
+kopiuj config/swaync/style.css   "$KONFIG/swaync/style.css"
 
 # Fish: fastfetch moved here from /etc/fish/config.fish, where it sat without
 # the "status is-interactive" condition and also fired in non-interactive
 # shells, cluttering the output of "fish -c ...".
 info "fish shell"
-kopiuj config/fish/config.fish "$HOME/.config/fish/config.fish"
+kopiuj config/fish/config.fish "$KONFIG/fish/config.fish"
 # fastfetch without the local IP address - reason in the file's header.
-kopiuj config/fastfetch/config.jsonc "$HOME/.config/fastfetch/config.jsonc"
+kopiuj config/fastfetch/config.jsonc "$KONFIG/fastfetch/config.jsonc"
 
 info "rofi (clipboard history), kitty"
-kopiuj config/rofi/dark-fantasy.rasi      "$HOME/.config/rofi/dark-fantasy.rasi"
-kopiuj config/kitty/kitty.conf            "$HOME/.config/kitty/kitty.conf"
+kopiuj config/rofi/dark-fantasy.rasi      "$KONFIG/rofi/dark-fantasy.rasi"
+kopiuj config/kitty/kitty.conf            "$KONFIG/kitty/kitty.conf"
 # Second kitty config for the panel window (Status) - passed by the
 # monitor-systemu wrapper, see the panel.conf header.
-kopiuj config/kitty/panel.conf            "$HOME/.config/kitty/panel.conf"
+kopiuj config/kitty/panel.conf            "$KONFIG/kitty/panel.conf"
 
 # Themes for the terminal programs behind the Satchel and Status tiles.
 info "yazi and btop (palette themes)"
-kopiuj config/yazi/theme.toml              "$HOME/.config/yazi/theme.toml"
-kopiuj config/btop/btop.conf               "$HOME/.config/btop/btop.conf"
-kopiuj config/btop/themes/dark-fantasy.theme "$HOME/.config/btop/themes/dark-fantasy.theme"
+kopiuj config/yazi/theme.toml              "$KONFIG/yazi/theme.toml"
+kopiuj config/btop/btop.conf               "$KONFIG/btop/btop.conf"
+kopiuj config/btop/themes/dark-fantasy.theme "$KONFIG/btop/themes/dark-fantasy.theme"
 
 # GTK: settings.ini (adw-gtk3 theme, Papirus icons, Bibata cursor) and
 # gtk.css with the dark-fantasy palette and zero corner radius.
@@ -189,13 +218,13 @@ kopiuj config/btop/themes/dark-fantasy.theme "$HOME/.config/btop/themes/dark-fan
 # ~/.config/gtk-*/gtk.css and run ./install.sh --apply.
 info "GTK (look of GTK apps: theme, icons, cursor, palette)"
 for v in 3.0 4.0; do
-    kopiuj "config/gtk-$v/settings.ini" "$HOME/.config/gtk-$v/settings.ini"
-    kopiuj "config/gtk-$v/gtk.css"      "$HOME/.config/gtk-$v/gtk.css"
+    kopiuj "config/gtk-$v/settings.ini" "$KONFIG/gtk-$v/settings.ini"
+    kopiuj "config/gtk-$v/gtk.css"      "$KONFIG/gtk-$v/gtk.css"
 done
 
 info "xdg-desktop-portal"
 kopiuj config/xdg-desktop-portal/hyprland-portals.conf \
-       "$HOME/.config/xdg-desktop-portal/hyprland-portals.conf"
+       "$KONFIG/xdg-desktop-portal/hyprland-portals.conf"
 
 info "Quickshell (HUD, tile row, panels, OSD, notifications)"
 # The WHOLE directory is installed, not a list of files. The Quickshell
@@ -204,16 +233,16 @@ info "Quickshell (HUD, tile row, panels, OSD, notifications)"
 # to this script for every new component.
 #
 # Launch:  qs -c dark-fantasy
-kopiuj config/quickshell/dark-fantasy "$HOME/.config/quickshell/dark-fantasy"
+kopiuj config/quickshell/dark-fantasy "$KONFIG/quickshell/dark-fantasy"
 
 info "Helper scripts (called by Waybar and keybindings)"
-for f in df-agent-bt df-jezyk limit-ladowania menedzer-plikow monitor-systemu pamiec-ustawien uklad-startowy waybar-data waybar-okladka waybar-odtwarzacz waybar-temperatura zrzut-ekranu; do
+for f in df-agent-bt df-blokada df-jezyk limit-ladowania menedzer-plikow monitor-systemu pamiec-ustawien uklad-startowy waybar-data waybar-okladka waybar-odtwarzacz waybar-temperatura zrzut-ekranu; do
     kopiuj "local/bin/$f" "$HOME/.local/bin/$f"
 done
 
 info "Quickshell shell as the notification daemon (D-Bus)"
 kopiuj local/share/dbus-1/services/org.freedesktop.Notifications.service \
-       "$HOME/.local/share/dbus-1/services/org.freedesktop.Notifications.service"
+       "$DANE/dbus-1/services/org.freedesktop.Notifications.service"
 
 # Icons for the menu tiles at the bottom of the screen (kafle/Kafel.qml).
 #
@@ -231,7 +260,7 @@ if [[ "$APPLY" == 1 ]]; then
         warn "python3 with Pillow (dev-python/pillow) not found - tile icons were not generated"
     fi
 fi
-kopiuj assets/ikony-menu/256 "${XDG_DATA_HOME:-$HOME/.local/share}/dark-fantasy/ikony-menu"
+kopiuj assets/ikony-menu/256 "$DANE/dark-fantasy/ikony-menu"
 
 # No wallpaper ships with the repository. The Cogwheel lists images from
 # <XDG Pictures>/Wallpapers (or an existing .../Tapety) and writes the chosen
@@ -245,7 +274,11 @@ TAPETY="$OBRAZY/Wallpapers"
 # hyprpaper.conf and hyprlock.conf point to, so it works whatever the XDG
 # Pictures folder is called. A copy also lands in an EMPTY wallpaper folder,
 # so the Cogwheel list is not empty on a fresh install.
-kopiuj assets/wallpaper.png "${XDG_DATA_HOME:-$HOME/.local/share}/dark-fantasy/wallpaper.png"
+#
+# Always ~/.local/share, NOT $XDG_DATA_HOME: both configs have the path
+# written out (hyprlang does not expand environment variables), so with a
+# custom XDG_DATA_HOME the wallpaper landed where neither looked.
+kopiuj assets/wallpaper.png "$HOME/.local/share/dark-fantasy/wallpaper.png"
 if compgen -G "$TAPETY/*.[pPjJwW]*" >/dev/null; then
     ok "$TAPETY"
 elif [[ "$APPLY" == 1 ]]; then
