@@ -56,7 +56,8 @@ Enable the overlays:
 ```sh
 sudo eselect repository enable guru
 sudo eselect repository enable hyproverlay
-sudo emaint sync -r guru -r hyproverlay
+sudo emaint sync -r guru
+sudo emaint sync -r hyproverlay
 ```
 
 Copy the Portage files. They add keywords for the `~amd64` packages and the USE flags this setup needs:

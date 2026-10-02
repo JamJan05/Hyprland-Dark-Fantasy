@@ -313,11 +313,24 @@ printf '  %s%d packages:%s %s\n' "$c_dim" "${#PAKIETY[@]}" "$c_off" "${PAKIETY[*
 # should not land in the world file, and plain "emerge hyprland" would not
 # upgrade an already installed 1.25 (no --deep). Nothing happens if 1.26 or
 # newer is already installed.
+#
+# emerge --ask, like sudo, needs a terminal on standard input: with
+# "curl | bash" stdin is the pipe and Portage exits with '"--ask" should
+# only be used in a terminal'. So the answer is read from /dev/tty. Without
+# a terminal at all there is no one to ask - --apply is the consent then.
+emerge_ask() {
+    if { : < /dev/tty; } 2>/dev/null; then
+        sudo emerge --ask "$@" < /dev/tty
+    else
+        sudo emerge "$@"
+    fi
+}
+
 if [[ "$APPLY" == 1 ]]; then
-    sudo emerge --ask --verbose --oneshot --update "$WAYLAND_ATOM" \
+    emerge_ask --verbose --oneshot --update "$WAYLAND_ATOM" \
         || die "emerge of $WAYLAND_ATOM failed. Fix the problem and run the script again."
     warn "This will take a while. Hyprland and the Qt dependencies take long to compile."
-    sudo emerge --ask --verbose --changed-use "${PAKIETY[@]}" \
+    emerge_ask --verbose --changed-use "${PAKIETY[@]}" \
         || die "emerge failed. Fix the problem and run the script again."
 else
     plan "sudo emerge --ask --verbose --oneshot --update \"$WAYLAND_ATOM\""
