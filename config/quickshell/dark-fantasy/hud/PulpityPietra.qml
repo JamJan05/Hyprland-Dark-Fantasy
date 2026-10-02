@@ -28,6 +28,8 @@ Row {
     id: root
 
     property Dymek dymek: null
+    // Wheel delta summed across events, see onWheel below.
+    property real sumaKolka: 0
 
     spacing: 4
 
@@ -70,8 +72,16 @@ Row {
                 cursorShape: Qt.PointingHandCursor
 
                 onClicked: Pietra.naPulpit(kwadrat.modelData.n)
+                // Summed like the emblem's wheel (hud/Godlo.qml): one step
+                // per notch, a touchpad swipe is not a dozen steps, and a
+                // horizontal event is not a step down.
                 onWheel: function (zdarzenie) {
-                    Pietra.krokPulpitu(zdarzenie.angleDelta.y > 0 ? 1 : -1);
+                    root.sumaKolka += zdarzenie.angleDelta.y;
+                    while (Math.abs(root.sumaKolka) >= 120) {
+                        const krok = root.sumaKolka > 0 ? 1 : -1;
+                        root.sumaKolka -= krok * 120;
+                        Pietra.krokPulpitu(krok);
+                    }
                 }
                 onContainsMouseChanged: {
                     if (!root.dymek) return;
