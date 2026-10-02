@@ -29,7 +29,7 @@ Oba gesty trzema palcami działają z dowolnego miejsca ekranu.
 - **W bok** przechodzi po istniejących pulpitach piętra. Nie zawija i **nigdy nie wychodzi poza piętro**. Za ostatnim pulpitem tworzy **jeden** nowy, tak jak natywny swipe, chyba że bieżący pulpit jest pusty albo jest pulpitem 0.
 - **W górę / w dół** zmienia piętro.
 - **Progi** są te same, których Hyprland używa dla natywnego swipe'a. Ruch musi osiągnąć `workspace_swipe_distance × workspace_swipe_cancel_ratio` (domyślnie 300 × 0,5 = 150 px) albo być szybkim machnięciem, więc przypadkowe drgnięcie nic nie robi.
-- **Kierunek** idzie za `gestures:workspace_swipe_invert`. Przy wartości domyślnej palce w lewo dają następny pulpit, a palce w górę następne piętro.
+- **Kierunek** idzie za `gestures:workspace_swipe_invert`. Przy wartości domyślnej palce w lewo dają następny pulpit, a palce w górę następne piętro. Oba kierunki odwrócisz w Zębatce → Hyprland → Wejście: „Następny pulpit / piętro: palce” na „w prawo / w dół”.
 - **Pulpit zmienia się po puszczeniu palców**, ze zwykłą animacją workspace'ów. Nie przesuwa się za palcami, bo natywnego gestu nie da się zatrzymać na krańcu piętra. To cena za gesty, które nie wychodzą poza piętro.
 
 Gesty pięter wyłączysz w Zębatce (Cogwheel) → Hyprland → Wejście.

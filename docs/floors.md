@@ -29,7 +29,7 @@ Both three-finger gestures work from anywhere on the screen.
 - **Sideways** moves through the existing desktops of the floor. It never wraps and **never leaves the floor**. Past the last desktop it creates **one** new desktop, as the native swipe does, except when the current desktop is empty or is desktop 0.
 - **Up / down** changes the floor.
 - **Thresholds** are the ones Hyprland uses for its native swipe. The movement must reach `workspace_swipe_distance × workspace_swipe_cancel_ratio` (default 300 × 0.5 = 150 px) or be a fast flick, so an accidental twitch does nothing.
-- **Direction** follows `gestures:workspace_swipe_invert`. With the default, fingers to the left go to the next desktop and fingers up go to the next floor.
+- **Direction** follows `gestures:workspace_swipe_invert`. With the default, fingers to the left go to the next desktop and fingers up go to the next floor. To reverse both, set "Next desktop / floor: fingers" to "right / down" in Cogwheel → Hyprland → Input.
 - **The desktop changes when you lift your fingers**, with the normal workspace animation. It does not follow the fingers, because the native gesture cannot be stopped at the edge of a floor. That is the trade-off for keeping gestures inside the floor.
 
 Floor gestures can be turned off in Cogwheel → Hyprland → Input.

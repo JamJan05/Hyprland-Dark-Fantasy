@@ -633,8 +633,11 @@ hl.config({
 
         sensitivity = 0, -- mouse sensitivity in the range -1.0 - 1.0, 0 means no modification.
 
+        natural_scroll = false, -- the mouse wheel: true = reversed, "phone-like" direction
+
         touchpad = {
             natural_scroll = false, -- true = "phone-like" scrolling, i.e. reversed direction
+                                    -- (both switchable in Cogwheel -> Hyprland -> Input)
         },
     },
 })
