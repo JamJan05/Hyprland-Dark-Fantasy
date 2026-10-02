@@ -1,5 +1,5 @@
 # Generates Icons.qml from EXACTLY the same code points
-# that config/waybar/config.jsonc and local/bin/waybar-panel-audio use.
+# that config/waybar/config.jsonc uses.
 def q(cp): return '"\\u{%x}"' % cp
 def arr(cps): return "[" + ", ".join(q(c) for c in cps) + "]"
 
@@ -86,8 +86,8 @@ TXT = f'''pragma Singleton
 //  NERD FONT GLYPHS.
 //
 //  THIS FILE IS GENERATED, not rewritten by hand. The code points
-//  come, every single one, from config/waybar/config.jsonc and
-//  local/bin/waybar-panel-audio - thanks to that the same battery,
+//  come, every single one, from config/waybar/config.jsonc (the
+//  audio panel script that also used them is gone) - so the same battery,
 //  the same speaker and the same power profile look identical on the bar
 //  and in the panel, not "almost the same".
 //

@@ -423,8 +423,9 @@ Rectangle {
             nazwa.forceActiveFocus()
             return
         }
-        if (haslo.text.length === 0)
-            return
+        // An empty password is passed on too: an account set up for
+        // passwordless login (PAM nullok) could not log in otherwise.
+        // A wrong empty one just ends in "Wrong password" like any other.
         root.komunikat = ""
         root.zajety = true
         sddm.login(root.uzytkownik, haslo.text, root.sesja)
