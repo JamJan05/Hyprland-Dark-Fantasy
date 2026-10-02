@@ -364,6 +364,18 @@ PanelWindow {
         id: odbiornik
         focus: true
 
+        // The one thing that can take the focus away is the Wi-Fi password
+        // field in the Cogwheel (system/NetworkRow.qml). When it goes away -
+        // password sent, row collapsed - Qt leaves the focus with no one,
+        // and arrows and Esc in the pause were dead from then on. So the
+        // receiver takes it back whenever it is not with a visible text field.
+        readonly property Item fokusOkna: Window.activeFocusItem
+        onFokusOknaChanged: {
+            if (!root.klawiatura || fokusOkna === odbiornik) return;
+            if (fokusOkna !== null && fokusOkna.visible && fokusOkna.echoMode !== undefined) return;
+            Qt.callLater(() => { if (root.klawiatura) odbiornik.forceActiveFocus(); });
+        }
+
         Keys.onPressed: function (zdarzenie) {
             if (!root.klawiatura) return;
 

@@ -43,9 +43,19 @@ SekcjaOpcji {
         width: root.width
         etykieta: Tr.t("Keyboard layout", "Układ klawiatury")
         typ: "wybor"
-        opcje: root.uklady.map(u => ({ kod: u.kod, nazwa: u.nazwa }))
-        indeks: Math.max(0, root.uklady.findIndex(u => u.kod === UstawieniaHyprlanda.wartosci["input:kb_layout"]))
-        onZmieniono: function (i) { UstawieniaHyprlanda.ustaw("input:kb_layout", root.uklady[i].kod); }
+        // A layout list from the config (e.g. "pl,us", switched with a key)
+        // is not one of the single layouts below. It is shown as its own,
+        // first option - before, the row showed the first layout and one
+        // arrow press replaced the list with a single layout.
+        readonly property string obecny: UstawieniaHyprlanda.wartosci["input:kb_layout"] ?? ""
+        readonly property var lista: obecny !== "" && !root.uklady.some(u => u.kod === obecny)
+            ? [{ kod: obecny, nazwa: obecny.split(",").map(k => k.trim()).join(", ") }].concat(root.uklady)
+            : root.uklady
+        opcje: lista.map(u => ({ kod: u.kod, nazwa: u.nazwa }))
+        indeks: Math.max(0, lista.findIndex(u => u.kod === obecny))
+        onZmieniono: function (i) {
+            if (lista[i].kod !== obecny) UstawieniaHyprlanda.ustaw("input:kb_layout", lista[i].kod);
+        }
     }
 
     WierszOpcji {

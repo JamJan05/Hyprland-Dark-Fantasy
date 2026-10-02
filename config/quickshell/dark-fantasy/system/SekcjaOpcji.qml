@@ -55,17 +55,27 @@ Column {
     }
 
     // Called by a row on mouse hover (see WierszOpcji).
-    function wybierzWiersz(w: var): void {
+    // Returns false when the row cannot be selected now.
+    function wybierzWiersz(w: var): bool {
         const i = wiersze.indexOf(w);
-        if (i < 0) return;
+        if (i < 0) return false;
+        // While a row is being edited (waiting for keys, typing a name) the
+        // mouse does not move the selection away from it - keys go to the
+        // selected row, so they ended up in the row merely brushed by the
+        // cursor, and the edited one kept Hyprland in capture until timeout.
+        if (wiersze.some(x => x.edycja && x !== w)) return false;
         wybrany = i;
         dotknieto();
+        return true;
     }
 
     function klawisz(zdarzenie: var): bool {
+        // The row being edited gets the keys, wherever the selection is.
+        const edytowany = wiersze.find(x => x.edycja);
+        if (edytowany !== undefined) return edytowany.klawisz(zdarzenie);
+
         const w = zaznaczonyWiersz;
         if (w === null) return false;
-        if (w.edycja) return w.klawisz(zdarzenie);
 
         if (zdarzenie.key === Qt.Key_Up) {
             wybrany = Math.max(0, wybrany - 1);

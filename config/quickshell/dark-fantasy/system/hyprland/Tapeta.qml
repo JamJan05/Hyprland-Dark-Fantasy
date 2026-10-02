@@ -56,7 +56,9 @@ SekcjaOpcji {
                 asynchronous: true
                 sourceSize.width: 608
                 source: root.tapety.length > 0
-                    ? "file://" + UstawieniaHyprlanda.katalogTapet + "/" + root.tapety[root.kandydat] : ""
+                    // Encoded: "#" or "%" in a file name broke the URL.
+                    ? "file://" + UstawieniaHyprlanda.katalogTapet + "/"
+                        + encodeURIComponent(root.tapety[root.kandydat] ?? "") : ""
             }
         }
     }

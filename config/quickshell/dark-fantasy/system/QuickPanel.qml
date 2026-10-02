@@ -110,9 +110,20 @@ PanelWindow {
     }
 
     Item {
+        id: odbiornikPanelu
         anchors.fill: parent
         focus: root.open
         Keys.onEscapePressed: root.closeRequested()
+
+        // Same as the tile row's receiver (kafle/RzadKafli.qml): after the
+        // Wi-Fi password field goes away the focus comes back here, so Esc
+        // closes the panel again.
+        readonly property Item fokusOkna: Window.activeFocusItem
+        onFokusOknaChanged: {
+            if (!root.open || fokusOkna === odbiornikPanelu) return;
+            if (fokusOkna !== null && fokusOkna.visible && fokusOkna.echoMode !== undefined) return;
+            Qt.callLater(() => { if (root.open) odbiornikPanelu.forceActiveFocus(); });
+        }
     }
 
     MouseArea {
