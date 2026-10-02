@@ -350,6 +350,8 @@ Item {
             if (root.parent && root.parent.wybierzWiersz !== undefined) root.parent.wybierzWiersz(root);
         }
         onClicked: {
+            // Same rule as the keyboard (klawisz): a greyed-out row does nothing.
+            if (!root.dostepny) return;
             if (root.typ === "przycisk") root.uzyto();
             else if (root.typ === "tekst") { root.roboczy = root.tekst; root.edycja = true; }
             else if (root.typ === "skrot") root.edycja = true;

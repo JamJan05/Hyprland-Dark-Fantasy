@@ -20,6 +20,12 @@ SekcjaOpcji {
     readonly property var tapety: UstawieniaHyprlanda.tapety
     property int kandydat: Math.max(0, tapety.indexOf(UstawieniaHyprlanda.tapeta))
 
+    // Picking a file replaces the binding above with a plain number, and this
+    // section outlives closing the Cogwheel while the list is re-read on
+    // every opening. So after the list changes, the candidate goes back to
+    // the current wallpaper - otherwise it could point past the end.
+    onTapetyChanged: kandydat = Math.max(0, tapety.indexOf(UstawieniaHyprlanda.tapeta))
+
     WierszOpcji {
         width: root.width
         etykieta: Tr.t("File", "Plik")
@@ -62,7 +68,7 @@ SekcjaOpcji {
             : Tr.t("Change the desktop and lock screen wallpaper", "Zmień tapetę pulpitu i blokady")
         typ: "przycisk"
         tekst: Tr.t("Set as wallpaper", "Ustaw jako tapetę")
-        dostepny: root.tapety.length > 0 && root.tapety[root.kandydat] !== UstawieniaHyprlanda.tapeta
+        dostepny: root.kandydat < root.tapety.length && root.tapety[root.kandydat] !== UstawieniaHyprlanda.tapeta
         onUzyto: UstawieniaHyprlanda.ustawTapete(root.tapety[root.kandydat])
     }
 }

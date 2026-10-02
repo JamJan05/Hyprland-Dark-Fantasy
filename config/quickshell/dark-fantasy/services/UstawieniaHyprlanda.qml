@@ -397,20 +397,26 @@ Singleton {
     }
 
     function ustawTapete(plik: string): void {
+        // Only a file from the current list. A stale index in the Cogwheel
+        // used to pass undefined here - the "string" annotation turns it into
+        // "undefined", and ".../Wallpapers/undefined" ended up in both
+        // configs: black desktop and lock screen.
+        if (tapety.indexOf(plik) < 0) return;
+
         const dom = Quickshell.env("HOME");
         const pelna = katalogTapet + "/" + plik;
         const sciezka = pelna.startsWith(dom + "/") ? "~" + pelna.slice(dom.length) : pelna;
 
         const hp = plikHyprpaper.text();
         if (/^\s*path\s*=/m.test(hp)) {
-            plikHyprpaper.setText(hp.replace(/^(\s*path\s*=\s*).*$/m, "$1" + sciezka));
+            plikHyprpaper.setText(hp.replace(/^(\s*path\s*=\s*).*$/m, (_, a) => a + sciezka));
         }
         // $tapeta in hyprlock - the tilde works (comment in hyprlock.conf).
         plikHyprlock.reload();
         plikHyprlock.waitForJob();
         const hl = plikHyprlock.text();
         if (/^\$tapeta\s*=/m.test(hl)) {
-            plikHyprlock.setText(hl.replace(/^(\$tapeta\s*=\s*).*$/m, "$1" + sciezka));
+            plikHyprlock.setText(hl.replace(/^(\$tapeta\s*=\s*).*$/m, (_, a) => a + sciezka));
         }
         tapeta = plik;
 
