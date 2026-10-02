@@ -62,6 +62,12 @@ Singleton {
 
     readonly property int count: history.length
 
+    // History is capped. Each entry keeps the notification tracked (image
+    // data included) until it is dismissed, so in a long session without
+    // clearing the list memory only grew. The oldest ones beyond the limit
+    // are closed as expired.
+    readonly property int limitHistorii: 100
+
     // ---------------- POPUPS ----------------
     // The subset of the history currently shown on screen.
     property var popups: []
@@ -73,7 +79,7 @@ Singleton {
 
     // Also when the saved "on" arrives only after powloka.json has loaded:
     // a notification that came in before that must not stay up as a popup.
-    onDndChanged: if (dnd) popups = []
+    onDndChanged: if (dnd) ustawPopupy([])
 
     // How many seconds a popup stays up. The same values that
     // config/swaync/config.json had - so that switching the daemon does not
@@ -129,13 +135,21 @@ Singleton {
             // "transient" means: show it, but do not keep it in history.
             // Used e.g. by the volume indicators of other shells.
             if (!n.transient) {
-                root.history = [n].concat(root.history);
+                const nowa = [n].concat(root.history);
+                root.history = nowa.slice(0, root.limitHistorii);
+                for (const stara of nowa.slice(root.limitHistorii)) {
+                    if (root.popups.indexOf(stara) === -1) stara.expire();
+                }
             }
 
             // keepOnReload: after a shell reload the server sends every
             // tracked notification again, marked lastGeneration. They go
             // back into history, but must not pop up a second time.
-            if (n.lastGeneration) return;
+            // A transient one is in neither list then, so it is closed.
+            if (n.lastGeneration) {
+                if (n.transient) n.expire();
+                return;
+            }
 
             // With "do not disturb" on, the notification goes
             // into history but does not pop up on screen. Critical ones
@@ -144,6 +158,9 @@ Singleton {
             const krytyczne = n.urgency === QSN.NotificationUrgency.Critical;
             if (!root.dnd || krytyczne) {
                 root.popups = root.popups.concat([n]);
+            } else if (n.transient) {
+                // Not shown and not kept: nothing would ever release it.
+                n.expire();
             }
         }
     }
@@ -161,25 +178,45 @@ Singleton {
     // the same notification twice at once makes no sense - the center
     // contains them all.
     function hideAllPopups() {
-        root.popups = [];
+        ustawPopupy([]);
     }
 
     // Hide a popup. The notification stays in history.
     function hidePopup(n) {
-        root.popups = root.popups.filter(function (x) { return x !== n; });
+        ustawPopupy(root.popups.filter(function (x) { return x !== n; }));
+    }
+
+    // Every change of the popup list goes through here. A notification
+    // that is not in history - a transient one, or one pushed out by the
+    // history limit while its popup was up - has nothing referring to it
+    // once its popup is gone, so it is closed as expired. Before, it stayed
+    // tracked for good, invisible, and "clear all" could not reach it.
+    function ustawPopupy(nowe) {
+        const stare = root.popups;
+        root.popups = nowe;
+        for (const n of stare) {
+            if (n !== null && nowe.indexOf(n) === -1 && root.history.indexOf(n) === -1)
+                n.expire();
+        }
     }
 
     // Remove from history and close on the application side.
     function dismiss(n) {
-        hidePopup(n);
+        // Not through hidePopup: that would expire a transient one first,
+        // and the dismiss below would then hit a closed notification.
+        root.popups = root.popups.filter(function (x) { return x !== n; });
         root.history = root.history.filter(function (x) { return x !== n; });
         if (n !== null) n.dismiss();
     }
 
     function clearAll() {
         const kopia = root.history;
+        // Popups that are not in history (transient, or pushed out by the
+        // limit) are expired - the rest are dismissed with the history below.
+        const pozaHistoria = root.popups.filter(n => n !== null && kopia.indexOf(n) === -1);
         root.history = [];
         root.popups = [];
+        for (const n of pozaHistoria) n.expire();
         for (const n of kopia) {
             if (n !== null) n.dismiss();
         }

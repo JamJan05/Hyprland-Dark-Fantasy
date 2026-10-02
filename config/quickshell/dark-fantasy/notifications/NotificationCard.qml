@@ -121,6 +121,11 @@ Card {
                     if (root.notification === null) return "";
                     const nazwa = root.notification.appIcon;
                     if (nazwa === "") return "";
+                    // The spec also allows a file:// URI or an absolute path
+                    // (notify-send -i /path/icon.png); iconPath only knows
+                    // theme names and returned "" for those - the bell.
+                    if (nazwa.startsWith("file://")) return nazwa;
+                    if (nazwa.startsWith("/")) return "file://" + nazwa;
                     return Quickshell.iconPath(nazwa, true);
                 }
 
@@ -188,7 +193,12 @@ Card {
         Label {
             width: parent.width
             visible: text !== ""
-            text: root.notification === null ? "" : root.notification.body
+            // <img> tags are stripped: StyledText loads them, so a body
+            // with <img src="http://..."> made the shell fetch the URL (a
+            // tracking pixel) or read a local file. bodyImagesSupported:
+            // false is only a hint to applications.
+            text: root.notification === null ? ""
+                : root.notification.body.replace(/<img\b[^>]*>/gi, "")
             color: Theme.textMuted
             wrapMode: Text.Wrap
             maximumLineCount: 6
