@@ -69,6 +69,7 @@ Many file and identifier names in the code are Polish (`kafle` = tiles, `Zebatka
 | `pamiec-ustawien` | Autostart | Restores the screen and keyboard backlight, volume and mute from before the shutdown, then saves them every few seconds to `~/.local/state/dark-fantasy/ustawienia-sprzetu`. Num Lock from the same file is read by `hyprland.lua`. |
 | `df-agent-bt` | Autostart | Bluetooth pairing agent (NoInputNoOutput). BlueZ will not pair without an agent. It accepts pairing and services only for devices marked trusted, which the Cogwheel does before pairing. |
 | `uklad-startowy` | Autostart | Builds the welcome layout: terminal and `tty-clock` on the left, yazi on the right. Skips when the desktop already has a window. |
+| `df-blokada` | SUPER+L, hypridle, Bonfire tile | Locks the screen with hyprlock, unless this session is already locked |
 | `df-jezyk` | Waybar scripts, hyprlock | Prints the interface language, `en` or `pl` |
 | `waybar-data` | `custom/data` | Date next to the clock in the interface language, without a leading zero |
 | `waybar-okladka` | `image#okladka` | Downloads the MPRIS cover art and turns it into a desaturated engraving with a vignette; prints nothing (the module hides) when no player is running |

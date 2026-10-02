@@ -9,8 +9,8 @@ pragma Singleton
 //  They are called by the Bonfire tile (kafle/Ognisko.qml). The commands are the same as
 //  in config/hypr/hypridle.conf:
 //
-//      lock        pidof hyprlock || hyprlock   - guard against a second
-//                  lock instance (see hyprland.lua, SUPER+L)
+//      lock        ~/.local/bin/df-blokada      - does not start a second
+//                  lock in this session (see hyprland.lua, SUPER+L)
 //      suspend     loginctl suspend
 //      log out     hyprshutdown, or hl.dsp.exit() without it - the same
 //                  as SUPER+M in hyprland.lua
@@ -36,7 +36,7 @@ Singleton {
     }
 
     function zablokuj(): void {
-        sh("pidof hyprlock || hyprlock");
+        Quickshell.execDetached([Quickshell.env("HOME") + "/.local/bin/df-blokada"]);
     }
 
     function uspij(): void {
