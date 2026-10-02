@@ -76,7 +76,13 @@ PanelWindow {
         spacing: Theme.spacingSm
 
         Repeater {
-            model: Notifications.popups
+            // ScriptModel, not the bare array: Notifications.popups is a new
+            // array after every change, and a Repeater given a plain array
+            // rebuilds ALL delegates. Each card then restarted its timer and
+            // fade-in, so with notifications arriving less than 8 s apart
+            // none ever disappeared. ScriptModel diffs the list and keeps the
+            // delegates of notifications that are still there.
+            model: ScriptModel { values: Notifications.popups }
 
             delegate: Item {
                 id: miejsce

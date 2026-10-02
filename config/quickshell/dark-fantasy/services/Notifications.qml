@@ -113,8 +113,11 @@ Singleton {
         bodyImagesSupported: false
         actionsSupported: true
         actionIconsSupported: false
-        imageSupported: true
-        inlineReplySupported: true
+        // No image and no inline reply: NotificationCard renders neither.
+        // Advertising inline reply made Quickshell remove the app's own
+        // "Reply" action, so messengers lost replying altogether.
+        imageSupported: false
+        inlineReplySupported: false
         persistenceSupported: true
 
         onNotification: function (n) {
@@ -128,6 +131,11 @@ Singleton {
             if (!n.transient) {
                 root.history = [n].concat(root.history);
             }
+
+            // keepOnReload: after a shell reload the server sends every
+            // tracked notification again, marked lastGeneration. They go
+            // back into history, but must not pop up a second time.
+            if (n.lastGeneration) return;
 
             // With "do not disturb" on, the notification goes
             // into history but does not pop up on screen. Critical ones
