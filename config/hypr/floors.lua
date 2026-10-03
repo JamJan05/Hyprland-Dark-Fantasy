@@ -293,8 +293,15 @@ end
 
 -- One floor up (+1) or down (-1). Stops at the first and last floor
 -- instead of wrapping around.
+--
+-- After the number of floors is lowered in the Cogwheel you can be left
+-- standing above the new limit (windows stay where they were). A step down
+-- from there lands on the highest allowed floor - otherwise every step
+-- below the limit was refused and only SUPER+CTRL+number got you out.
 function M.floor_step(delta)
-    return M.floor(current() + delta)
+    local target = current() + delta
+    if delta < 0 and target > liczbaPieter then target = liczbaPieter end
+    return M.floor(target)
 end
 
 -- Existing desktops of the current floor (sorted) and the current one's

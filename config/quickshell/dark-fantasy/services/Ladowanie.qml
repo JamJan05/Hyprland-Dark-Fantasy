@@ -110,8 +110,11 @@ Singleton {
                     ? Tr.t("Save cancelled - limit unchanged.", "Zapis anulowany - limit bez zmian.")
                     : (bledyZapisu.text.trim() || Tr.t("Could not save the limit.", "Nie udało się zapisać limitu."));
             }
-            // The slider moved during the write - we write that value too.
-            if (root.roboczy >= 0 && root.roboczy !== root.zapisywany && kod === 0)
+            // The slider moved during the write - we write that value too,
+            // also after a failed or cancelled write: the newer value is a
+            // new request, and dropping it left the slider snapping back
+            // with that value never tried.
+            if (root.roboczy >= 0 && root.roboczy !== root.zapisywany)
                 opoznienie.restart();
             else
                 root.roboczy = -1;

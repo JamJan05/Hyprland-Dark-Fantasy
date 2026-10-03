@@ -350,6 +350,16 @@ Item {
             if (root.parent && root.parent.wybierzWiersz !== undefined) root.parent.wybierzWiersz(root);
         }
         onClicked: {
+            // Same rule as the keyboard (klawisz): a greyed-out row does nothing.
+            if (!root.dostepny) return;
+            // A click also brings the keyboard to this row. With the cursor
+            // already resting on it no hover change came, so after Esc back
+            // to the tile row a click started capture while the keys still
+            // walked the tiles.
+            // While another row waits for keys the click is ignored, so that
+            // two rows never edit at once.
+            if (root.parent && root.parent.wybierzWiersz !== undefined
+                    && !root.parent.wybierzWiersz(root)) return;
             if (root.typ === "przycisk") root.uzyto();
             else if (root.typ === "tekst") { root.roboczy = root.tekst; root.edycja = true; }
             else if (root.typ === "skrot") root.edycja = true;

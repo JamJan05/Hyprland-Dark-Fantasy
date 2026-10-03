@@ -30,6 +30,7 @@ DST="/usr/share/sddm/themes/dark-fantasy"
 CONF="/etc/sddm.conf.d/zz-dark-fantasy.conf"
 CONF_STARY="/etc/sddm.conf.d/10-dark-fantasy.conf"
 STAMP="$(date +%Y%m%d-%H%M%S)"
+KOPIE="/var/backups/dark-fantasy-sddm"
 
 usage() {
     cat <<USAGE
@@ -158,9 +159,13 @@ fi
 
 step "Installing the theme to $DST"
 
+# The backup goes OUTSIDE the themes directory. Kept next to the theme,
+# every backup still had its metadata.desktop, and theme pickers (the
+# Plasma SDDM module) listed several "Dark Fantasy" themes.
 if [[ -d "$DST" ]]; then
-    run sudo mv "$DST" "$DST.bak-$STAMP"
-    warn "previous version moved to $DST.bak-$STAMP"
+    run sudo mkdir -p "$KOPIE"
+    run sudo mv "$DST" "$KOPIE/dark-fantasy.bak-$STAMP"
+    warn "previous version moved to $KOPIE/dark-fantasy.bak-$STAMP"
 fi
 
 run sudo mkdir -p "$DST/backgrounds"
@@ -186,7 +191,9 @@ step "Setting it as the default theme"
 
 if [[ "$APPLY" == 1 ]]; then
     printf '  $ sudo tee %s\n' "$CONF"
-    sudo tee "$CONF" >/dev/null <<'CONFEOF'
+    # Checked like every "run" step - a failed write used to print ok anyway.
+    sudo mkdir -p "$(dirname "$CONF")" || die "cannot create $(dirname "$CONF")"
+    sudo tee "$CONF" >/dev/null <<'CONFEOF' || die "writing $CONF failed"
 # Login theme.
 #
 # The file name starts with "zz-" so that it sorts alphabetically AFTER

@@ -14,8 +14,8 @@ pragma Singleton
 //  NERD FONT GLYPHS.
 //
 //  THIS FILE IS GENERATED, not rewritten by hand. The code points
-//  come, every single one, from config/waybar/config.jsonc and
-//  local/bin/waybar-panel-audio - thanks to that the same battery,
+//  come, every single one, from config/waybar/config.jsonc (the
+//  audio panel script that also used them is gone) - so the same battery,
 //  the same speaker and the same power profile look identical on the bar
 //  and in the panel, not "almost the same".
 //

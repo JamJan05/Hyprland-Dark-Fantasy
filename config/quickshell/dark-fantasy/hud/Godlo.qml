@@ -114,10 +114,21 @@ Item {
         }
     }
 
+    // One step per wheel notch (120 units of angleDelta). A touchpad sends
+    // many small events per swipe, so they are summed up - one event per
+    // step jumped several floors at once. A purely horizontal event
+    // (y === 0) adds nothing; it used to count as a step down.
+    property real sumaKolka: 0
+
     WheelHandler {
         acceptedDevices: PointerDevice.Mouse | PointerDevice.TouchPad
         onWheel: function (zdarzenie) {
-            Pietra.krokPietra(zdarzenie.angleDelta.y > 0 ? 1 : -1);
+            root.sumaKolka += zdarzenie.angleDelta.y;
+            while (Math.abs(root.sumaKolka) >= 120) {
+                const krok = root.sumaKolka > 0 ? 1 : -1;
+                root.sumaKolka -= krok * 120;
+                Pietra.krokPietra(krok);
+            }
         }
     }
 }

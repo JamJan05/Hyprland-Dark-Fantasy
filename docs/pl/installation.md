@@ -32,7 +32,7 @@ Co robi `--apply`, po kolei:
 2. Od razu na początku raz prosi o hasło `sudo`. Przy `curl | bash` czyta je z `/dev/tty`.
 3. Włącza overlaye **GURU** i **hyproverlay** przez `eselect repository` i je synchronizuje.
 4. Klonuje repozytorium do `~/Hyprland-Dark-Fantasy`. Jeśli tam jeszcze nie ma klonu, a jest w `~/hyprland-dark-fantasy` (wcześniejsza domyślna ścieżka), i nie ustawiono `HYPR_REPO_DIR`, używa tamtego. Inną ścieżkę podasz w `HYPR_REPO_DIR`. Uruchomiony z wnętrza klonu, bez ustawionego `HYPR_REPO_DIR`, używa tego klonu. Jeśli docelową ścieżkę zajmuje coś, co nie jest klonem, skrypt zatrzymuje się z komunikatem i niczego tam nie rusza.
-5. Kopiuje `gentoo/package.accept_keywords/hyprland-desktop` i `gentoo/package.use/hyprland-desktop` do `/etc/portage/`, jeśli ich tam jeszcze nie ma. Jeśli Portage nadal nie widzi `dev-libs/wayland` 1.26 (starsza kopia pliku), dopisuje ten jeden wpis.
+5. Kopiuje `gentoo/package.accept_keywords/hyprland-desktop` i `gentoo/package.use/hyprland-desktop` do `/etc/portage/`. Istniejącą kopię, która różni się od repozytorium, podmienia, a starą zostawia jako ukryty `.hyprland-desktop.bak-<data>` (Portage pomija ukryte pliki). Jeśli Portage nadal nie widzi `dev-libs/wayland` 1.26, dopisuje ten jeden wpis.
 6. Podnosi `dev-libs/wayland` do 1.26 (`emerge --oneshot --update`), a potem instaluje pakiety przez `emerge --ask --verbose --changed-use`. Kompilacja Hyprlanda i zależności Qt trochę trwa.
 7. Uruchamia `install.sh --apply`.
 8. Wgrywa regułę udev dla baterii, ale tylko wtedy, gdy bateria ma progi ładowania.
@@ -56,7 +56,8 @@ Włącz overlaye:
 ```sh
 sudo eselect repository enable guru
 sudo eselect repository enable hyproverlay
-sudo emaint sync -r guru -r hyproverlay
+sudo emaint sync -r guru
+sudo emaint sync -r hyproverlay
 ```
 
 Skopiuj pliki Portage. Dodają keywordy dla pakietów `~amd64` i flagi USE, których ta konfiguracja potrzebuje:

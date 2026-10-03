@@ -78,6 +78,8 @@ Singleton {
         { klucz: "decoration:dim_strength",       lua: ["decoration", "dim_strength"],       typ: "float" },
         { klucz: "animations:enabled",            lua: ["animations", "enabled"],            typ: "bool" },
         { klucz: "input:touchpad:natural_scroll", lua: ["input", "touchpad", "natural_scroll"], typ: "bool" },
+        { klucz: "input:natural_scroll",          lua: ["input", "natural_scroll"],          typ: "bool" },
+        { klucz: "gestures:workspace_swipe_invert", lua: ["gestures", "workspace_swipe_invert"], typ: "bool" },
         { klucz: "input:kb_layout",               lua: ["input", "kb_layout"],               typ: "str" }
     ]
 
@@ -316,8 +318,12 @@ Singleton {
              + ", position = \"0x0\", scale = " + literal(String(m.skala)) + " })");
     }
 
+    // The saved state only counts for the same output. With another monitor
+    // first in the list (an external screen plugged in), reusing it sent
+    // the old output's name with this monitor's mode - the wrong screen got
+    // an invalid mode and the visible one did not change.
     function stanMonitora(): var {
-        if (stan.monitor) return Object.assign({}, stan.monitor);
+        if (stan.monitor && stan.monitor.nazwa === monitor.name) return Object.assign({}, stan.monitor);
         return { nazwa: monitor.name,
                  tryb: monitor.width + "x" + monitor.height + "@" + monitor.refreshRate.toFixed(2),
                  skala: monitor.scale };
@@ -385,7 +391,7 @@ Singleton {
         printErrors: false
         onLoaded: {
             const r = /^\s*path\s*=\s*(.+)$/m.exec(text());
-            root.tapeta = r ? r[1].trim().split("/").pop() : "";
+            root.tapeta = r ? r[1].trim().replace(/##/g, "#").split("/").pop() : "";
         }
     }
 
@@ -397,20 +403,29 @@ Singleton {
     }
 
     function ustawTapete(plik: string): void {
+        // Only a file from the current list. A stale index in the Cogwheel
+        // used to pass undefined here - the "string" annotation turns it into
+        // "undefined", and ".../Wallpapers/undefined" ended up in both
+        // configs: black desktop and lock screen.
+        if (tapety.indexOf(plik) < 0) return;
+
         const dom = Quickshell.env("HOME");
         const pelna = katalogTapet + "/" + plik;
-        const sciezka = pelna.startsWith(dom + "/") ? "~" + pelna.slice(dom.length) : pelna;
+        // "#" starts a comment in hyprlang; "##" is a literal "#". Without
+        // this "a#b.png" was cut to "a" and no wallpaper showed.
+        const sciezka = (pelna.startsWith(dom + "/") ? "~" + pelna.slice(dom.length) : pelna)
+            .replace(/#/g, "##");
 
         const hp = plikHyprpaper.text();
         if (/^\s*path\s*=/m.test(hp)) {
-            plikHyprpaper.setText(hp.replace(/^(\s*path\s*=\s*).*$/m, "$1" + sciezka));
+            plikHyprpaper.setText(hp.replace(/^(\s*path\s*=\s*).*$/m, (_, a) => a + sciezka));
         }
         // $tapeta in hyprlock - the tilde works (comment in hyprlock.conf).
         plikHyprlock.reload();
         plikHyprlock.waitForJob();
         const hl = plikHyprlock.text();
         if (/^\$tapeta\s*=/m.test(hl)) {
-            plikHyprlock.setText(hl.replace(/^(\$tapeta\s*=\s*).*$/m, "$1" + sciezka));
+            plikHyprlock.setText(hl.replace(/^(\$tapeta\s*=\s*).*$/m, (_, a) => a + sciezka));
         }
         tapeta = plik;
 
@@ -735,8 +750,11 @@ Singleton {
         zapis.stop();
         przechwytuj(false);
         stan = domyslnyStan();
-        Quickshell.execDetached(["sh", "-c",
-            "rm -f " + JSON.stringify(sciezkaUstawien) + " && hyprctl reload"]);
+        // The path as a separate argument ($1), not pasted into the script:
+        // JSON.stringify gives double quotes, inside which the shell still
+        // expands $(...), backticks and $VAR from the directory name.
+        Quickshell.execDetached(["sh", "-c", "rm -f -- \"$1\" && hyprctl reload",
+                                 "sh", sciezkaUstawien]);
         ponownyOdczyt.restart();
     }
 

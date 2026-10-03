@@ -59,7 +59,13 @@ Rectangle {
 
     // ---- state ----
     property int    sesja:     sessionModel.lastIndex
-    property string uzytkownik: userModel.lastUser
+    // The user name comes from SDDM's lastUser. It is empty on a fresh
+    // install, after logging in through another display manager or with
+    // RememberLastUser=false - then a name field is shown instead of the
+    // label, otherwise sddm.login("") could never succeed.
+    readonly property bool znanyUzytkownik: userModel.lastUser !== ""
+    readonly property string uzytkownik: znanyUzytkownik ? userModel.lastUser
+                                                         : nazwa.text.trim()
     property string komunikat: ""
     property bool   zajety:    false
 
@@ -173,12 +179,44 @@ Rectangle {
         // ---- user name ----
         Label {
             Layout.alignment: Qt.AlignHCenter
+            visible: root.znanyUzytkownik
             text: root.uzytkownik
             color: root.cPrzyg
             font.family: root.czcionkaNapisow
             font.pixelSize: 17
             font.capitalization: Font.SmallCaps
             font.letterSpacing: 2
+        }
+
+        // ---- user name field (only when SDDM does not know the last user) ----
+        TextField {
+            id: nazwa
+            Layout.fillWidth: true
+            Layout.preferredHeight: 46
+            visible: !root.znanyUzytkownik
+
+            placeholderText: root.tr("Enter user name", "Wpisz nazwę użytkownika")
+            placeholderTextColor: root.cZelazo
+            color: root.cTekst
+            font.family: root.czcionka
+            font.pixelSize: 15
+            horizontalAlignment: TextInput.AlignHCenter
+            selectByMouse: true
+            enabled: !root.zajety
+            inputMethodHints: Qt.ImhNoAutoUppercase | Qt.ImhNoPredictiveText
+
+            background: Rectangle {
+                color: root.cKarta
+                opacity: 0.88
+                radius: 0
+                border.width: 1
+                border.color: nazwa.activeFocus ? root.cZloto : root.cZelazo
+                Behavior on border.color { ColorAnimation { duration: 180 } }
+            }
+
+            // Enter in the name field moves on to the password.
+            onAccepted: haslo.forceActiveFocus()
+            onTextChanged: root.komunikat = ""
         }
 
         // ---- password field ----
@@ -200,8 +238,12 @@ Rectangle {
 
             // Focus right after startup - the login screen should accept
             // the password without clicking on anything.
+            // With an unknown user the name field gets the focus first.
             focus: true
-            Component.onCompleted: forceActiveFocus()
+            Component.onCompleted: {
+                if (root.znanyUzytkownik) forceActiveFocus()
+                else nazwa.forceActiveFocus()
+            }
 
             background: Rectangle {
                 color: root.cKarta
@@ -377,8 +419,13 @@ Rectangle {
     // ============================================================== LOGIC
 
     function zaloguj() {
-        if (haslo.text.length === 0)
+        if (root.uzytkownik === "") {
+            nazwa.forceActiveFocus()
             return
+        }
+        // An empty password is passed on too: an account set up for
+        // passwordless login (PAM nullok) could not log in otherwise.
+        // A wrong empty one just ends in "Wrong password" like any other.
         root.komunikat = ""
         root.zajety = true
         sddm.login(root.uzytkownik, haslo.text, root.sesja)

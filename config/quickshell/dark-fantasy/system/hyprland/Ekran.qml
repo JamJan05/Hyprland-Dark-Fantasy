@@ -20,7 +20,10 @@ SekcjaOpcji {
     readonly property var skale: UstawieniaHyprlanda.skale
     readonly property var hz: UstawieniaHyprlanda.odswiezania
 
-    readonly property real skala: UstawieniaHyprlanda.stan.monitor
+    // The saved scale only when it was saved for this same output
+    // (see stanMonitora in UstawieniaHyprlanda).
+    readonly property real skala: m && UstawieniaHyprlanda.stan.monitor
+            && UstawieniaHyprlanda.stan.monitor.nazwa === m.name
         ? Number(UstawieniaHyprlanda.stan.monitor.skala) : (m ? m.scale : 1)
 
     WierszOpcji {

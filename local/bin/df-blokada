@@ -1,0 +1,28 @@
+#!/bin/bash
+# Locks the screen of THIS Hyprland session, unless it is already locked.
+# Used by SUPER+L (hyprland.lua), hypridle's lock_cmd and the shell's
+# Session menu (services/Sesja.qml).
+#
+# The guard used to be "pidof hyprlock || hyprlock". pidof sees every
+# hyprlock on the machine, so a lock in ANOTHER graphical session (a second
+# login, a test session) made this one skip locking - and report success.
+# Now only a hyprlock running in this Hyprland instance counts: same user,
+# same HYPRLAND_INSTANCE_SIGNATURE in its environment.
+#
+# A second hyprlock in the same session is still never started: it would
+# stack on top of the first, and each would need the password separately.
+# Never kill a running hyprlock - see the hyprlock.conf header.
+
+sygnatura="${HYPRLAND_INSTANCE_SIGNATURE:-}"
+
+for pid in $(pgrep -u "$(id -u)" -x hyprlock); do
+    # Without a signature (run outside Hyprland) any hyprlock of this user
+    # counts - the old behaviour, minus other users.
+    if [[ -z $sygnatura ]] ||
+       tr '\0' '\n' < "/proc/$pid/environ" 2>/dev/null |
+           grep -qxF "HYPRLAND_INSTANCE_SIGNATURE=$sygnatura"; then
+        exit 0
+    fi
+done
+
+exec hyprlock

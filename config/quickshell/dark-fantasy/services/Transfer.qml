@@ -27,6 +27,11 @@ Singleton {
     // noise (syncing, DNS queries), which is not worth showing.
     readonly property real progStatusu: 100 * 1024
 
+    // Only real links are counted. A VPN (tun/wg) carries the same traffic
+    // as the Wi-Fi under it, so with a VPN up the speed was counted twice;
+    // bridges and veth pairs of containers likewise repeat other traffic.
+    readonly property var wirtualny: /^(lo|tun|tap|wg|veth|docker|br-|virbr|vnet|tailscale|zt)/
+
     property real poprzednieBajty: -1
     property real poprzedniCzas: 0
 
@@ -36,7 +41,7 @@ Singleton {
         for (const w of wiersze) {
             const dwukropek = w.indexOf(":");
             if (dwukropek === -1) continue;
-            if (w.slice(0, dwukropek).trim() === "lo") continue;
+            if (root.wirtualny.test(w.slice(0, dwukropek).trim())) continue;
             const pola = w.slice(dwukropek + 1).trim().split(/\s+/).map(Number);
             bajty += (pola[0] || 0) + (pola[8] || 0);
         }

@@ -70,7 +70,13 @@ for a in "$@"; do
     case "$a" in
         --apply) APPLY=1 ;;
         --help|-h)
-            sed -n '2,26p' "$0" | sed 's/^# \?//'
+            # With "curl | bash" $0 is "bash", not the script - nothing to read.
+            if [[ -f "${BASH_SOURCE[0]:-}" ]]; then
+                sed -n '2,26p' "${BASH_SOURCE[0]}" | sed 's/^# \?//'
+            else
+                echo "Dark Fantasy bootstrap. Without arguments: a dry run. --apply: install."
+                echo "Full help: download the script and run: bash bootstrap.sh --help"
+            fi
             exit 0 ;;
         *) echo "Unknown argument: $a" >&2; exit 2 ;;
     esac
@@ -186,13 +192,31 @@ fetch_portage() {  # $1 = subdirectory, $2 = target directory
     local src="$REPO_DIR/gentoo/$1/hyprland-desktop"
     local dst="/etc/portage/$1/hyprland-desktop"
 
-    if [[ -f "$dst" ]]; then
-        ok "$dst already exists - skipping"
-        return 0
+    # Portage also accepts a single plain file instead of the directory.
+    # mkdir -p on it failed with a bare "File exists"; say what to do instead.
+    if [[ -e "/etc/portage/$1" && ! -d "/etc/portage/$1" ]]; then
+        die "/etc/portage/$1 is a file, not a directory. Turn it into a directory:
+            sudo mv /etc/portage/$1 /etc/portage/$1.old
+            sudo mkdir /etc/portage/$1
+            sudo mv /etc/portage/$1.old /etc/portage/$1/main
+        and run the script again."
     fi
     if [[ ! -f "$src" ]]; then
         plan "will copy $1/hyprland-desktop from the repository (after cloning)"
         return 0
+    fi
+    if [[ -f "$dst" ]] && cmp -s "$src" "$dst"; then
+        ok "$dst is up to date"
+        return 0
+    fi
+    # An existing copy that differs is replaced: one from an older version
+    # of the repo lacked later entries (a USE flag, a keyword), and keeping
+    # it brought back the very conflict the entry was added for. The old
+    # one is kept with a leading dot - Portage skips hidden files, while a
+    # plain "hyprland-desktop.bak" in that directory would still be read.
+    if [[ -f "$dst" ]]; then
+        run sudo cp -p "$dst" "/etc/portage/$1/.hyprland-desktop.bak-$STAMP"
+        warn "$dst differed from the repository - previous copy: /etc/portage/$1/.hyprland-desktop.bak-$STAMP"
     fi
     run sudo mkdir -p "/etc/portage/$1"
     run sudo cp "$src" "$dst"
@@ -205,7 +229,9 @@ if jest_klonem "$REPO_DIR"; then
     run git_czysty -C "$REPO_DIR" pull --ff-only
 # Run from inside a clone: use it - unless HYPR_REPO_DIR names another path,
 # which is then honored (cloned to if it has no clone yet).
-elif [[ -z "${HYPR_REPO_DIR:-}" && -f "$(dirname "${BASH_SOURCE[0]}")/install.sh" ]]; then
+# ${BASH_SOURCE[0]:-}: with "curl | bash" there is no script file and,
+# under set -u, a bare BASH_SOURCE[0] printed "unbound variable".
+elif [[ -z "${HYPR_REPO_DIR:-}" && -n "${BASH_SOURCE[0]:-}" && -f "$(dirname "${BASH_SOURCE[0]}")/install.sh" ]]; then
     REPO_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
     ok "running from inside the repository: $REPO_DIR"
 else
@@ -220,13 +246,20 @@ else
 fi
 
 step "Keywords and USE flags"
+# The keywords are written for ~amd64. On another architecture they are
+# silently ignored and emerge stops on masked packages much later.
+ARCH_PORTAGE="$(portageq envvar ARCH 2>/dev/null || true)"
+if [[ -n $ARCH_PORTAGE && $ARCH_PORTAGE != amd64 ]]; then
+    warn "Portage ARCH is $ARCH_PORTAGE, but the keywords in gentoo/package.accept_keywords are ~amd64."
+    warn "Change ~amd64 to ~$ARCH_PORTAGE in /etc/portage/package.accept_keywords/hyprland-desktop, or emerge will report masked packages."
+fi
 fetch_portage package.accept_keywords
 fetch_portage package.use
 
 # libwayland 1.26 - reason in gentoo/package.accept_keywords/hyprland-desktop.
-# fetch_portage skips a file that already exists, so a copy from before this
-# entry was added gets the line appended. portageq asks Portage itself, so
-# a keyword set in any other file counts as well.
+# The copied file already has it; this covers a run without the clone
+# (dry run) and a keyword file the user edited. portageq asks Portage
+# itself, so a keyword set in any other file counts as well.
 WAYLAND_ATOM=">=dev-libs/wayland-1.26.0"
 KEYWORDS_FILE=/etc/portage/package.accept_keywords/hyprland-desktop
 if [[ -n "$(portageq best_visible / "$WAYLAND_ATOM" 2>/dev/null)" ]]; then
@@ -313,11 +346,24 @@ printf '  %s%d packages:%s %s\n' "$c_dim" "${#PAKIETY[@]}" "$c_off" "${PAKIETY[*
 # should not land in the world file, and plain "emerge hyprland" would not
 # upgrade an already installed 1.25 (no --deep). Nothing happens if 1.26 or
 # newer is already installed.
+#
+# emerge --ask, like sudo, needs a terminal on standard input: with
+# "curl | bash" stdin is the pipe and Portage exits with '"--ask" should
+# only be used in a terminal'. So the answer is read from /dev/tty. Without
+# a terminal at all there is no one to ask - --apply is the consent then.
+emerge_ask() {
+    if { : < /dev/tty; } 2>/dev/null; then
+        sudo emerge --ask "$@" < /dev/tty
+    else
+        sudo emerge "$@"
+    fi
+}
+
 if [[ "$APPLY" == 1 ]]; then
-    sudo emerge --ask --verbose --oneshot --update "$WAYLAND_ATOM" \
+    emerge_ask --verbose --oneshot --update "$WAYLAND_ATOM" \
         || die "emerge of $WAYLAND_ATOM failed. Fix the problem and run the script again."
     warn "This will take a while. Hyprland and the Qt dependencies take long to compile."
-    sudo emerge --ask --verbose --changed-use "${PAKIETY[@]}" \
+    emerge_ask --verbose --changed-use "${PAKIETY[@]}" \
         || die "emerge failed. Fix the problem and run the script again."
 else
     plan "sudo emerge --ask --verbose --oneshot --update \"$WAYLAND_ATOM\""

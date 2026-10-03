@@ -116,9 +116,22 @@ PanelWindow {
     // Keyboard in pause, and at rest on an empty desktop - there are no
     // windows to steal typing from, so the arrows can walk the row right away.
     // As soon as a window appears (or another panel opens) the row lets go.
-    WlrLayershell.keyboardFocus: root.klawiatura
-        ? WlrKeyboardFocus.Exclusive
-        : WlrKeyboardFocus.None
+    //
+    // EXCLUSIVE ONLY IN PAUSE. Hyprland 0.56.2 sends ALL pointer input to an
+    // exclusive layer surface, past its input mask (InputManager.cpp,
+    // mouseMoveUnified, "forced above all"). Held at rest on an empty desktop,
+    // it made Waybar dead to clicks - Bluetooth, Wi-Fi, media - until some
+    // window opened. At rest the row is therefore "on demand", which does not
+    // take the pointer. But on demand alone does not GET the keyboard when
+    // the last window closes (Hyprland grants it only on map, or on a click),
+    // so the row grabs it: Exclusive for a moment (chwyt), then on demand.
+    // Exclusive -> on demand keeps the keyboard focus (LayerSurface.cpp,
+    // onCommit) and only gives the pointer back to what lies under it.
+    WlrLayershell.keyboardFocus: !root.klawiatura
+        ? WlrKeyboardFocus.None
+        : (root.pauza || root.chwyt)
+            ? WlrKeyboardFocus.Exclusive
+            : WlrKeyboardFocus.OnDemand
 
     anchors {
         top: true
@@ -268,6 +281,18 @@ PanelWindow {
     // Row holds the keyboard - see WlrLayershell.keyboardFocus above.
     readonly property bool klawiatura: pauza || (pustyPulpit && !innyPanel)
 
+    // The moment of Exclusive that takes the keyboard - see keyboardFocus above.
+    // 150 ms, not Qt.callLater: the Exclusive state has to reach Hyprland in
+    // its own commit, or it only ever sees the final "on demand".
+    // Starts true, so the shell starting on an empty desktop grabs it too.
+    property bool chwyt: true
+    Timer {
+        id: puszczenieChwytu
+        interval: 150
+        running: true
+        onTriggered: root.chwyt = false
+    }
+
     // Delay before hiding. Without it, sliding two pixels off a tile -
     // or moving the mouse diagonally - would hide the row exactly when
     // you are aiming at something. 450 ms is long enough for that and still
@@ -328,12 +353,28 @@ PanelWindow {
     onPauzaChanged: if (!pauza) poziom = 0;
 
     onKlawiaturaChanged: {
-        if (klawiatura) Qt.callLater(() => odbiornik.forceActiveFocus());
+        if (klawiatura) {
+            chwyt = true;
+            puszczenieChwytu.restart();
+            Qt.callLater(() => odbiornik.forceActiveFocus());
+        }
     }
 
     Item {
         id: odbiornik
         focus: true
+
+        // The one thing that can take the focus away is the Wi-Fi password
+        // field in the Cogwheel (system/NetworkRow.qml). When it goes away -
+        // password sent, row collapsed - Qt leaves the focus with no one,
+        // and arrows and Esc in the pause were dead from then on. So the
+        // receiver takes it back whenever it is not with a visible text field.
+        readonly property Item fokusOkna: Window.activeFocusItem
+        onFokusOknaChanged: {
+            if (!root.klawiatura || fokusOkna === odbiornik) return;
+            if (fokusOkna !== null && fokusOkna.visible && fokusOkna.echoMode !== undefined) return;
+            Qt.callLater(() => { if (root.klawiatura) odbiornik.forceActiveFocus(); });
+        }
 
         Keys.onPressed: function (zdarzenie) {
             if (!root.klawiatura) return;

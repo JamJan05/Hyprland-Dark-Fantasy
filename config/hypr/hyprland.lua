@@ -330,6 +330,21 @@ hl.env("XCURSOR_THEME", "Bibata-Original-Classic")
 -- scaling, so at a scale other than 1 such windows are blurry.
 hl.env("ELECTRON_OZONE_PLATFORM_HINT", "auto")
 
+-- ~/.local/bin in PATH. The helper scripts installed there (uklad-startowy,
+-- df-agent-bt, pamiec-ustawien, menedzer-plikow, df-jezyk in hyprlock.conf)
+-- are called by bare name. Hyprland inherits PATH from the login, and
+-- Gentoo's base PATH does not include ~/.local/bin - only config.fish adds
+-- it, and fish is optional. Without this, with a bash login shell all of
+-- them failed silently (run_once sends output to /dev/null).
+-- The check keeps a reload from adding the directory a second time.
+do
+    local bin = (os.getenv("HOME") or "") .. "/.local/bin"
+    local path = os.getenv("PATH") or ""
+    if (":" .. path .. ":"):find(":" .. bin .. ":", 1, true) == nil then
+        hl.env("PATH", path == "" and bin or (bin .. ":" .. path))
+    end
+end
+
 -- Disables Hyprland's native cursor format (hyprcursor). This way
 -- the compositor is sure to use the regular XCursor theme set above,
 -- and not its own default cursor.
@@ -618,8 +633,11 @@ hl.config({
 
         sensitivity = 0, -- mouse sensitivity in the range -1.0 - 1.0, 0 means no modification.
 
+        natural_scroll = false, -- the mouse wheel: true = reversed, "phone-like" direction
+
         touchpad = {
             natural_scroll = false, -- true = "phone-like" scrolling, i.e. reversed direction
+                                    -- (both switchable in Cogwheel -> Hyprland -> Input)
         },
     },
 })
@@ -869,8 +887,8 @@ hl.bind(mainMod .. " + mouse:273", hl.dsp.window.resize(), { mouse = true, descr
 -- repeating = holding the key repeats the action.
 hl.bind("XF86AudioRaiseVolume", hl.dsp.exec_cmd("wpctl set-volume -l 1 @DEFAULT_AUDIO_SINK@ 5%+"), { locked = true, repeating = true, description = T("Volume up", "Głośniej") })
 hl.bind("XF86AudioLowerVolume", hl.dsp.exec_cmd("wpctl set-volume @DEFAULT_AUDIO_SINK@ 5%-"),      { locked = true, repeating = true, description = T("Volume down", "Ciszej") })
-hl.bind("XF86AudioMute",        hl.dsp.exec_cmd("wpctl set-mute @DEFAULT_AUDIO_SINK@ toggle"),     { locked = true, repeating = true, description = T("Mute audio", "Wycisz dźwięk") })
-hl.bind("XF86AudioMicMute",     hl.dsp.exec_cmd("wpctl set-mute @DEFAULT_AUDIO_SOURCE@ toggle"),   { locked = true, repeating = true, description = T("Mute microphone", "Wycisz mikrofon") })
+hl.bind("XF86AudioMute",        hl.dsp.exec_cmd("wpctl set-mute @DEFAULT_AUDIO_SINK@ toggle"),     { locked = true, description = T("Mute audio", "Wycisz dźwięk") })
+hl.bind("XF86AudioMicMute",     hl.dsp.exec_cmd("wpctl set-mute @DEFAULT_AUDIO_SOURCE@ toggle"),   { locked = true, description = T("Mute microphone", "Wycisz mikrofon") })
 hl.bind("XF86MonBrightnessUp",  hl.dsp.exec_cmd("brightnessctl -n2 set 5%+"),                  { locked = true, repeating = true, description = T("Brightness up", "Jaśniej") })
 hl.bind("XF86MonBrightnessDown",hl.dsp.exec_cmd("brightnessctl -n2 set 5%-"),                  { locked = true, repeating = true, description = T("Brightness down", "Ciemniej") })
 
@@ -908,15 +926,17 @@ skrot("zrzut-okna", mainMod .. " + Print",     hl.dsp.exec_cmd(hyprshot .. "wind
 -- Screen lock on demand. The same hyprlock is also launched by hypridle after
 -- 10 minutes of idle (~/.config/hypr/hypridle.conf).
 --
--- "pidof hyprlock ||" matters here, it is not decoration. Without it, pressing
--- the shortcut twice launches a SECOND lock instance on top of the
--- first - and each has to be unlocked separately, typing the password twice.
--- hypridle uses the same safeguard in its lock_cmd.
+-- Through df-blokada, not plain hyprlock: it skips locking when this
+-- session is already locked. Without that guard, pressing the shortcut twice
+-- launches a SECOND lock instance on top of the first - and each has to be
+-- unlocked separately. It checks only this session's hyprlock ("pidof
+-- hyprlock" also saw other sessions' locks and then did not lock at all).
+-- hypridle and the shell's Session menu use the same script.
 --
 -- WARNING: do not kill hyprlock with pkill while the lock is active.
 -- It is an ext-session-lock protocol client, and killing it with a signal can
 -- bring down the whole session. Details in the hyprlock.conf header.
-skrot("blokada", mainMod .. " + L", hl.dsp.exec_cmd("pidof hyprlock || hyprlock"), { description = T("Lock screen", "Zablokuj ekran") })
+skrot("blokada", mainMod .. " + L", hl.dsp.exec_cmd("$HOME/.local/bin/df-blokada"), { description = T("Lock screen", "Zablokuj ekran") })
 
 -- Clipboard history.
 --
@@ -926,7 +946,7 @@ skrot("blokada", mainMod .. " + L", hl.dsp.exec_cmd("pidof hyprlock || hyprlock"
 -- decoded anyway; "-i" enables case-insensitive search.
 skrot("schowek", mainMod .. " + SHIFT + V", hl.dsp.exec_cmd(
     "cliphist list | rofi -dmenu -i -no-custom -p '" .. T("Clipboard", "Schowek") .. "' " ..
-    "-theme $HOME/.config/rofi/dark-fantasy.rasi " ..
+    "-theme \"${XDG_CONFIG_HOME:-$HOME/.config}/rofi/dark-fantasy.rasi\" " ..
     "-theme-str 'entry { placeholder: \"" .. T("search the clipboard...", "szukaj w schowku...") .. "\"; }' " ..
     "| cliphist decode | wl-copy"), { description = T("Clipboard history", "Historia schowka") })
 

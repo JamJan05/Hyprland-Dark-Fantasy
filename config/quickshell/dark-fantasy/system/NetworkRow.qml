@@ -185,6 +185,12 @@ Card {
                     background: null
 
                     onAccepted: root.wyslij()
+                    // Esc gives up typing. Unhandled, it never reached the
+                    // panel's key receiver, which is not a parent of the field.
+                    Keys.onEscapePressed: {
+                        pole.text = "";
+                        root.collapseRequested();
+                    }
                 }
             }
 

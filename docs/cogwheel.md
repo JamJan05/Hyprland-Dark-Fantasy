@@ -34,7 +34,7 @@ Network and Bluetooth need device lists, passwords and pairing, which do not fit
 | **Appearance** | Gap between windows, gap from screen edge, border width, blur, blur strength, opacity of inactive windows, dim inactive windows, dimming strength |
 | **Motion** | Animations on / off, animation speed 0.5× - 2× (one multiplier for every animation) |
 | **Wallpaper** | Pick a file from the wallpaper folder with a preview, then "Set as wallpaper" |
-| **Input** | Touchpad sensitivity (a rule for the touchpad only, not the mouse), natural scrolling, keyboard layout, floor gestures (3 fingers) |
+| **Input** | Touchpad sensitivity (a rule for the touchpad only, not the mouse), natural scrolling separately for the touchpad and the mouse wheel, keyboard layout, floor gestures (3 fingers) and their direction |
 | **Monitor** | Scale (only "clean" scales for the current resolution), refresh rate, position of a second monitor |
 | **Floors** | Number of floors (1-10) and a name for each floor |
 | **Shortcuts** | Your own application shortcuts, moving the main shortcuts to other keys, and a read-only list of the fixed ones (desktops, mouse, media keys). See [Shortcuts](#shortcuts) |
