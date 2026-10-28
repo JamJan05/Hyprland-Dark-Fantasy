@@ -106,6 +106,39 @@ cd ~/Hyprland-Dark-Fantasy
 ./install.sh --apply
 ```
 
+## Wariant C: overlay Portage
+
+Repozytorium jest zarazem overlayem Portage: `profiles/`, `metadata/` i kategoria `x11-themes/` leżą obok plików pulpitu, a Portage czyta tylko je (`config/`, `docs/` i resztę pomija). Pakiet `x11-themes/dark-fantasy` to ebuild live (`9999`), który pobiera `main`. Ciągnie całą listę zależności, kładzie pliki pulpitu w `/usr/share/dark-fantasy` i instaluje części wymagające roota, które `install.sh` tylko wypisuje:
+
+| Część | Gdzie |
+|---|---|
+| reguła udev do limitu ładowania baterii | `/usr/lib/udev/rules.d/99-dark-fantasy-bateria.rules` |
+| `df-limit-mocy` i jego reguła sudo | `/usr/sbin/df-limit-mocy`, `/etc/sudoers.d/dark-fantasy-moc` (ścieżka to `/usr/sbin`, nie `/usr/local/sbin` jak w repozytorium; zainstalowane kopie reguły i `LimitMocy.qml` są do niej przepisane) |
+| usługa OpenRC `dark-fantasy-stan` | `/etc/init.d/` (włącz sam: `rc-update add dark-fantasy-stan default`) |
+| motyw SDDM (USE `sddm`) | `/usr/share/sddm/themes/dark-fantasy`, ustawiony jako domyślny przez `/etc/sddm.conf.d/zz-dark-fantasy.conf`; USE `l10n_pl` daje polski ekran logowania |
+| `dark-fantasy-install` | `/usr/bin`, czyli `install.sh` uruchomiony z `/usr/share/dark-fantasy` |
+
+```sh
+sudo eselect repository add dark-fantasy git https://github.com/JamJan05/Hyprland-Dark-Fantasy.git
+sudo emaint sync -r dark-fantasy
+echo 'x11-themes/dark-fantasy **' | sudo tee /etc/portage/package.accept_keywords/dark-fantasy
+sudo cp /var/db/repos/dark-fantasy/gentoo/package.accept_keywords/hyprland-desktop /etc/portage/package.accept_keywords/
+sudo cp /var/db/repos/dark-fantasy/gentoo/package.use/hyprland-desktop             /etc/portage/package.use/
+sudo emerge --ask --verbose x11-themes/dark-fantasy
+```
+
+Linia `**` jest potrzebna, bo ebuild jest live; pliki `hyprland-desktop` odblokowują stos Hyprlanda w `~amd64`, dokładnie jak w wariancie B. GURU i hyproverlay muszą być włączone, to one mają Hyprlanda i Quickshella.
+
+Portage nie pisze do katalogu domowego, więc część użytkownika zostaje osobnym krokiem, uruchamianym jako Ty:
+
+```sh
+dark-fantasy-install            # próba na sucho
+dark-fantasy-install --apply    # kopiuje do ~/.config, zachowuje Twoje lokalne zmiany
+hyprctl reload
+```
+
+To ten sam `install.sh` z tym samym manifestem sum kontrolnych, więc zachowuje się dokładnie jak w wariantach A i B. Uruchamiaj go po każdej aktualizacji pakietu. Ebuildu live zwykłe `emerge --update` nie przebudowuje; najnowszy commit pobiera `sudo emerge @live-rebuild` (albo `smart-live-rebuild`).
+
 ## Co kopiuje `install.sh`
 
 Każdy wpis jest **kopiowany** z repozytorium; instalator nie tworzy dowiązań symbolicznych. Po `--apply` katalog z repozytorium można usunąć. Żeby coś później zmienić, sklonuj repo ponownie, wprowadź zmianę, uruchom `./install.sh --apply` i znowu usuń katalog.

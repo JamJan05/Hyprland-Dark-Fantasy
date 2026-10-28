@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE pkgmetadata SYSTEM "https://www.gentoo.org/dtd/metadata.dtd">
+<pkgmetadata>
+	<maintainer type="person">
+		<name>JamJan05</name>
+	</maintainer>
+	<use>
+		<flag name="sddm">Install the login theme into /usr/share/sddm/themes and make it the default through /etc/sddm.conf.d</flag>
+	</use>
+	<upstream>
+		<remote-id type="github">JamJan05/Hyprland-Dark-Fantasy</remote-id>
+	</upstream>
+</pkgmetadata>

@@ -35,17 +35,11 @@ The design is original. The repository contains no assets, images, fonts or text
 
 ### Recommended: the Portage overlay
 
-The [`overlay`](https://github.com/JamJan05/Hyprland-Dark-Fantasy/tree/overlay) branch is a Portage overlay with the package `x11-themes/dark-fantasy`. It pulls in every dependency from [Requirements](#requirements), installs the root-side parts (the udev and sudo rules, the OpenRC service, the SDDM theme with USE `sddm`) and puts the desktop files in `/usr/share/dark-fantasy`. The GURU and hyproverlay overlays have to be enabled, they ship Hyprland and Quickshell themselves.
+This repository is also a Portage overlay (`profiles/`, `metadata/` and `x11-themes/` sit next to the desktop files) with the package `x11-themes/dark-fantasy`. It pulls in every dependency from [Requirements](#requirements), installs the root-side parts (the udev and sudo rules, the OpenRC service, the SDDM theme with USE `sddm`) and puts the desktop files in `/usr/share/dark-fantasy`. The GURU and hyproverlay overlays have to be enabled, they ship Hyprland and Quickshell themselves.
 
 ```sh
-# 1. The overlay - from the "overlay" branch, not from main.
-sudo tee /etc/portage/repos.conf/dark-fantasy.conf >/dev/null <<'EOF'
-[dark-fantasy]
-location = /var/db/repos/dark-fantasy
-sync-type = git
-sync-uri = https://github.com/JamJan05/Hyprland-Dark-Fantasy.git
-sync-git-clone-extra-opts = --branch overlay --single-branch
-EOF
+# 1. The overlay.
+sudo eselect repository add dark-fantasy git https://github.com/JamJan05/Hyprland-Dark-Fantasy.git
 sudo emaint sync -r dark-fantasy
 
 # 2. Keywords: the package is live (**), and the Hyprland stack is ~amd64.
@@ -64,7 +58,7 @@ dark-fantasy-install --apply    # copies into ~/.config, backs up files you chan
 hyprctl reload                  # or log out and start a Hyprland session
 ```
 
-Updating: `sudo emaint sync -r dark-fantasy && sudo emerge @live-rebuild`, then `dark-fantasy-install --apply` again (Portage cannot write into a home directory, so that step stays yours). The overlay branch's [README](https://github.com/JamJan05/Hyprland-Dark-Fantasy/tree/overlay#readme) has the details and the USE flags.
+Updating: `sudo emaint sync -r dark-fantasy && sudo emerge @live-rebuild`, then `dark-fantasy-install --apply` again (Portage cannot write into a home directory, so that step stays yours). Details and the USE flags: [installation.md](docs/installation.md#option-c-portage-overlay).
 
 ### Alternative: clone and `install.sh`
 

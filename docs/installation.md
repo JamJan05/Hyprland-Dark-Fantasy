@@ -106,6 +106,39 @@ cd ~/Hyprland-Dark-Fantasy
 ./install.sh --apply
 ```
 
+## Option C: Portage overlay
+
+The repository is also a Portage overlay: `profiles/`, `metadata/` and the `x11-themes/` category sit next to the desktop files, and Portage reads only those (it ignores `config/`, `docs/` and the rest). The package `x11-themes/dark-fantasy` is a live ebuild (`9999`) that fetches `main`. It pulls in the whole dependency list, puts the desktop files in `/usr/share/dark-fantasy` and installs the root-side parts that `install.sh` otherwise only prints:
+
+| Part | Where |
+|---|---|
+| udev rule for the battery charge limit | `/usr/lib/udev/rules.d/99-dark-fantasy-bateria.rules` |
+| `df-limit-mocy` and its sudo rule | `/usr/sbin/df-limit-mocy`, `/etc/sudoers.d/dark-fantasy-moc` (the path is `/usr/sbin`, not `/usr/local/sbin` as in the repository - the installed copies of the rule and of `LimitMocy.qml` are rewritten to match) |
+| OpenRC service `dark-fantasy-stan` | `/etc/init.d/` (enable it yourself: `rc-update add dark-fantasy-stan default`) |
+| SDDM theme (USE `sddm`) | `/usr/share/sddm/themes/dark-fantasy`, set as the default by `/etc/sddm.conf.d/zz-dark-fantasy.conf`; USE `l10n_pl` makes the login screen Polish |
+| `dark-fantasy-install` | `/usr/bin` - `install.sh` run from `/usr/share/dark-fantasy` |
+
+```sh
+sudo eselect repository add dark-fantasy git https://github.com/JamJan05/Hyprland-Dark-Fantasy.git
+sudo emaint sync -r dark-fantasy
+echo 'x11-themes/dark-fantasy **' | sudo tee /etc/portage/package.accept_keywords/dark-fantasy
+sudo cp /var/db/repos/dark-fantasy/gentoo/package.accept_keywords/hyprland-desktop /etc/portage/package.accept_keywords/
+sudo cp /var/db/repos/dark-fantasy/gentoo/package.use/hyprland-desktop             /etc/portage/package.use/
+sudo emerge --ask --verbose x11-themes/dark-fantasy
+```
+
+The `**` line is needed because the ebuild is live; the `hyprland-desktop` files unmask the `~amd64` Hyprland stack, exactly as in Option B. GURU and hyproverlay must be enabled, they ship Hyprland and Quickshell.
+
+Portage cannot write into a home directory, so the per-user part stays a separate step, run as yourself:
+
+```sh
+dark-fantasy-install            # dry run
+dark-fantasy-install --apply    # copies into ~/.config, keeps your local edits
+hyprctl reload
+```
+
+It is the same `install.sh` with the same checksum manifest, so it behaves exactly like Options A and B. Run it again after every update of the package. A live ebuild is not rebuilt by a plain `emerge --update`; `sudo emerge @live-rebuild` (or `smart-live-rebuild`) fetches the newest commit.
+
 ## What `install.sh` copies
 
 Every entry is **copied** from the repository; no symlinks are created. After `--apply` the repository folder can be deleted. To change something later, clone it again, edit, run `./install.sh --apply` and delete the folder again.
