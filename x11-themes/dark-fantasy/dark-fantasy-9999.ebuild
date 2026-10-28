@@ -58,7 +58,7 @@ RDEPEND="
 	x11-themes/adw-gtk3
 	x11-themes/papirus-icon-theme
 	x11-themes/bibata-xcursors
-	sddm? ( x11-misc/sddm )
+	sddm? ( gui-apps/sddm )
 "
 
 # Where the desktop files land. The per-user part (~/.config, ~/.local) is
