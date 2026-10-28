@@ -299,6 +299,12 @@ fi
 echo
 if [[ "$APPLY" == 0 ]]; then
     info "Nothing was changed. Run: ./install.sh --apply"
+elif [[ "$REPO" == /usr/share/dark-fantasy ]]; then
+    # Run as "dark-fantasy-install" from the Portage package: the root-side
+    # parts below (Portage files, udev rule, sudo rule, OpenRC service, SDDM
+    # theme) are installed by the ebuild, so only the reload is left.
+    info "Done. The package (x11-themes/dark-fantasy) has installed the root-side parts."
+    info "Reload: hyprctl reload, or log in again."
 else
     info "Done. The repository folder is no longer needed - you can delete it."
     info "Still to do by hand:"

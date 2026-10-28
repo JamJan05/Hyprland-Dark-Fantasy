@@ -45,6 +45,9 @@ hyprctl reload          # albo wyloguj się i uruchom sesję Hyprlanda
 
 Po `--apply` pliki w `~/.config` są kopiami, więc katalog z repozytorium można usunąć. Żeby coś później zmienić, sklonuj repo ponownie, wprowadź zmianę, uruchom `./install.sh --apply` i znowu usuń katalog. Twoje lokalne zmiany w `~/.config` przetrwają ponowną instalację, chyba że ten sam plik zmienił się w repo; patrz [installation.md](docs/pl/installation.md#co-kopiuje-installsh). Na koniec instalator wypisuje kroki, które wymagają roota: pliki Portage, motyw SDDM i regułę udev.
 
+> [!TIP]
+> **Gentoo: instalacja jako pakiet.** Gałąź [`overlay`](https://github.com/JamJan05/Hyprland-Dark-Fantasy/tree/overlay) to overlay Portage z pakietem `x11-themes/dark-fantasy`. Ciągnie wszystkie zależności, instaluje części wymagające roota (reguły udev i sudo, usługę OpenRC, motyw SDDM z flagą USE `sddm`) i kładzie pliki pulpitu w `/usr/share/dark-fantasy`; potem `dark-fantasy-install --apply` kopiuje je do katalogu domowego, dokładnie jak `install.sh` powyżej. Kroki instalacji są w README tej gałęzi.
+
 > [!NOTE]
 > Domyślny układ klawiatury to `pl`. Zmienisz go w Zębatce → Hyprland → Wejście → Układ klawiatury albo w `kb_layout` w `config/hypr/hyprland.lua`.
 
