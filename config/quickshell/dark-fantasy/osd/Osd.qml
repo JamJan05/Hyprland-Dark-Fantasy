@@ -78,11 +78,13 @@ PanelWindow {
     color: "transparent"
     visible: true
 
-    // Room for the shadow sticking out beyond the card outline.
-    readonly property int zapasNaCien: Theme.shadowBlur + Theme.shadowOffsetY
+    // Room around the card: the surface clips whatever sticks out, and the card
+    // drifts in by Theme.driftDistance. Also part of the card's distance
+    // from the bottom edge.
+    readonly property int zapas: 32
 
-    implicitWidth: 320 + 2 * zapasNaCien
-    implicitHeight: powierzchnia.implicitHeight + 2 * zapasNaCien
+    implicitWidth: 320 + 2 * zapas
+    implicitHeight: powierzchnia.implicitHeight + 2 * zapas
 
     // The OSD is for looking only. An empty mask lets the mouse
     // pass straight through it - otherwise it would block clicks

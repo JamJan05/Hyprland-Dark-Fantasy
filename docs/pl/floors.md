@@ -53,7 +53,7 @@ piętro I → 1..10     piętro II → 11..20     …     piętro X → 91..100
 - Piętro I to dokładnie klasyczne workspace'y 1-10, więc kto nie zmienia pięter, nie zauważy różnicy.
 - Workspace'y powstają przy pierwszym wejściu i znikają puste; nic nie jest tworzone z góry.
 - Nie ma nazwanych workspace'ów, bo Hyprland nadaje im ujemne numery w kolejności tworzenia, a te zmieniałyby się w każdej sesji.
-- Numerów workspace'ów nie widać nigdzie w interfejsie.
+- Numerów workspace'ów nie widać nigdzie w interfejsie. Cyfra w kwadraciku HUD-u to numer pulpitu w obrębie piętra (1-9, 0), nie numer workspace'u.
 
 ## Implementacja
 

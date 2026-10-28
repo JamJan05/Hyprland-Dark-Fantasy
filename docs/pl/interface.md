@@ -101,7 +101,7 @@ HUD to osobne okno warstwy powłoki nad lewym końcem paska. Ma tę samą wysoko
   | Stamina | obciążenie procesora | 12 px na wątek |
 
   Podczas ładowania obwódka HP zmienia kolor na żar. Bez baterii HP to pełny pasek o stałej długości.
-- **Pulpity piętra.** Kwadracik na każdy istniejący pulpit. Aktywny jest wypełniony złotem, a pulpit z oknem wołającym o uwagę jest w żarze. Kliknięcie w kwadracik przełącza pulpit.
+- **Pulpity piętra.** Kwadracik na każdy istniejący pulpit, w środku cyfra pulpitu (klawisz, który go otwiera). Aktywny jest wypełniony złotem, a pulpit z oknem wołającym o uwagę jest w żarze. Kliknięcie w kwadracik przełącza pulpit.
 - **Statusy narastające.** Pojawiają się tylko, gdy coś się dzieje, i gasną po 5 s ciszy: transfer sieci powyżej 100 KiB/s (złoto) i temperatura procesora powyżej 70 °C (żar).
 
 Paski wyłączysz w Zębatce → System → Zachowanie → Paski HUD-u. Procesor, pamięć i baterię pokazuje wtedy prawa strona Waybara jako liczby (`custom/zasoby`).

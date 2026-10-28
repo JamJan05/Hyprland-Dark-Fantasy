@@ -29,7 +29,7 @@ pragma Singleton
 //                                      Quickshell app menu)
 //      config/rofi/dark-fantasy.rasi
 //      config/kitty/kitty.conf
-//      config/hypr/hyprland.lua   (animation curves, blur, shadow)
+//      config/hypr/hyprland.lua   (animation curves, blur)
 //
 //  Every value has a comment saying where it comes from.
 //  If you change a color in those files, change it here too -
@@ -361,20 +361,6 @@ Singleton {
     readonly property real noiseOpacity: 0.07
 
     // ================================================================
-    //  SHADOW
-    //
-    //  All shadows in the repository are cast in near-black #060607 -
-    //  the same one Hyprland shades windows with (color = 0xcc060607).
-    //  QtQuick has no box-shadow; MultiEffect draws it - see
-    //  components/PanelSurface.qml.
-    //
-    //      swaync .control-center:  0 8px 24px rgba(6,6,7,.65)
-    // ================================================================
-    readonly property color shadowColor: Qt.rgba(0.024, 0.024, 0.027, 0.65)
-    readonly property int shadowBlur: 24
-    readonly property int shadowOffsetY: 8
-
-    // ================================================================
     //  TOP BAR - dimensions shared with Waybar
     //
     //  Mirror of "height", "margin-top" and "margin-left" from
@@ -465,9 +451,10 @@ Singleton {
     // install starts from.
     readonly property bool hudBars: true
 
-    // Digit in the desktop square (mono 8 px). Off by default -
-    // the square's position tells which desktop it is anyway.
-    readonly property bool workspaceNumbers: false
+    // Digit in the desktop square (mono 8 px). On: the row holds only the
+    // desktops that exist (hud/PulpityPietra.qml), so with desktops 1, 4
+    // and 9 open three squares alone do not say which key to press.
+    readonly property bool workspaceNumbers: true
 
     // ================================================================
     //  TILE ROW - menu at the bottom of the screen (kafle/RzadKafli.qml)

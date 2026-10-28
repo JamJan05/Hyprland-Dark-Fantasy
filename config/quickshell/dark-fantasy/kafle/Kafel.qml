@@ -93,8 +93,8 @@ Item {
     }
 
     // Desaturation of an unselected tile. MultiEffect only for the image -
-    // passing text through the effect softens the letters (see
-    // components/DropShadow.qml), but it does no harm to the relief.
+    // passing text through the effect's texture softens the letters,
+    // but it does no harm to the relief.
     MultiEffect {
         anchors.fill: parent
         source: obraz

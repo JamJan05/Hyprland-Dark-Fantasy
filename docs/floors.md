@@ -53,7 +53,7 @@ floor I  → 1..10     floor II → 11..20     …     floor X → 91..100
 - Floor I is exactly the classic workspaces 1-10, so if you never change floors nothing is different.
 - Workspaces appear on first entry and vanish when empty; nothing is created in advance.
 - Named workspaces are not used, because Hyprland gives them negative ids in creation order, which would change every session.
-- Workspace numbers are not shown anywhere in the interface.
+- Workspace numbers are not shown anywhere in the interface. The digit in a HUD square is the desktop's number within its floor (1-9, 0), not the workspace ID.
 
 ## Implementation
 
