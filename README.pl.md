@@ -35,17 +35,11 @@ Design jest autorski. Repozytorium nie zawiera żadnych assetów, grafik, krojó
 
 ### Polecane: overlay Portage
 
-Gałąź [`overlay`](https://github.com/JamJan05/Hyprland-Dark-Fantasy/tree/overlay) to overlay Portage z pakietem `x11-themes/dark-fantasy`. Ciągnie wszystkie zależności z [Wymagań](#wymagania), instaluje części wymagające roota (reguły udev i sudo, usługę OpenRC, motyw SDDM z flagą USE `sddm`) i kładzie pliki pulpitu w `/usr/share/dark-fantasy`. Overlaye GURU i hyproverlay muszą być włączone, to one mają samego Hyprlanda i Quickshella.
+To repozytorium jest zarazem overlayem Portage (`profiles/`, `metadata/` i `x11-themes/` leżą obok plików pulpitu) z pakietem `x11-themes/dark-fantasy`. Ciągnie wszystkie zależności z [Wymagań](#wymagania), instaluje części wymagające roota (reguły udev i sudo, usługę OpenRC, motyw SDDM z flagą USE `sddm`) i kładzie pliki pulpitu w `/usr/share/dark-fantasy`. Overlaye GURU i hyproverlay muszą być włączone, to one mają samego Hyprlanda i Quickshella.
 
 ```sh
-# 1. Overlay - z gałęzi "overlay", nie z main.
-sudo tee /etc/portage/repos.conf/dark-fantasy.conf >/dev/null <<'EOF'
-[dark-fantasy]
-location = /var/db/repos/dark-fantasy
-sync-type = git
-sync-uri = https://github.com/JamJan05/Hyprland-Dark-Fantasy.git
-sync-git-clone-extra-opts = --branch overlay --single-branch
-EOF
+# 1. Overlay.
+sudo eselect repository add dark-fantasy git https://github.com/JamJan05/Hyprland-Dark-Fantasy.git
 sudo emaint sync -r dark-fantasy
 
 # 2. Słowa kluczowe: pakiet jest live (**), a stos Hyprlanda jest ~amd64.
@@ -64,7 +58,7 @@ dark-fantasy-install --apply    # kopiuje do ~/.config, zmienione pliki odkłada
 hyprctl reload                  # albo wyloguj się i uruchom sesję Hyprlanda
 ```
 
-Aktualizacja: `sudo emaint sync -r dark-fantasy && sudo emerge @live-rebuild`, potem znowu `dark-fantasy-install --apply` (Portage nie pisze do katalogu domowego, więc ten krok zostaje po Twojej stronie). Szczegóły i flagi USE są w [README](https://github.com/JamJan05/Hyprland-Dark-Fantasy/tree/overlay#readme) gałęzi overlay.
+Aktualizacja: `sudo emaint sync -r dark-fantasy && sudo emerge @live-rebuild`, potem znowu `dark-fantasy-install --apply` (Portage nie pisze do katalogu domowego, więc ten krok zostaje po Twojej stronie). Szczegóły i flagi USE: [installation.md](docs/pl/installation.md#wariant-c-overlay-portage).
 
 ### Alternatywa: klon i `install.sh`
 
