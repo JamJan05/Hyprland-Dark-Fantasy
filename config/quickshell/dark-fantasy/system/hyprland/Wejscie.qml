@@ -1,5 +1,5 @@
 // -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- --
-//  HYPRLAND -> INPUT - touchpad, scrolling direction, keyboard layout,
+//  HYPRLAND -> INPUT - touchpad, touchpad while typing, scrolling direction, keyboard layout,
 //  floor gestures and their direction.
 //
 //  Touchpad sensitivity is a device rule (hl.device with the touchpad name
@@ -30,6 +30,18 @@ SekcjaOpcji {
         wartosc: UstawieniaHyprlanda.czuloscTouchpada
         formatuj: v => (v > 0 ? "+" : "") + Tr.dziesietna(v, 1)
         onZmieniono: function (v) { UstawieniaHyprlanda.ustawCzuloscTouchpada(v); }
+    }
+
+    // input:touchpad:disable_while_typing, shown the other way round: "on" =
+    // the touchpad is not blocked while a key is down (keyboard + touchpad
+    // together, e.g. in games). Hyprland's default blocks it.
+    WierszOpcji {
+        width: root.width
+        etykieta: Tr.t("Touchpad while typing", "Touchpad podczas pisania")
+        typ: "przelacznik"
+        dostepny: UstawieniaHyprlanda.nazwaTouchpada !== ""
+        wlaczony: !(UstawieniaHyprlanda.wartosci["input:touchpad:disable_while_typing"] ?? true)
+        onZmieniono: function (v) { UstawieniaHyprlanda.ustaw("input:touchpad:disable_while_typing", !v); }
     }
 
     // Scrolling direction of pages, separately for the touchpad and the

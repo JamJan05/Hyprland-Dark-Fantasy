@@ -651,6 +651,8 @@ hl.config({
         touchpad = {
             natural_scroll = false, -- true = "phone-like" scrolling, i.e. reversed direction
                                     -- (both switchable in Cogwheel -> Hyprland -> Input)
+            disable_while_typing = false, -- false = the touchpad keeps working while a key is held,
+                                          -- e.g. WASD + cursor (Cogwheel -> Hyprland -> Input)
         },
     },
 })

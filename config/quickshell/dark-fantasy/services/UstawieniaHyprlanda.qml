@@ -78,6 +78,7 @@ Singleton {
         { klucz: "decoration:dim_strength",       lua: ["decoration", "dim_strength"],       typ: "float" },
         { klucz: "animations:enabled",            lua: ["animations", "enabled"],            typ: "bool" },
         { klucz: "input:touchpad:natural_scroll", lua: ["input", "touchpad", "natural_scroll"], typ: "bool" },
+        { klucz: "input:touchpad:disable_while_typing", lua: ["input", "touchpad", "disable_while_typing"], typ: "bool" },
         { klucz: "input:natural_scroll",          lua: ["input", "natural_scroll"],          typ: "bool" },
         { klucz: "gestures:workspace_swipe_invert", lua: ["gestures", "workspace_swipe_invert"], typ: "bool" },
         { klucz: "input:kb_layout",               lua: ["input", "kb_layout"],               typ: "str" }

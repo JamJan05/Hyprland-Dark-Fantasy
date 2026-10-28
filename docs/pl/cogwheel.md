@@ -36,7 +36,7 @@ W nawiasach nazwy z angielskiego interfejsu.
 | **Wygląd** (Appearance) | Odstęp między oknami, odstęp od krawędzi, grubość ramki, rozmycie, siła rozmycia, krycie nieaktywnych okien, przygaszanie nieaktywnych, siła przygaszania. Okna na pełnym ekranie, odtwarzacze wideo i gry są wyłączone z krycia i przygaszania (reguły okien w `hyprland.lua`) |
 | **Ruch** (Motion) | Animacje wł. / wył., tempo animacji 0,5× - 2× (jeden mnożnik dla wszystkich animacji) |
 | **Tapeta** (Wallpaper) | Wybór pliku z katalogu tapet z podglądem, potem „Ustaw jako tapetę” |
-| **Wejście** (Input) | Czułość touchpada (reguła tylko dla touchpada, nie dla myszy), naturalne przewijanie osobno dla touchpada i kółka myszy, układ klawiatury, gesty pięter (3 palce) i ich kierunek |
+| **Wejście** (Input) | Czułość touchpada (reguła tylko dla touchpada, nie dla myszy), touchpad podczas pisania (wyłączone = blokowany, gdy wciśnięty jest klawisz), naturalne przewijanie osobno dla touchpada i kółka myszy, układ klawiatury, gesty pięter (3 palce) i ich kierunek |
 | **Ekran** (Monitor) | Skala (tylko „czyste” skale dla bieżącej rozdzielczości), odświeżanie, położenie drugiego monitora |
 | **Piętra** (Floors) | Liczba pięter (1-10) i nazwa każdego piętra |
 | **Skróty** (Shortcuts) | Własne skróty do aplikacji, przenoszenie głównych skrótów na inne klawisze i podgląd skrótów stałych (pulpity, mysz, klawisze multimedialne). Patrz [Skróty](#skróty) |
