@@ -45,6 +45,9 @@ hyprctl reload          # or log out and start a Hyprland session
 
 After `--apply` the files in `~/.config` are copies, so the repository folder can be deleted. To change something later, clone it again, edit, run `./install.sh --apply` and delete the folder again. Your local edits in `~/.config` survive a reinstall unless the same file changed in the repo; see [installation.md](docs/installation.md#what-installsh-copies). The installer also prints the steps that need root: Portage files, the SDDM theme and the udev rule.
 
+> [!TIP]
+> **Gentoo: install it as a package.** The [`overlay`](https://github.com/JamJan05/Hyprland-Dark-Fantasy/tree/overlay) branch is a Portage overlay with `x11-themes/dark-fantasy`. It pulls in every dependency, installs the root-side parts (udev and sudo rules, the OpenRC service, the SDDM theme with USE `sddm`) and puts the desktop files in `/usr/share/dark-fantasy`; `dark-fantasy-install --apply` then copies them into your home, exactly like `install.sh` above. Setup steps are in that branch's README.
+
 > [!NOTE]
 > The default keyboard layout is `pl`. Change it in Cogwheel → Hyprland → Input → Keyboard layout, or in `kb_layout` in `config/hypr/hyprland.lua`.
 
