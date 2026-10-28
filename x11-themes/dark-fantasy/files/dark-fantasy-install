@@ -1,0 +1,7 @@
+#!/bin/sh
+# dark-fantasy-install [--apply] - copies the desktop from the package
+# (/usr/share/dark-fantasy, x11-themes/dark-fantasy) into ~/.config and
+# ~/.local of the user running it. It is install.sh from the repository;
+# a dry run without --apply only prints the plan. Run it as yourself, not
+# as root - the files belong in your home.
+exec /usr/share/dark-fantasy/install.sh "$@"
