@@ -320,6 +320,7 @@ Some state is deliberately **outside** the repository, because it belongs to one
 
 - `~/.config/hypr/ustawienia.lua`: Hyprland settings from the Cogwheel (also listed in `.gitignore`),
 - `~/.config/hypr/lokalne.lua`: your own hand-written Hyprland additions for this computer (see below),
+- `~/.config/hypr/hyprlock.lokalne.conf`: the same for hyprlock, e.g. `auth { fingerprint { enabled = true } }`; `hyprlock.conf` sources it last, so it can override any setting, and a missing file is only logged,
 - `~/.local/state/dark-fantasy/powloka.json`: shell settings (language, HUD bars, charge limit, CPU power limits).
 
 **The wallpaper is local too.** Choosing a wallpaper in the Cogwheel rewrites `path` in `~/.config/hypr/hyprpaper.conf` and `$tapeta` in `~/.config/hypr/hyprlock.conf`. Those are copies, so the change is local: it does not show up in `git status`, and `install.sh --apply` keeps it unless the repo's version of either file changed since the last install (then your version goes to a `.bak-*` backup and you pick the wallpaper again). Copy these files into the repo only if the image path also exists on your other machines.
