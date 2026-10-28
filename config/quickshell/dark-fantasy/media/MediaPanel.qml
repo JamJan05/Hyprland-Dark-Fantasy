@@ -8,12 +8,19 @@
 //  bare glyphs instead of pill buttons. It only fades - no sliding.
 //
 //  Keys: Left/Right - previous/next, Enter or Space - play/pause,
+//  Up/Down - volume, S - shuffle, R - repeat (track / playlist / off),
 //  Esc - close. Clicking outside the slab closes it too.
+//
+//  The volume bar is the SYSTEM output (services/Audio.qml), the same
+//  number the OSD and the Cogwheel show - not the player's own MPRIS
+//  volume, which browsers rarely support and Spotify keeps separate
+//  from the sink, so the two would drift apart.
 // -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- --
 
 import QtQuick
 import Quickshell
 import Quickshell.Wayland
+import Quickshell.Services.Mpris
 import qs
 import qs.components
 import qs.services
@@ -55,6 +62,10 @@ PanelWindow {
 
     readonly property int margines: Theme.spacingLg
 
+    // 5 % - the same step as the volume keys in hyprland.lua and the
+    // Cogwheel slider.
+    readonly property real krokGlosnosci: 0.05
+
     Item {
         anchors.fill: parent
         focus: root.open
@@ -74,6 +85,22 @@ PanelWindow {
             case Qt.Key_Return:
             case Qt.Key_Enter:
                 if (root.jest && root.gracz.canTogglePlaying) Player.toggle();
+                break;
+            // Volume may auto-repeat (a held key is one smooth motion);
+            // the toggles must not, or holding S would flicker.
+            case Qt.Key_Up:
+                Audio.setVolume(Audio.volume + root.krokGlosnosci);
+                break;
+            case Qt.Key_Down:
+                Audio.setVolume(Audio.volume - root.krokGlosnosci);
+                break;
+            case Qt.Key_S:
+                if (zdarzenie.isAutoRepeat) break;
+                Player.toggleShuffle();
+                break;
+            case Qt.Key_R:
+                if (zdarzenie.isAutoRepeat) break;
+                Player.cycleLoop();
                 break;
             default:
                 return;
@@ -110,12 +137,18 @@ PanelWindow {
 
     // A bare glyph: iron when unavailable, muted at rest, gold under the
     // cursor. The middle one (play/pause) is larger and brighter.
+    //
+    // "wlaczony" is for the toggles (shuffle, repeat): gold at rest when
+    // on, and under the cursor the brighter text color, so an "on" glyph
+    // still reacts to hovering. "maly" shrinks the glyph, not the hit box.
     component Glif: Item {
         id: glif
 
         property string znak: ""
         property bool duzy: false
+        property bool maly: false
         property bool dostepny: true
+        property bool wlaczony: false
         signal uzyty()
 
         implicitWidth: duzy ? 48 : 36
@@ -125,9 +158,10 @@ PanelWindow {
         Label {
             anchors.centerIn: parent
             text: glif.znak
-            font.pixelSize: glif.duzy ? 30 : 20
+            font.pixelSize: glif.duzy ? 30 : glif.maly ? 16 : 20
             color: !glif.dostepny ? Theme.iron
-                 : myszGlifu.containsMouse ? Theme.accent
+                 : myszGlifu.containsMouse ? (glif.wlaczony ? Theme.text : Theme.accent)
+                 : glif.wlaczony ? Theme.accent
                  : glif.duzy ? Theme.text : Theme.textMuted
 
             Behavior on color { ColorAnimation { duration: Theme.animNormal } }
@@ -367,6 +401,17 @@ PanelWindow {
                     anchors.centerIn: parent
                     spacing: Theme.spacingLg
 
+                    // Shuffle on the far left, repeat on the far right - the
+                    // transport stays in the middle, where the hand expects it.
+                    Glif {
+                        anchors.verticalCenter: parent.verticalCenter
+                        maly: true
+                        znak: Icons.mediaShuffle
+                        dostepny: Player.shuffleSupported
+                        wlaczony: Player.shuffle
+                        onUzyty: Player.toggleShuffle()
+                    }
+
                     Glif {
                         anchors.verticalCenter: parent.verticalCenter
                         znak: Icons.mediaPrevious
@@ -388,6 +433,93 @@ PanelWindow {
                         dostepny: root.jest && root.gracz.canGoNext
                         onUzyty: Player.next()
                     }
+
+                    // One glyph, three states: off (muted), the playlist
+                    // (gold), this track (gold, with the "1").
+                    Glif {
+                        anchors.verticalCenter: parent.verticalCenter
+                        maly: true
+                        znak: Player.loopState === MprisLoopState.Track
+                            ? Icons.mediaRepeatOnce : Icons.mediaRepeat
+                        dostepny: Player.loopSupported
+                        wlaczony: Player.loopState !== MprisLoopState.None
+                        onUzyty: Player.cycleLoop()
+                    }
+                }
+            }
+
+            // Volume: speaker glyph (click = mute), the HUD bar, percentage.
+            Item {
+                id: glosnosc
+
+                width: parent.width
+                height: visible ? 32 : 0
+                visible: root.jest
+
+                readonly property bool dostepna: Audio.sinkReady
+                readonly property int procent: Math.round(Audio.volume * 100)
+
+                Glif {
+                    id: glosnik
+                    anchors.left: parent.left
+                    anchors.verticalCenter: parent.verticalCenter
+                    implicitWidth: 28
+                    implicitHeight: 32
+                    maly: true
+                    znak: Audio.muted ? Icons.volumeMuted
+                        : Icons.volumeSteps[Audio.volume < 0.34 ? 0 : Audio.volume < 0.67 ? 1 : 2]
+                    dostepny: glosnosc.dostepna
+                    wlaczony: !Audio.muted
+                    onUzyty: Audio.toggleMute()
+                }
+
+                StatBar {
+                    id: pasekGlosnosci
+                    anchors.left: glosnik.right
+                    anchors.leftMargin: Theme.spacingSm
+                    anchors.right: procenty.left
+                    anchors.rightMargin: Theme.spacingMd
+                    anchors.verticalCenter: parent.verticalCenter
+                    length: width
+                    value: Audio.volume
+                    fillColor: Audio.muted ? Theme.iron : Theme.accent
+                    opacity: glosnosc.dostepna ? 1 : Theme.disabledOpacity
+                }
+
+                // Press or drag sets the level from the x position; the wheel
+                // moves by one step. Only the vertical hit area is enlarged,
+                // so x maps straight onto the bar.
+                MouseArea {
+                    anchors.fill: pasekGlosnosci
+                    anchors.topMargin: -8
+                    anchors.bottomMargin: -8
+                    enabled: glosnosc.dostepna
+                    cursorShape: enabled ? Qt.PointingHandCursor : Qt.ArrowCursor
+
+                    function ustaw(x: real) {
+                        if (width <= 0) return;
+                        Audio.setVolume(Math.max(0, Math.min(1, x / width)));
+                    }
+
+                    onPressed: function (zdarzenie) { ustaw(zdarzenie.x); }
+                    onPositionChanged: function (zdarzenie) { if (pressed) ustaw(zdarzenie.x); }
+                    onWheel: function (zdarzenie) {
+                        const kroki = zdarzenie.angleDelta.y / 120;
+                        if (kroki !== 0) Audio.setVolume(Audio.volume + kroki * root.krokGlosnosci);
+                        zdarzenie.accepted = true;
+                    }
+                }
+
+                Label {
+                    id: procenty
+                    anchors.right: parent.right
+                    anchors.verticalCenter: parent.verticalCenter
+                    width: 40
+                    horizontalAlignment: Text.AlignRight
+                    text: glosnosc.dostepna ? glosnosc.procent + " %" : "—"
+                    font.pixelSize: Theme.fontSizeSmall
+                    font.features: { "tnum": 1 }
+                    color: Audio.muted ? Theme.iron : Theme.textMuted
                 }
             }
 
@@ -403,8 +535,9 @@ PanelWindow {
                 visible: root.jest
                 topPadding: Theme.spacingXs
                 horizontalAlignment: Text.AlignRight
-                text: Tr.t("← →  track      Enter  play / pause      Esc  close",
-                           "← →  utwór      Enter  graj / pauza      Esc  zamknij")
+                wrapMode: Text.Wrap
+                text: Tr.t("← →  track      ↑ ↓  volume      Enter  play / pause\nS  shuffle      R  repeat      Esc  close",
+                           "← →  utwór      ↑ ↓  głośność      Enter  graj / pauza\nS  losowo      R  powtórz      Esc  zamknij")
                 font.pixelSize: Theme.fontSizeSmall
                 color: Theme.iron
             }

@@ -124,10 +124,15 @@ Volume and brightness are not on the bar. They live in the Cogwheel, the media k
 
 Open it with `SUPER + O`, or by clicking the title or cover in the "now" frame. It shows the current player: a "Now playing" header, the cover as an "item" (desaturated, vignetted), the track, progress as a 6 px HUD bar, and bare glyph buttons. When nothing plays it says so.
 
+Around the transport buttons: shuffle on the left, repeat on the right (click cycles this track → playlist → off; the glyph shows a "1" for a single track). Both are grey when the player does not support them (a browser tab, a stream). Below them a volume bar: click or drag to set, scroll to step by 5 %, click the speaker to mute. It is the system output volume, the same one the OSD and the Cogwheel show.
+
 | Keys | Action |
 |---|---|
 | `←` / `→` | Previous / next track |
 | `Enter` / `Space` | Play / pause |
+| `↑` `↓` | Volume by 5 % |
+| `S` | Shuffle on / off |
+| `R` | Repeat: this track → playlist → off |
 | `Esc` or a click outside | Close |
 
 ## Notifications and OSD

@@ -42,6 +42,11 @@ MEDIA_PREV  = 0xF04AE  # 󰒮
 MEDIA_NEXT  = 0xF04AD  # 󰒭
 MEDIA_PLAY  = 0xF040A  # 󰐊
 MEDIA_PAUSE = 0xF03E4  # 󰏤
+# Shuffle and repeat in the media panel. Checked after rendering: F0457
+# next to them is repeat-OFF (crossed out), not "repeat once".
+MEDIA_SHUFFLE     = 0xF049D  # 󰒝 shuffle
+MEDIA_REPEAT      = 0xF0456  # 󰑖 repeat (playlist)
+MEDIA_REPEAT_ONCE = 0xF0458  # 󰑘 repeat with a "1" (this track)
 # Network - the same glyphs the "network" module on the bar uses
 WIFI       = [0xF091F, 0xF0922, 0xF0925, 0xF0928]
 WIFI_OFF   = 0xF05AA   # 󰖪
@@ -153,6 +158,9 @@ Singleton {{
     readonly property string mediaNext: {q(MEDIA_NEXT)}
     readonly property string mediaPlay: {q(MEDIA_PLAY)}
     readonly property string mediaPause: {q(MEDIA_PAUSE)}
+    readonly property string mediaShuffle: {q(MEDIA_SHUFFLE)}
+    readonly property string mediaRepeat: {q(MEDIA_REPEAT)}
+    readonly property string mediaRepeatOnce: {q(MEDIA_REPEAT_ONCE)}
 
     // ---------------- BLUETOOTH ----------------
     readonly property string bluetoothOn: {q(BT_ON)}

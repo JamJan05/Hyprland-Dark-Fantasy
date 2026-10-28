@@ -124,10 +124,15 @@ Głośności i jasności nie ma na pasku. Są w Zębatce, klawisze multimedialne
 
 Otwiera go `SUPER + O` albo kliknięcie w tytuł lub okładkę w ramce „teraz”. Pokazuje bieżący odtwarzacz: nagłówek „Teraz gra”, okładkę jako „przedmiot” (zdesaturowaną, z winietą), utwór, postęp jako 6-pikselowy pasek z HUD-u i gołe glify zamiast przycisków. Gdy nic nie gra, panel to mówi.
 
+Obok przycisków odtwarzania: losowa kolejność po lewej, powtarzanie po prawej (kliknięcie przełącza ten utwór → playlista → wyłączone; glif z „1” oznacza jeden utwór). Oba są szare, gdy odtwarzacz tego nie obsługuje (karta przeglądarki, strumień). Niżej pasek głośności: kliknięcie lub przeciągnięcie ustawia poziom, kółko zmienia o 5 %, kliknięcie w głośnik wycisza. To głośność wyjścia systemowego, ta sama, którą pokazują OSD i Zębatka.
+
 | Klawisze | Działanie |
 |---|---|
 | `←` / `→` | Poprzedni / następny utwór |
 | `Enter` / `Spacja` | Odtwarzanie / pauza |
+| `↑` `↓` | Głośność o 5 % |
+| `S` | Losowa kolejność wł. / wył. |
+| `R` | Powtarzanie: ten utwór → playlista → wyłączone |
 | `Esc` albo kliknięcie obok | Zamknięcie |
 
 ## Powiadomienia i OSD

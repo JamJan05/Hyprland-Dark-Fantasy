@@ -166,8 +166,10 @@ window#waybar.empty #window {
 
    Two zones in one frame. The player zone exists only while some application
    is playing: with no player the cover art and the title hide and the frame
-   shrinks to the clock and the date. While playing, the title zone has a
-   fixed min-width, so changing tracks does not move the clock. */
+   shrinks to the clock and the date. While playing, the title zone is as
+   wide as the title itself (up to 28 characters, cut by the script), so the frame
+   hugs a short title instead of holding a 270 px void after it. The price:
+   the clock shifts by half the difference when the title length changes. */
 
 /* Clock - mono typeface, fixed-width digits. A small right margin:
    the date should hug the time, not stand apart like a separate module. */
@@ -217,11 +219,9 @@ window#waybar.empty #window {
     padding: 0;
 }
 
-/* Title and artist. min-width fits 28 characters (max-length in config.jsonc)
-   of letter-spaced 16 px small caps - a shorter title does not
-   narrow the frame. */
+/* Title and artist. No min-width: the zone follows the text, and the script
+   (local/bin/waybar-odtwarzacz) caps it at 28 characters with an ellipsis. */
 #custom-odtwarzacz {
-    min-width: 270px;
     padding-left: 4px;
     /* SC family instead of font-variant - "ł" in titles, see #custom-data. */
     font-family: "EB Garamond SC", "EB Garamond", serif;
