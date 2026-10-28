@@ -31,7 +31,7 @@ Network and Bluetooth need device lists, passwords and pairing, which do not fit
 
 | Section | Options |
 |---|---|
-| **Appearance** | Gap between windows, gap from screen edge, border width, blur, blur strength, opacity of inactive windows, dim inactive windows, dimming strength |
+| **Appearance** | Gap between windows, gap from screen edge, border width, blur, blur strength, opacity of inactive windows, dim inactive windows, dimming strength. Full-screen windows, video players and games are exempt from the opacity and dimming (window rules in `hyprland.lua`) |
 | **Motion** | Animations on / off, animation speed 0.5× - 2× (one multiplier for every animation) |
 | **Wallpaper** | Pick a file from the wallpaper folder with a preview, then "Set as wallpaper" |
 | **Input** | Touchpad sensitivity (a rule for the touchpad only, not the mouse), natural scrolling separately for the touchpad and the mouse wheel, keyboard layout, floor gestures (3 fingers) and their direction |

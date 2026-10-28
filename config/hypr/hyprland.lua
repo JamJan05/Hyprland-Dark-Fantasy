@@ -366,8 +366,12 @@ hl.config({
 -- See https://wiki.hypr.land/Configuring/Basics/Variables/
 hl.config({
     general = {
-        gaps_in  = 5,  -- gap between neighbouring windows (in pixels)
-        gaps_out = 10, -- gap between windows and the screen edge
+        -- 12 px from the screen edge, like Waybar and the HUD (margin-left /
+        -- margin-right 12 in waybar/config.jsonc, Theme.barMargin in the shell):
+        -- the window frames and the bar's islands then sit on one vertical
+        -- line. With 10 the frames stuck out 2 px past the bar on both sides.
+        gaps_in  = 6,  -- gap between neighbouring windows (in pixels)
+        gaps_out = 12, -- gap between windows and the screen edge
 
         -- 1 px, like every frame in this theme - in Waybar, in the Quickshell
         -- shell, in hyprlock. The frame should suggest the edge of forged
@@ -378,16 +382,18 @@ hl.config({
             -- Colors in rgba(RRGGBBAA) format, where the last two digits are
             -- the transparency.
             --
-            -- Active window: full old gold. Inactive: the same gold
-            -- at 20 % opacity (33 in hex) - exactly the "obwodka" border from
-            -- waybar/style.css and Theme.border in the shell.
+            -- Active window: full old gold. Inactive: the same gold at 35 %
+            -- (59 in hex). The bar and the shell keep their 20 % frames
+            -- (waybar/style.css, Theme.border) - they sit on a translucent
+            -- background, where 20 % still reads. An opaque window on the
+            -- near-black wallpaper lost its edge at 20 %.
             --
             -- No gradient to ember: in this theme ember means ONLY alarm and
             -- charging, and on the frame of every active window it would fake
             -- an alarm all day long.
             --   gold  #b19a67   ember #8f4935   iron  #55504a
             active_border   = "rgba(b19a67ff)",
-            inactive_border = "rgba(b19a6733)",
+            inactive_border = "rgba(b19a6759)",
         },
 
         -- Set to true to resize windows by grabbing their
@@ -409,18 +415,21 @@ hl.config({
 
         -- Opacity of the active window and of inactive windows
         -- (1.0 = fully opaque, e.g. 0.9 = slightly see-through).
-        -- The active window stays at 1.0, because transparency is meant only for the terminal,
-        -- not for all windows. Kitty handles it itself - see
-        -- ~/.config/kitty/kitty.conf, option background_opacity.
+        -- Both stay at 1.0: transparency is meant only for the terminal, not
+        -- for all windows, and kitty handles it itself (~/.config/kitty/kitty.conf,
+        -- background_opacity). A compositor-side inactive_opacity made every
+        -- unfocused window see-through, text included - and with
+        -- follow_mouse = 1 merely crossing a window with the cursor changed
+        -- whether the one next to it was readable.
         active_opacity   = 1.0,
-        inactive_opacity = 0.92,
+        inactive_opacity = 1.0,
 
-        -- Dimming of inactive windows. Together with inactive_opacity it gives
-        -- the "world in fog, the active window in the bonfire light" effect. 0.15 is
-        -- little - at 0.5 (the default) an inactive terminal becomes
+        -- Dimming of inactive windows - the whole "world in fog, the active
+        -- window in the bonfire light" effect now rests on this alone. 0.1 is
+        -- a hint, not a veil: at 0.5 (the default) an inactive terminal becomes
         -- unreadable, and sometimes you need to read something next to the active one.
         dim_inactive = true,
-        dim_strength = 0.15,
+        dim_strength = 0.1,
 
         -- Strength of the dimming around a window with the dim_around rule (the panel window
         -- "df-panel" - btop from the Status tile). 0.6, not the default 0.4: the tile row
@@ -429,19 +438,20 @@ hl.config({
         -- the same, not suddenly brighten.
         dim_around = 0.6,
 
+        -- No window shadow. A near-black shadow (0xcc060607, range 22) on the
+        -- near-black wallpaper measured about 5 RGB levels at the frame - not
+        -- visible, only paid for on the integrated GPU. The shell dropped its
+        -- panel shadows for the same reason; the 1 px frame does the lifting.
         shadow = {
-            enabled      = true,       -- shadow cast by windows
-            -- 22 px: a wide, soft shadow lifts the window off the wallpaper like
-            -- a stone slab off a wall. 4 px gave an outline, not a shadow.
-            range        = 22,         -- shadow reach (blur) in pixels
-            render_power = 3,          -- how fast the shadow fades at the edge, higher = sharper falloff
-            color        = 0xcc060607, -- shadow color 0xAARRGGBB; almost black, to match the #0b0b0c background
+            enabled = false,
         },
 
         blur = {
             enabled   = true,   -- background blur under transparent windows and panels
             size      = 6,      -- blur strength (radius)
-            passes    = 3,      -- number of blur passes, more = nicer, but more expensive for the GPU
+            passes    = 2,      -- number of blur passes, more = nicer, but more expensive for the GPU;
+                                -- under the bar and a 0.82 terminal on a near-black
+                                -- wallpaper the third pass made no visible difference
             vibrancy  = 0.1696, -- color saturation boost in the blurred background (range 0.0 - 1.0)
 
             -- "Ash, not smooth black." Noise laid over the blurred background
@@ -505,7 +515,9 @@ hl.curve("quick",          { type = "bezier", points = { {0.15, 0},    {0.1, 1} 
 -- again with the recomputed duration.
 local ANIMACJE = {
     { leaf = "global",        speed = 10,    bezier = "default" },
-    { leaf = "border",        speed = 5.39,  bezier = "easeOutQuint" },
+    -- 200 ms, shorter than the windows: the gold frame is the focus
+    -- indicator, and at 539 ms it arrived noticeably after the focus did.
+    { leaf = "border",        speed = 2,     bezier = "easeOutQuint" },
     { leaf = "windows",       speed = 3,     bezier = "easeOutQuint" },
     { leaf = "windowsIn",     speed = 3,     bezier = "easeOutQuint",  style = "popin 100%" },
     { leaf = "windowsOut",    speed = 3,     bezier = "easeOutQuint",  style = "popin 100%" },
@@ -579,8 +591,9 @@ hl.config({
 -- Change them when you want to get rid of Hyprland's default background.
 hl.config({
     misc = {
-        force_default_wallpaper = 0,     -- 0 = no built-in wallpaper; hyprpaper draws the background
-        disable_hyprland_logo   = true,  -- no random background with the Hyprland logo / anime
+        force_default_wallpaper = 0,     -- which built-in wallpaper (-1 random, 0 plain, 1-2 anime);
+                                         -- only matters until the next line switches them all off
+        disable_hyprland_logo   = true,  -- no built-in background at all; hyprpaper draws it
         -- WARNING: this option does NOT remove the splash text ("Read the wiki.") that
         -- sits at the bottom of the wallpaper. Hyprland only picks the random string -
         -- the text is DRAWN BY HYPRPAPER, which fetches it from the compositor and paints
@@ -987,6 +1000,41 @@ hl.window_rule({
     },
 
     no_focus = true, -- such a window will never take focus
+})
+
+-- READABLE FULL SCREEN, VIDEO AND GAMES.
+--
+-- dim_inactive (and any inactive_opacity set in the Cogwheel) applies to
+-- every window that loses focus - also to a film on the full screen or a
+-- game, when a notification or the second monitor takes the focus away.
+-- These windows stay as they are: no dimming, no see-through.
+--
+-- "override" matters: a bare "1.0" is a MULTIPLIER of the global opacity
+-- (1.0 x 0.7 is still 0.7), "1.0 override" replaces it. Three values =
+-- active, inactive, fullscreen. The rule neutralizes the compositor only -
+-- transparency an application draws itself (kitty) stays.
+--
+-- The class list is a starting point: the ID a program reports depends on
+-- its packaging (Flatpak IDs are reverse-DNS). Check with: hyprctl clients
+local czytelne = {
+    opacity = "1.0 override 1.0 override 1.0 override",
+    no_dim  = true,
+}
+
+hl.window_rule({
+    name  = "czytelny-pelny-ekran",
+    match = { fullscreen = true },
+
+    opacity = czytelne.opacity,
+    no_dim  = czytelne.no_dim,
+})
+
+hl.window_rule({
+    name  = "czytelne-wideo-i-gry",
+    match = { class = "^(mpv|imv|vlc|org[.]gnome[.]Loupe|steam_app_.*)$" },
+
+    opacity = czytelne.opacity,
+    no_dim  = czytelne.no_dim,
 })
 
 -- LAYER RULES

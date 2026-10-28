@@ -29,7 +29,7 @@ pragma Singleton
 //                                      Quickshell app menu)
 //      config/rofi/dark-fantasy.rasi
 //      config/kitty/kitty.conf
-//      config/hypr/hyprland.lua   (animation curves, blur, shadow)
+//      config/hypr/hyprland.lua   (animation curves, blur)
 //
 //  Every value has a comment saying where it comes from.
 //  If you change a color in those files, change it here too -
@@ -451,9 +451,10 @@ Singleton {
     // install starts from.
     readonly property bool hudBars: true
 
-    // Digit in the desktop square (mono 8 px). Off by default -
-    // the square's position tells which desktop it is anyway.
-    readonly property bool workspaceNumbers: false
+    // Digit in the desktop square (mono 8 px). On: the row holds only the
+    // desktops that exist (hud/PulpityPietra.qml), so with desktops 1, 4
+    // and 9 open three squares alone do not say which key to press.
+    readonly property bool workspaceNumbers: true
 
     // ================================================================
     //  TILE ROW - menu at the bottom of the screen (kafle/RzadKafli.qml)

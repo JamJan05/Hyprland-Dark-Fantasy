@@ -25,7 +25,7 @@ SekcjaOpcji {
         width: root.width
         etykieta: Tr.t("Gap between windows", "Odstęp między oknami")
         typ: "suwak"; od: 0; doo: 30; krok: 1
-        wartosc: root.w["general:gaps_in"] ?? 5
+        wartosc: root.w["general:gaps_in"] ?? 6
         formatuj: root.px
         onZmieniono: function (v) { UstawieniaHyprlanda.ustaw("general:gaps_in", v); }
     }
@@ -34,7 +34,7 @@ SekcjaOpcji {
         width: root.width
         etykieta: Tr.t("Gap from screen edge", "Odstęp od krawędzi")
         typ: "suwak"; od: 0; doo: 60; krok: 2
-        wartosc: root.w["general:gaps_out"] ?? 10
+        wartosc: root.w["general:gaps_out"] ?? 12
         formatuj: root.px
         onZmieniono: function (v) { UstawieniaHyprlanda.ustaw("general:gaps_out", v); }
     }
@@ -70,7 +70,7 @@ SekcjaOpcji {
         width: root.width
         etykieta: Tr.t("Opacity of inactive windows", "Krycie nieaktywnych okien")
         typ: "suwak"; od: 0.5; doo: 1; krok: 0.02
-        wartosc: root.w["decoration:inactive_opacity"] ?? 0.92
+        wartosc: root.w["decoration:inactive_opacity"] ?? 1.0
         formatuj: root.procent
         onZmieniono: function (v) { UstawieniaHyprlanda.ustaw("decoration:inactive_opacity", v); }
     }
@@ -88,7 +88,7 @@ SekcjaOpcji {
         etykieta: Tr.t("Dimming strength", "Siła przygaszania")
         typ: "suwak"; od: 0; doo: 0.6; krok: 0.05
         dostepny: root.w["decoration:dim_inactive"] ?? true
-        wartosc: root.w["decoration:dim_strength"] ?? 0.15
+        wartosc: root.w["decoration:dim_strength"] ?? 0.1
         formatuj: root.procent
         onZmieniono: function (v) { UstawieniaHyprlanda.ustaw("decoration:dim_strength", v); }
     }

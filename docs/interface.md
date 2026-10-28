@@ -101,7 +101,7 @@ The HUD is a separate shell layer window above the left end of the bar. It has t
   | Stamina | CPU load | 12 px per thread |
 
   While charging, the HP outline turns ember. Without a battery, HP is a full bar of fixed length.
-- **The floor's desktops.** One square per existing desktop. The active desktop is filled with gold, and a desktop whose window wants attention is ember. Click a square to switch.
+- **The floor's desktops.** One square per existing desktop, with the desktop's digit (the key that opens it) inside. The active desktop is filled with gold, and a desktop whose window wants attention is ember. Click a square to switch.
 - **Build-up statuses.** They appear only while something is happening and fade after 5 s of quiet: network transfer above 100 KiB/s (gold) and CPU temperature above 70 °C (ember).
 
 The bars can be turned off in Cogwheel → System → Behavior → HUD bars. CPU, memory and battery then appear as numbers on the right side of Waybar (`custom/zasoby`).
