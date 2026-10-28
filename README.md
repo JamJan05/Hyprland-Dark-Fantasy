@@ -78,7 +78,7 @@ cd ~/Hyprland-Dark-Fantasy
 hyprctl reload          # or log out and start a Hyprland session
 ```
 
-After `--apply` the files in `~/.config` are copies, so the repository folder can be deleted. To change something later, clone it again, edit, run `./install.sh --apply` and delete the folder again. Your local edits in `~/.config` survive a reinstall unless the same file changed in the repo; see [installation.md](docs/installation.md#what-installsh-copies). The installer also prints the steps that need root: Portage files, the SDDM theme and the udev rule. `dark-fantasy-install` from the package is this same script run from `/usr/share/dark-fantasy`.
+After `--apply` the files in `~/.config` are copies, so the repository folder can be deleted. To change something later, clone it again, edit, run `./install.sh --apply` and delete the folder again. Your local edits in `~/.config` survive a reinstall unless the same file changed in the repo; see [installation.md](docs/installation.md#what-installsh-copies). The installer also prints the steps that need root: Portage files, the SDDM theme, the udev rule for the battery charge limit, the optional CPU power limit helper (ryzenadj + sudoers) and the OpenRC service that restores the backlight and Num Lock before login. `dark-fantasy-install` from the package is this same script run from `/usr/share/dark-fantasy`.
 
 > [!NOTE]
 > The default keyboard layout is `pl`. Change it in Cogwheel → Hyprland → Input → Keyboard layout, or in `kb_layout` in `config/hypr/hyprland.lua`.

@@ -78,7 +78,7 @@ cd ~/Hyprland-Dark-Fantasy
 hyprctl reload          # albo wyloguj się i uruchom sesję Hyprlanda
 ```
 
-Po `--apply` pliki w `~/.config` są kopiami, więc katalog z repozytorium można usunąć. Żeby coś później zmienić, sklonuj repo ponownie, wprowadź zmianę, uruchom `./install.sh --apply` i znowu usuń katalog. Twoje lokalne zmiany w `~/.config` przetrwają ponowną instalację, chyba że ten sam plik zmienił się w repo; patrz [installation.md](docs/pl/installation.md#co-kopiuje-installsh). Na koniec instalator wypisuje kroki, które wymagają roota: pliki Portage, motyw SDDM i regułę udev. `dark-fantasy-install` z pakietu to ten sam skrypt uruchomiony z `/usr/share/dark-fantasy`.
+Po `--apply` pliki w `~/.config` są kopiami, więc katalog z repozytorium można usunąć. Żeby coś później zmienić, sklonuj repo ponownie, wprowadź zmianę, uruchom `./install.sh --apply` i znowu usuń katalog. Twoje lokalne zmiany w `~/.config` przetrwają ponowną instalację, chyba że ten sam plik zmienił się w repo; patrz [installation.md](docs/pl/installation.md#co-kopiuje-installsh). Na koniec instalator wypisuje kroki, które wymagają roota: pliki Portage, motyw SDDM, regułę udev dla limitu ładowania baterii, opcjonalny limit mocy procesora (ryzenadj + sudoers) oraz usługę OpenRC, która przywraca podświetlenie i Num Lock jeszcze przed logowaniem. `dark-fantasy-install` z pakietu to ten sam skrypt uruchomiony z `/usr/share/dark-fantasy`.
 
 > [!NOTE]
 > Domyślny układ klawiatury to `pl`. Zmienisz go w Zębatce → Hyprland → Wejście → Układ klawiatury albo w `kb_layout` w `config/hypr/hyprland.lua`.

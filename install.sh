@@ -262,9 +262,9 @@ if [[ "$APPLY" == 1 ]]; then
 fi
 kopiuj assets/ikony-menu/256 "$DANE/dark-fantasy/ikony-menu"
 
-# No wallpaper ships with the repository. The Cogwheel lists images from
-# <XDG Pictures>/Wallpapers (or an existing .../Tapety) and writes the chosen
-# one into hyprpaper.conf and hyprlock.conf.
+# The default wallpaper ships with the repository (assets/wallpaper.png). The
+# Cogwheel lists images from <XDG Pictures>/Wallpapers (or an existing
+# .../Tapety) and writes the chosen one into hyprpaper.conf and hyprlock.conf.
 info "Wallpaper"
 OBRAZY="$(xdg-user-dir PICTURES 2>/dev/null || true)"
 [[ -z $OBRAZY || $OBRAZY == "$HOME" ]] && OBRAZY="$HOME/Pictures"
