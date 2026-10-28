@@ -361,20 +361,6 @@ Singleton {
     readonly property real noiseOpacity: 0.07
 
     // ================================================================
-    //  SHADOW
-    //
-    //  All shadows in the repository are cast in near-black #060607 -
-    //  the same one Hyprland shades windows with (color = 0xcc060607).
-    //  QtQuick has no box-shadow; MultiEffect draws it - see
-    //  components/PanelSurface.qml.
-    //
-    //      swaync .control-center:  0 8px 24px rgba(6,6,7,.65)
-    // ================================================================
-    readonly property color shadowColor: Qt.rgba(0.024, 0.024, 0.027, 0.65)
-    readonly property int shadowBlur: 24
-    readonly property int shadowOffsetY: 8
-
-    // ================================================================
     //  TOP BAR - dimensions shared with Waybar
     //
     //  Mirror of "height", "margin-top" and "margin-left" from

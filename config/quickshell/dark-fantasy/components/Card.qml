@@ -7,8 +7,7 @@
 //      corner     = two steps smaller than the panel holding it
 //      border     = 1 px, gold at alpha .20
 //
-//  The card has NO shadow. In this repository only things floating
-//  above the wallpaper get a shadow (panel, tooltip); an element
+//  The card has no shadow - nothing in the shell does; an element
 //  lying inside a panel is set apart by its background alone.
 // -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- --
 

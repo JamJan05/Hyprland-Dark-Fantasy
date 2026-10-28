@@ -51,15 +51,18 @@ PanelWindow {
     visible: true
 
     readonly property int szerokosc: 400
-    readonly property int zapasNaCien: Theme.shadowBlur + Theme.shadowOffsetY
+    // Room around the stack: the surface clips whatever sticks out, and a new
+    // popup drifts in by Theme.driftDistance. Also part of the distance
+    // from the screen corner.
+    readonly property int zapas: 32
 
-    implicitWidth: szerokosc + 2 * zapasNaCien
-    implicitHeight: Math.max(1, stos.implicitHeight + 2 * zapasNaCien)
+    implicitWidth: szerokosc + 2 * zapas
+    implicitHeight: Math.max(1, stos.implicitHeight + 2 * zapas)
 
     // Empty popup list = window transparent to the mouse.
     mask: Region {
-        x: root.zapasNaCien
-        y: root.zapasNaCien
+        x: root.zapas
+        y: root.zapas
         width: Notifications.popups.length > 0 ? root.szerokosc : 0
         height: Notifications.popups.length > 0 ? stos.implicitHeight : 0
     }
@@ -69,8 +72,8 @@ PanelWindow {
 
         anchors.top: parent.top
         anchors.right: parent.right
-        anchors.topMargin: root.zapasNaCien
-        anchors.rightMargin: root.zapasNaCien
+        anchors.topMargin: root.zapas
+        anchors.rightMargin: root.zapas
 
         width: root.szerokosc
         spacing: Theme.spacingSm
@@ -97,12 +100,6 @@ PanelWindow {
                 // (leaf "layers" in hyprland.lua), so that everything on this
                 // desktop has one tempo.
                 Component.onCompleted: wjazd.start()
-
-                DropShadow {
-                    anchors.fill: karta
-                    radius: karta.radius
-                    opacity: karta.opacity
-                }
 
                 NotificationCard {
                     id: karta

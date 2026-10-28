@@ -1,5 +1,5 @@
 // -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- --
-//  PANEL SURFACE - background, border, shadow and opening animation.
+//  PANEL SURFACE - background, border and opening animation.
 //
 //  Common base for MediaPanel, the quick panel (QuickPanel)
 //  and the OSD. Thanks to it all three open identically and share
@@ -63,20 +63,14 @@ Item {
     //
     // true = the panel touches Waybar with its top edge and should look
     // like it slides out OF it, not like a separate window hanging below.
-    // This changes three things at once:
+    // This changes two things at once:
     //
     //   1. the top corners are squared off - rounded corners at the joint
     //      would read as "this is a separate card";
-    //   2. the shadow does not extend above the top edge - otherwise
-    //      it would darken the bar the panel hangs under (the Quickshell
-    //      layer is created AFTER Waybar, so it lies above it);
-    //   3. the caller should zero slideDistance, because a downward slide
+    //   2. the caller should zero slideDistance, because a downward slide
     //      would mean the panel is drawn ABOVE the bar at the start
     //      of the animation.
     property bool attachedTop: false
-
-    // How far the shadow sticks out past the card's outline.
-    readonly property int zapasCienia: Theme.shadowBlur + Theme.shadowOffsetY
 
     // Everything the caller puts into PanelSurface lands inside
     // the card - not next to it.
@@ -113,32 +107,6 @@ Item {
 
     implicitWidth: karta.implicitWidth
     implicitHeight: karta.implicitHeight
-
-    // ---------------------------------------------------------------
-    //  SHADOW - under the card, so declared before it.
-    //
-    //  It sits in a container that, for a panel attached to the bar,
-    //  clips it to the card's top edge. Without that the shadow would spill
-    //  onto the bar and darken its right end.
-    // ---------------------------------------------------------------
-    Item {
-        anchors.fill: karta
-        anchors.leftMargin: -root.zapasCienia
-        anchors.rightMargin: -root.zapasCienia
-        anchors.bottomMargin: -root.zapasCienia
-        anchors.topMargin: root.attachedTop ? 0 : -root.zapasCienia
-
-        clip: root.attachedTop
-        opacity: root.postep
-
-        DropShadow {
-            x: root.zapasCienia
-            y: root.attachedTop ? 0 : root.zapasCienia
-            width: karta.width
-            height: karta.height
-            radius: karta.radius
-        }
-    }
 
     // ---------------------------------------------------------------
     //  CARD
