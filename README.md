@@ -33,7 +33,42 @@ The design is original. The repository contains no assets, images, fonts or text
 
 ## Quick start
 
-These commands install the configuration. The packages have to be installed already (see [Requirements](#requirements)).
+### Recommended: the Portage overlay
+
+The [`overlay`](https://github.com/JamJan05/Hyprland-Dark-Fantasy/tree/overlay) branch is a Portage overlay with the package `x11-themes/dark-fantasy`. It pulls in every dependency from [Requirements](#requirements), installs the root-side parts (the udev and sudo rules, the OpenRC service, the SDDM theme with USE `sddm`) and puts the desktop files in `/usr/share/dark-fantasy`. The GURU and hyproverlay overlays have to be enabled, they ship Hyprland and Quickshell themselves.
+
+```sh
+# 1. The overlay - from the "overlay" branch, not from main.
+sudo tee /etc/portage/repos.conf/dark-fantasy.conf >/dev/null <<'EOF'
+[dark-fantasy]
+location = /var/db/repos/dark-fantasy
+sync-type = git
+sync-uri = https://github.com/JamJan05/Hyprland-Dark-Fantasy.git
+sync-git-clone-extra-opts = --branch overlay --single-branch
+EOF
+sudo emaint sync -r dark-fantasy
+
+# 2. Keywords: the package is live (**), and the Hyprland stack is ~amd64.
+echo 'x11-themes/dark-fantasy **' | sudo tee /etc/portage/package.accept_keywords/dark-fantasy
+sudo curl -fsSL -o /etc/portage/package.accept_keywords/hyprland-desktop \
+  https://raw.githubusercontent.com/JamJan05/Hyprland-Dark-Fantasy/main/gentoo/package.accept_keywords/hyprland-desktop
+sudo curl -fsSL -o /etc/portage/package.use/hyprland-desktop \
+  https://raw.githubusercontent.com/JamJan05/Hyprland-Dark-Fantasy/main/gentoo/package.use/hyprland-desktop
+
+# 3. The package (USE="sddm" adds the login theme, "l10n_pl" makes it Polish).
+sudo emerge --ask --verbose x11-themes/dark-fantasy
+
+# 4. Your home - as yourself, not as root.
+dark-fantasy-install            # dry run: prints what would be copied, changes nothing
+dark-fantasy-install --apply    # copies into ~/.config, backs up files you changed
+hyprctl reload                  # or log out and start a Hyprland session
+```
+
+Updating: `sudo emaint sync -r dark-fantasy && sudo emerge @live-rebuild`, then `dark-fantasy-install --apply` again (Portage cannot write into a home directory, so that step stays yours). The overlay branch's [README](https://github.com/JamJan05/Hyprland-Dark-Fantasy/tree/overlay#readme) has the details and the USE flags.
+
+### Alternative: clone and `install.sh`
+
+The packages have to be installed already (see [Requirements](#requirements)).
 
 ```sh
 git clone https://github.com/JamJan05/Hyprland-Dark-Fantasy.git ~/Hyprland-Dark-Fantasy
@@ -43,10 +78,7 @@ cd ~/Hyprland-Dark-Fantasy
 hyprctl reload          # or log out and start a Hyprland session
 ```
 
-After `--apply` the files in `~/.config` are copies, so the repository folder can be deleted. To change something later, clone it again, edit, run `./install.sh --apply` and delete the folder again. Your local edits in `~/.config` survive a reinstall unless the same file changed in the repo; see [installation.md](docs/installation.md#what-installsh-copies). The installer also prints the steps that need root: Portage files, the SDDM theme and the udev rule.
-
-> [!TIP]
-> **Gentoo: install it as a package.** The [`overlay`](https://github.com/JamJan05/Hyprland-Dark-Fantasy/tree/overlay) branch is a Portage overlay with `x11-themes/dark-fantasy`. It pulls in every dependency, installs the root-side parts (udev and sudo rules, the OpenRC service, the SDDM theme with USE `sddm`) and puts the desktop files in `/usr/share/dark-fantasy`; `dark-fantasy-install --apply` then copies them into your home, exactly like `install.sh` above. Setup steps are in that branch's README.
+After `--apply` the files in `~/.config` are copies, so the repository folder can be deleted. To change something later, clone it again, edit, run `./install.sh --apply` and delete the folder again. Your local edits in `~/.config` survive a reinstall unless the same file changed in the repo; see [installation.md](docs/installation.md#what-installsh-copies). The installer also prints the steps that need root: Portage files, the SDDM theme and the udev rule. `dark-fantasy-install` from the package is this same script run from `/usr/share/dark-fantasy`.
 
 > [!NOTE]
 > The default keyboard layout is `pl`. Change it in Cogwheel → Hyprland → Input → Keyboard layout, or in `kb_layout` in `config/hypr/hyprland.lua`.
