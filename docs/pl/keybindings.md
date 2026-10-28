@@ -122,4 +122,7 @@ Działają także przy zablokowanym ekranie.
 |---|---|
 | `←` `→` | Poprzedni / następny utwór |
 | `Enter` / `Spacja` | Odtwarzanie / pauza |
+| `↑` `↓` | Głośność o 5 % |
+| `S` | Losowa kolejność wł. / wył. |
+| `R` | Powtarzanie: ten utwór → playlista → wyłączone |
 | `Esc` | Zamknięcie |

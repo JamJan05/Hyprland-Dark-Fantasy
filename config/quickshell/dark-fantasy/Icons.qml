@@ -81,6 +81,9 @@ Singleton {
     readonly property string mediaNext: "\u{f04ad}"
     readonly property string mediaPlay: "\u{f040a}"
     readonly property string mediaPause: "\u{f03e4}"
+    readonly property string mediaShuffle: "\u{f049d}"
+    readonly property string mediaRepeat: "\u{f0456}"
+    readonly property string mediaRepeatOnce: "\u{f0458}"
 
     // ---------------- BLUETOOTH ----------------
     readonly property string bluetoothOn: "\u{f00af}"

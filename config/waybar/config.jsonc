@@ -261,10 +261,13 @@
     // empty text and Waybar hides the module, and the drawer buttons with it.
     //
     // NO "interval": the script writes a new line on every change of track
-    // or state, and Waybar reads them live. The zone width is held by
-    // min-width in style.css, and max-length cuts longer titles with an ellipsis.
-    // "align": 0 pushes a short title against the cover art instead of centering
-    // it in the empty zone.
+    // or state, and Waybar reads them live. The zone is as wide as the title
+    // (no min-width in style.css - a short title would otherwise sit in a
+    // 270 px void), and the SCRIPT cuts titles longer than 28 characters.
+    // Not "max-length": Waybar sizes that by Pango's average character width,
+    // which ignores the letter-spacing and small caps of the title font, so
+    // a 26-character title got an ellipsis at max-length 28. "align": 0 keeps
+    // the text against the cover art should the zone ever be wider than it.
     //
     // No colored player icons (the Spotify note, the browser's little screen):
     // in the small-caps label they would be the only colored glyphs in the
@@ -276,7 +279,6 @@
     "custom/odtwarzacz": {
         "exec": "$HOME/.local/bin/waybar-odtwarzacz",
         "return-type": "json",
-        "max-length": 28,
         "align": 0,
         "on-click": "qs -c dark-fantasy ipc call media toggle"
     },

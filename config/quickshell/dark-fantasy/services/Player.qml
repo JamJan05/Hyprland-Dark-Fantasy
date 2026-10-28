@@ -118,6 +118,24 @@ Singleton {
     }
 
     // ---------------------------------------------------------------
+    //  LOOP AND SHUFFLE
+    //
+    //  MPRIS reports both as optional: a player that has no playlist
+    //  (a browser tab, mpv with one file) reports loopSupported /
+    //  shuffleSupported false, and canControl false means the whole
+    //  player is read-only (e.g. a stream). The panel greys the glyph
+    //  out in those cases instead of sending a write that would only
+    //  produce a D-Bus error in the log.
+    // ---------------------------------------------------------------
+    readonly property bool loopSupported:
+        active !== null && active.canControl && active.loopSupported
+    readonly property int loopState: active?.loopState ?? MprisLoopState.None
+
+    readonly property bool shuffleSupported:
+        active !== null && active.canControl && active.shuffleSupported
+    readonly property bool shuffle: active?.shuffle ?? false
+
+    // ---------------------------------------------------------------
     //  WHO STARTED PLAYING
     // ---------------------------------------------------------------
     Instantiator {
@@ -172,5 +190,20 @@ Singleton {
     // Raises the player window. Not all players support this.
     function raise() {
         if (active !== null && active.canRaise) active.raise();
+    }
+
+    // Off -> this track -> whole playlist -> off. "This track" comes
+    // first, because that is the one you reach for while listening.
+    function cycleLoop() {
+        if (!loopSupported) return;
+        const s = active.loopState;
+        active.loopState = s === MprisLoopState.None  ? MprisLoopState.Track
+                         : s === MprisLoopState.Track ? MprisLoopState.Playlist
+                         :                              MprisLoopState.None;
+    }
+
+    function toggleShuffle() {
+        if (!shuffleSupported) return;
+        active.shuffle = !active.shuffle;
     }
 }

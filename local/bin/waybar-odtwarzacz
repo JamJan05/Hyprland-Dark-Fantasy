@@ -10,8 +10,8 @@
 # frame shrinks to the clock and the date. The built-in "mpris" module would
 # hide too, but it cannot follow the interface language or give this tooltip.
 #
-# While a player exists, the zone width is held by "min-width" in style.css,
-# and "max-length" in config.jsonc cuts titles that are too long.
+# While a player exists, the zone is as wide as the title (no min-width in
+# style.css); titles longer than MAKS_ZNAKOW are cut here, in the script.
 #
 # ----------------------------------------------------------------------
 # NO POLLING
@@ -35,6 +35,10 @@
 # ----------------------------------------------------------------------
 
 KROK=3
+
+# Longest "title  ·  artist" shown in the bar, in characters; longer ones
+# end with an ellipsis (see pokaz). The tooltip always has the whole text.
+MAKS_ZNAKOW=28
 
 # df-jezyk lives next to it (install.sh copies both scripts into ~/.local/bin).
 jezyk() {
@@ -100,6 +104,16 @@ pokaz() {
 
     local tekst=${tytul:-$T_NIEZNANY} klasa
     [[ -n $wykonawca ]] && tekst+="  ·  $wykonawca"
+
+    # Cut here, not with "max-length" in config.jsonc: Waybar's max-length
+    # sizes the label by Pango's AVERAGE character width, which ignores the
+    # letter-spacing and small caps of the title font, so a 26-character
+    # title got an ellipsis at 28. Characters, not bytes - "ł" and "…" are
+    # multibyte, and the locale is UTF-8 on this desktop.
+    if (( ${#tekst} > MAKS_ZNAKOW )); then
+        tekst=${tekst:0:MAKS_ZNAKOW-1}
+        tekst=${tekst% }…
+    fi
 
     case $stan in
         Playing) klasa="gra" ;;

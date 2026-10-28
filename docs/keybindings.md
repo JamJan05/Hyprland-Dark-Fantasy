@@ -122,4 +122,7 @@ These also work while the screen is locked.
 |---|---|
 | `←` `→` | Previous / next track |
 | `Enter` / `Space` | Play / pause |
+| `↑` `↓` | Volume by 5 % |
+| `S` | Shuffle on / off |
+| `R` | Repeat: this track → playlist → off |
 | `Esc` | Close |
