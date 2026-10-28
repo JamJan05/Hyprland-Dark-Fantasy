@@ -320,6 +320,7 @@ Część stanu celowo zostaje **poza** repozytorium, bo dotyczy jednego komputer
 
 - `~/.config/hypr/ustawienia.lua`: ustawienia Hyprlanda z Zębatki (wpisane też do `.gitignore`),
 - `~/.config/hypr/lokalne.lua`: Twoje własne, pisane ręcznie dodatki do Hyprlanda dla tego komputera (patrz niżej),
+- `~/.config/hypr/hyprlock.lokalne.conf`: to samo dla hyprlocka, np. `auth { fingerprint { enabled = true } }`; `hyprlock.conf` wczytuje go na końcu, więc może nadpisać każde ustawienie, a brak pliku hyprlock tylko odnotowuje w logu,
 - `~/.local/state/dark-fantasy/powloka.json`: ustawienia powłoki (język, paski HUD-u, limit ładowania, limity mocy procesora).
 
 **Tapeta też jest lokalna.** Wybór tapety w Zębatce przepisuje `path` w `~/.config/hypr/hyprpaper.conf` i `$tapeta` w `~/.config/hypr/hyprlock.conf`. To kopie, więc zmiana jest lokalna: nie pojawia się w `git status`, a `install.sh --apply` ją zachowuje, chyba że od ostatniej instalacji zmieniła się wersja któregoś z tych plików w repo (wtedy Twoja wersja trafia do kopii `.bak-*` i tapetę wybierasz ponownie). Przenoś te pliki do repo tylko wtedy, gdy ścieżka obrazu istnieje też na Twoich innych komputerach.

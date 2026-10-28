@@ -3,7 +3,9 @@
 
 EAPI=8
 
-inherit git-r3 udev
+PYTHON_COMPAT=( python3_{11..14} )
+
+inherit git-r3 python-any-r1 udev
 
 DESCRIPTION="Dark Souls-styled Hyprland desktop: HUD, tile menu, Cogwheel, hyprlock and SDDM theme"
 HOMEPAGE="https://github.com/JamJan05/Hyprland-Dark-Fantasy"
@@ -60,12 +62,30 @@ RDEPEND="
 	x11-themes/bibata-xcursors
 	sddm? ( gui-apps/sddm )
 "
+# tools/skaluj-ikony-menu.py makes the 256 px tile icons at build time (see
+# src_compile); it needs Pillow for the Python the build runs with.
+BDEPEND="
+	${PYTHON_DEPS}
+	$(python_gen_any_dep 'dev-python/pillow[${PYTHON_USEDEP}]')
+"
+
+python_check_deps() {
+	python_has_version "dev-python/pillow[${PYTHON_USEDEP}]"
+}
 
 # Where the desktop files land. The per-user part (~/.config, ~/.local) is
 # copied from here by "dark-fantasy-install", which is install.sh from the
 # repository run from this directory - Portage installs as root and must not
 # touch a home directory.
 DF_SHARE="/usr/share/${PN}"
+
+src_compile() {
+	# The 256 px menu tile icons (assets/ikony-menu/256/) are build output,
+	# not part of the repository. From a git clone install.sh generates them
+	# itself, but ${DF_SHARE} is read-only for the user, so the package has
+	# to ship them ready - install.sh then only copies them.
+	"${EPYTHON}" tools/skaluj-ikony-menu.py || die "generating the tile icons failed"
+}
 
 src_install() {
 	insinto "${DF_SHARE}"

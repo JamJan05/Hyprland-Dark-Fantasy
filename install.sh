@@ -251,14 +251,20 @@ kopiuj local/share/dbus-1/services/org.freedesktop.Notifications.service \
 # reads them from the FIXED path ~/.local/share/dark-fantasy/ikony-menu,
 # where they are copied. A fixed path, because the repository may not exist
 # once installed, so nothing may point into it.
+#
+# Installed as a package (/usr/share/dark-fantasy, read-only for the user)
+# the 256 px versions are already there - the ebuild generates them at build
+# time - so the script is skipped: it would only fail on the read-only tree.
 info "Tile menu icons"
-if [[ "$APPLY" == 1 ]]; then
+if [[ "$APPLY" == 1 && -w "$REPO/assets/ikony-menu" ]]; then
     if command -v python3 >/dev/null && python3 -c 'import PIL' 2>/dev/null; then
         ( cd "$REPO" && python3 tools/skaluj-ikony-menu.py ) \
             || warn "an original is missing from assets/ikony-menu/ - its tile will show an empty square with the name"
     else
         warn "python3 with Pillow (dev-python/pillow) not found - tile icons were not generated"
     fi
+elif [[ "$APPLY" == 1 && ! -d "$REPO/assets/ikony-menu/256" ]]; then
+    warn "$REPO/assets/ikony-menu is read-only and has no 256/ - tile icons were not generated"
 fi
 kopiuj assets/ikony-menu/256 "$DANE/dark-fantasy/ikony-menu"
 

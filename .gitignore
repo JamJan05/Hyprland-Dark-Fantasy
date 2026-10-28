@@ -100,9 +100,11 @@ config/hypr/ustawienia.lua
 
 # ----- LOCAL ADDITIONS -----
 # ~/.config/hypr/lokalne.lua holds hand-written additions for one computer
-# (loaded by hyprland.lua, never touched by install.sh). Private by design -
-# the pattern is here in case someone copies it into the repository.
+# (loaded by hyprland.lua, never touched by install.sh); hyprlock.lokalne.conf
+# is the same for hyprlock (sourced last by hyprlock.conf). Private by design -
+# the patterns are here in case someone copies them into the repository.
 config/hypr/lokalne.lua
+config/hypr/hyprlock.lokalne.conf
 
 # ----- ASSETS -----
 # The 256 px tile icons are the OUTPUT of tools/skaluj-ikony-menu.py, not a source -
